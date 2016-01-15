@@ -1,0 +1,1 @@
+# Pipeline Stage View Plugin
