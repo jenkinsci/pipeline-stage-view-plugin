@@ -1,0 +1,60 @@
+<div class="input cbwf-info-action-popover run-input-required">
+    <div class="remove"><span class="glyphicon glyphicon-remove remove"></span></div>
+    <div class="caption">{{message}}</div>
+    <div class="form">
+        <div class="inputs">
+            {{#each inputs}}
+            {{#ifCond type '===' 'BooleanParameterDefinition'}}
+                <div class="checkbox">
+                    <label>
+                        <input name="{{name}}" type="checkbox" checked="{{definition.defaultVal}}">{{name}}
+                    </label>
+                    {{#if description}}<p class="help-block">{{description}}</p>{{/if}}
+                </div>
+            {{/ifCond}}
+            {{#ifCond type '===' 'StringParameterDefinition'}}
+                <div class="form-group">
+                    <label for="{{id}}-input-{{@index}}">{{name}}</label>
+                    <input name="{{name}}" type="text" class="form-control" id="{{id}}-input-{{@index}}" value="{{definition.defaultVal}}">
+                    {{#if description}}<p class="help-block">{{description}}</p>{{/if}}
+                </div>
+            {{/ifCond}}
+            {{#ifCond type '===' 'TextParameterDefinition'}}
+                <div class="form-group">
+                    <label for="{{id}}-input-{{@index}}">{{name}}</label>
+                    <input name="{{name}}" type="text" class="form-control" id="{{id}}-input-{{@index}}" value="{{definition.defaultVal}}">
+                    {{#if description}}<p class="help-block">{{description}}</p>{{/if}}
+                </div>
+            {{/ifCond}}
+            {{#ifCond type '===' 'PasswordParameterDefinition'}}
+                <div class="form-group">
+                    <label for="{{id}}-input-{{@index}}">{{name}}</label>
+                    <input name="{{name}}" type="password" class="form-control" id="{{id}}-input-{{@index}}" value="{{definition.defaultVal}}" placeholder="Password">
+                    {{#if description}}<p class="help-block">{{description}}</p>{{/if}}
+                </div>
+            {{/ifCond}}
+            {{#ifCond type '===' 'ChoiceParameterDefinition'}}
+                <div class="form-group">
+                    <label for="{{id}}-input-{{@index}}">{{name}}</label>
+                    <select name="{{name}}" class="form-control" id="{{id}}-input-{{@index}}">
+                        {{#each definition.choices}}
+                            {{#ifCond this '===' ../defaultVal}}
+                            <option selected>{{this}}</option>
+                            {{/ifCond}}
+                            {{#ifCond this '!==' ../defaultVal}}
+                            <option>{{this}}</option>
+                            {{/ifCond}}
+                        {{/each}}
+                    </select>
+                    {{#if description}}<p class="help-block">{{description}}</p>{{/if}}
+                </div>
+            {{/ifCond}}
+            {{/each}}
+        </div>
+        <div class="buttons">
+            <button type="submit" class="btn btn-primary btn-sm proceed-button">{{proceedText}}</button>
+            <button type="submit" class="btn btn-default btn-sm abort-button">Abort</button>
+        </div>
+    </div>
+
+</div>

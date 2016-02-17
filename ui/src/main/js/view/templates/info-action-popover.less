@@ -1,0 +1,76 @@
+.cbwf-info-action-popover {
+  width: 350px;
+  font-size: 0.9em;
+  margin: 0px !important; // Needs to be important so as to override bootstraps 20px margin-bottom on alerts
+
+  .label {
+    position: relative;
+    top: 2px;
+    font-size: 90%;
+    text-shadow:none;
+  }
+
+  .alert {
+    position: relative;
+    margin: 0px;
+  }
+
+  table, td {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+  .btn-toolbar:before, .btn-toolbar:after{
+    display: table;
+    content: " ";
+    clear:both;
+  }
+  .btn-toolbar{
+    .btn-group{
+      position: relative;
+      display: inline-block;
+      vertical-align: middle;
+      float:left;
+      margin-top:10px;
+
+      .btn{
+        position:relative;
+        float:left;
+        padding:10px;
+        margin-right:1px;
+        border-radius:5px;
+        color:#fff;
+        cursor:pointer;
+        font-weight:bold;
+      }
+    }
+  }
+}
+
+.cbwf-info-action-popover.alert {
+  width: auto;
+  min-width: 10em;
+  max-width: 25em;
+  position: relative;
+}
+
+.cbwf-info-action-popover.input {
+  width: auto;
+  min-width: 10em;
+  max-width: 25em;
+  position: relative;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+  color: #8a6d3b;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  text-shadow: #fff 0 0 2px, #fff 0 1px 1px;
+  max-width: 25em;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.feature-tbd-alert {
+  width: 200px;
+}

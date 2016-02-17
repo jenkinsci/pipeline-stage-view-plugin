@@ -1,0 +1,10 @@
+<div class="cbwf-stage-logs">
+    {{#each stageFlowNodes}}
+        {{#if this._links.log.href}}
+        <div class="node-log-frame {{this.status}}" cbwf-controller="node-log" objectUrl="{{this._links.log.href}}">
+            <div class="node-name"><span class="glyphicon glyphicon-collapse-down" title="Expand"></span><span class="glyphicon glyphicon-collapse-up" title="Collapse"></span> {{this.name}} <a class="show-all" href="#">(show all steps)</a></div>
+            <div class="log-details"></div>
+        </div>
+        {{/if}}
+    {{/each}}
+</div>

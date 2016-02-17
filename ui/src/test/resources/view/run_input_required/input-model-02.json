@@ -1,0 +1,15 @@
+{
+  "id": "Run-test-suites",
+  "proceedText": "Okay",
+  "message": "Workflow Configuration",
+  "inputs": [
+    {
+      "type": "XXXXXX",
+      "name": "Unsupported",
+      "description": "Unsupported input type"
+    }
+  ],
+  "proceedUrl": "/jenkins/job/Workflow/24/wfapi/inputSubmit?inputId=Run-test-suites",
+  "abortUrl": "/jenkins/job/Workflow/24/input/Run-test-suites/abort",
+  "redirectApprovalUrl": "/jenkins/job/Workflow/24/input"
+}

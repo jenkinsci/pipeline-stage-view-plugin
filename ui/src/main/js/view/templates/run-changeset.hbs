@@ -1,0 +1,24 @@
+<div class="alert alert-info run-changeset-details {{kind}}-repo">
+    <div class="header">{{commitCount}} commit{{#ifCond commitCount '>' 1}}s{{/ifCond}} by <span class="contributor">{{contributors.0.authorJenkinsId}}</span>{{#ifCond contributorCount '>' 1}} and others{{/ifCond}}</div>
+    <div class="body">
+        <table>
+        {{#each commits}}
+            <tr title="by {{authorJenkinsId}} - {{formatDate timestamp 'short'}}">
+                <td class="commitId">
+                    <span class="label label-default">
+                        {{#if commitUrl}}
+                        <a href="{{commitUrl}}" target="_blank">{{commitIdDisplay}}</a>
+                        {{else}}
+                        {{commitIdDisplay}}
+                        {{/if}}
+                    </span>
+                </td>
+                <td class="message">{{messageLine1}}</td>
+            </tr>
+        {{/each}}
+        </table>
+    </div>
+    <div class="footer">
+        <a href="{{consoleUrl}}" target="_blank">See detail page</a>
+    </div>
+</div>

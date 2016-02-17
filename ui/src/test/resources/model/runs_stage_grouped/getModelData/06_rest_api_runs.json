@@ -1,0 +1,294 @@
+[
+    {
+        "_links": {
+            "self": {
+                "href": "/jenkins/job/WFX/7/wfapi/describe"
+            }
+        },
+        "id": "2014-11-21_20-04-27",
+        "name": "#7",
+        "status": "SUCCESS",
+        "startTimeMillis": 1416600267530,
+        "endTimeMillis": 1416600311344,
+        "durationMillis": 36316,
+        "queueDurationMillis": 7498,
+        "pauseDurationMillis": 19763,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/7/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416600275028,
+                "durationMillis": 18,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/7/execution/node/12/wfapi/describe"
+                    }
+                },
+                "id": "12",
+                "name": "QA",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416600275046,
+                "durationMillis": 16358,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/7/execution/node/23/wfapi/describe"
+                    }
+                },
+                "id": "23",
+                "name": "Staging",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416600291404,
+                "durationMillis": 19876,
+                "pauseDurationMillis": 19763
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/7/execution/node/29/wfapi/describe"
+                    }
+                },
+                "id": "29",
+                "name": "Production",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416600311280,
+                "durationMillis": 64,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "_links": {
+            "self": {
+                "href": "/jenkins/job/WFX/6/wfapi/describe"
+            }
+        },
+        "id": "2014-11-21_19-48-24",
+        "name": "#6",
+        "status": "SUCCESS",
+        "startTimeMillis": 1416599304588,
+        "endTimeMillis": 1416599306990,
+        "durationMillis": 61,
+        "queueDurationMillis": 2341,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/6/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "execNode": "master",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/6/execution/node/12/wfapi/describe"
+                    }
+                },
+                "id": "12",
+                "name": "QA",
+                "execNode": "master",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/6/execution/node/23/wfapi/describe"
+                    }
+                },
+                "id": "23",
+                "name": "Staging",
+                "execNode": "master",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/6/execution/node/29/wfapi/describe"
+                    }
+                },
+                "id": "29",
+                "name": "Production",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416599306929,
+                "durationMillis": 61,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "_links": {
+            "self": {
+                "href": "/jenkins/job/WFX/5/wfapi/describe"
+            }
+        },
+        "id": "2014-11-21_18-12-24",
+        "name": "#5",
+        "status": "SUCCESS",
+        "startTimeMillis": 1416593544229,
+        "endTimeMillis": 1416593953946,
+        "durationMillis": 395102,
+        "queueDurationMillis": 14615,
+        "pauseDurationMillis": 379948,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/5/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416593558844,
+                "durationMillis": 12,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/5/execution/node/12/wfapi/describe"
+                    }
+                },
+                "id": "12",
+                "name": "QA",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416593558856,
+                "durationMillis": 15037,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/5/execution/node/23/wfapi/describe"
+                    }
+                },
+                "id": "23",
+                "name": "Staging",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416593573893,
+                "durationMillis": 380013,
+                "pauseDurationMillis": 379948
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/5/execution/node/29/wfapi/describe"
+                    }
+                },
+                "id": "29",
+                "name": "Production",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416593953906,
+                "durationMillis": 40,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "_links": {
+            "self": {
+                "href": "/jenkins/job/WFX/4/wfapi/describe"
+            }
+        },
+        "id": "2014-11-21_18-12-17",
+        "name": "#4",
+        "status": "SUCCESS",
+        "startTimeMillis": 1416593537396,
+        "endTimeMillis": 1416593538818,
+        "durationMillis": 41,
+        "queueDurationMillis": 1381,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/4/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "execNode": "master",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/4/execution/node/12/wfapi/describe"
+                    }
+                },
+                "id": "12",
+                "name": "QA",
+                "execNode": "master",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/4/execution/node/23/wfapi/describe"
+                    }
+                },
+                "id": "23",
+                "name": "Staging",
+                "execNode": "master",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/jenkins/job/WFX/4/execution/node/29/wfapi/describe"
+                    }
+                },
+                "id": "29",
+                "name": "Production",
+                "execNode": "master",
+                "status": "SUCCESS",
+                "startTimeMillis": 1416593538777,
+                "durationMillis": 41,
+                "pauseDurationMillis": 0
+            }
+        ]
+    }
+]

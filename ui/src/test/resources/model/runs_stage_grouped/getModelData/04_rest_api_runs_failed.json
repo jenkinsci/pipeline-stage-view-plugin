@@ -1,0 +1,131 @@
+[
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/3/wfapi/describe"
+            },
+            "artifacts": {
+                "href": "/job/cd/3/wfapi/artifacts"
+            }
+        },
+        "id": "2014-10-26_10-12-29",
+        "name": "#3",
+        "status": "FAILED",
+        "startTimeMillis": 1414318349569,
+        "endTimeMillis": 1414318389097,
+        "durationMillis": 39528,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/3/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318349991,
+                "durationMillis": 3018,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/3/execution/node/13/wfapi/describe"
+                    }
+                },
+                "id": "13",
+                "name": "QA",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318353009,
+                "durationMillis": 35788,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/3/execution/node/27/wfapi/describe"
+                    }
+                },
+                "id": "27",
+                "name": "Staging",
+                "status": "FAILED",
+                "startTimeMillis": 1414318388797,
+                "durationMillis": 300,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/1/wfapi/describe"
+            },
+            "artifacts": {
+                "href": "/job/cd/1/wfapi/artifacts"
+            }
+        },
+        "id": "2014-10-26_10-10-32",
+        "name": "#1",
+        "status": "SUCCESS",
+        "startTimeMillis": 1414318232950,
+        "endTimeMillis": 1414318288921,
+        "durationMillis": 55971,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318237346,
+                "durationMillis": 3357,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/13/wfapi/describe"
+                    }
+                },
+                "id": "13",
+                "name": "QA",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318240703,
+                "durationMillis": 37342,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/27/wfapi/describe"
+                    }
+                },
+                "id": "27",
+                "name": "Staging",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318278045,
+                "durationMillis": 10247,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/33/wfapi/describe"
+                    }
+                },
+                "id": "33",
+                "name": "Production",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318288292,
+                "durationMillis": 629,
+                "pauseDurationMillis": 0
+            }
+        ]
+    }
+]

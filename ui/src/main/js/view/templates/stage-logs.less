@@ -1,0 +1,85 @@
+.cbwf-stage-logs-dialog {
+  .header {
+    margin-bottom: 0px;
+  }
+  .body {
+    padding: 0px;
+    overflow: hidden;
+  }
+}
+.cbwf-stage-logs {
+  position: relative;
+  padding: 3px;
+
+  .node-name {
+    padding: 5px 10px;
+    background-color: @light-header-background-color;
+    border-radius: @cbwf-border-radius;
+    cursor: pointer;
+  }
+
+  .log-details {
+    overflow: auto;
+    display: none;
+    color:rgba(0,0,0,.67);
+    background:#eff;
+
+    box-shadow:inset rgba(0,0,0,.2) 0 1px 2px,inset rgba(0,0,0,.2) 0 0 0 1px, inset rgba(255,255,255,.2) 0 0 0 99em;
+
+    .console-output{
+      padding:15px;
+      line-height:20px;
+      box-shadow:inset rgba(0,0,0,.1) -1px 0 0;
+      background:repeating-linear-gradient(
+        transparent,
+        transparent 20px,
+        rgba(0,0,0,.05) 20px,
+        rgba(0,0,0,.05) 40px
+      );}
+  }
+
+  .node-log-frame {
+    margin-top: 2px;
+
+    .glyphicon-collapse-down {
+      display: inline-block;
+    }
+    .glyphicon-collapse-up {
+      display: none;
+    }
+    .show-all {
+      display: none;
+    }
+    .show-all, .show-all:visited {
+      display: none;
+      color: #1e90ff;
+    }
+  }
+
+  .node-log-frame.FAILED {
+    .node-name {
+      background-color: #f29d9d;
+    }
+  }
+
+  .node-log-frame.inactive {
+    display: none;
+  }
+
+  .node-log-frame.active {
+    .glyphicon-collapse-down {
+      display: none;
+    }
+    .glyphicon-collapse-up {
+      display: inline-block;
+    }
+    .show-all {
+      display: inline-block;
+      margin-left: 20px;
+    }
+
+    .log-details {
+      display: block;
+    }
+  }
+}

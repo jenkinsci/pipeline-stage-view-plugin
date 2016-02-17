@@ -1,0 +1,45 @@
+{
+    "commitCount": 3,
+    "commits": [
+        {
+            "commitId": "0cd41e3000442fdf222f99a282af76c2faae7f1b",
+            "commitUrl": "https://github.com/tfennelly/simple-maven-project-with-tests/commit/0cd41e3000442fdf222f99a282af76c2faae7f1b",
+            "authorJenkinsId": "tom.fennelly",
+            "message": "commit1",
+            "timestamp": 1413473000,
+            "consoleUrl": "/jenkins/job/Test%20Workflow/18/changes#0cd41e3000442fdf222f99a282af76c2faae7f1b",
+            "messageLine1": "commit1",
+            "commitIdDisplay": "0cd41e3",
+            "kind": "git"
+        },
+        {
+            "commitId": "0cd41e3000442fdf222f99a282af76c2faae7f1c",
+            "commitUrl": "https://github.com/tfennelly/simple-maven-project-with-tests/commit/0cd41e3000442fdf222f99a282af76c2faae7f1c",
+            "authorJenkinsId": "tom.fennelly",
+            "message": "commit2\nwith some extra info",
+            "timestamp": 1413493000,
+            "consoleUrl": "/jenkins/job/Test%20Workflow/18/changes#0cd41e3000442fdf222f99a282af76c2faae7f1c",
+            "messageLine1": "commit2",
+            "commitIdDisplay": "0cd41e3",
+            "kind": "git"
+        },
+        {
+            "commitId": "1cd41e3000442fdf222f99a282af76c2faae7f1c",
+            "authorJenkinsId": "tom.fennelly",
+            "message": "commit3\nwith no commit url",
+            "timestamp": 1413503000,
+            "consoleUrl": "/jenkins/job/Test%20Workflow/18/changes#1cd41e3000442fdf222f99a282af76c2faae7f1c",
+            "messageLine1": "commit3",
+            "commitIdDisplay": "1cd41e3",
+            "kind": "git"
+        }
+    ],
+    "consoleUrl": "/jenkins/job/Test%20Workflow/18/changes",
+    "contributorCount": 1,
+    "contributors": [
+        {
+            "authorJenkinsId": "tom.fennelly"
+        }
+    ],
+    "kind": "git"
+}

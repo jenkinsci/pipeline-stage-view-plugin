@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<!--
+    See workflow-plugin/job/src/main/resources/org/jenkinsci/plugins/workflow/job/WorkflowJob/main.jelly.
+    It loads jobMain.jelly for all Action impls bound to a WorkflowJob.
+-->
+<j:jelly xmlns:j="jelly:core" xmlns:wf="/com/cloudbees/workflow">
+    <wf:controller name="pipeline-staged" fragCaption="Stage View" />
+</j:jelly>

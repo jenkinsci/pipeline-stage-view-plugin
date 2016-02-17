@@ -1,0 +1,22 @@
+<div class="alert alert-{{alert}} cbwf-info-action-popover {{alert-classes}}">
+    {{#if dismissible}}<div class="remove"><span class="glyphicon glyphicon-remove"></span></div>{{/if}}
+    {{#if caption}}<div class="caption">{{caption}}</div>{{/if}}
+    {{#if errors}}
+    <table class="errors">
+        {{#each errors}}
+        <tr>
+            <td>{{#if this.label}}<span class="label label-danger">{{this.label}}</span>{{/if}}</td>
+            <td>{{#if this.message}}<span class="message">{{this.message}}</span>{{/if}}</td>
+        </tr>
+        {{/each}}
+    </table>
+    {{/if}}
+    {{#if footer}}<div class="footer">{{footer}}</div>{{/if}}
+    <div class="cbwf-menu-item btn-toolbar" role="toolbar">
+      <div class="btn-group">
+      {{#each options}}
+        <div class="btn btn-small" cbwf-controller="{{this.controller}}" descUrl="{{../descUrl}}"><span class="glyphicon glyphicon-{{this.icon}}"></span> {{this.label}}</div>
+      {{/each}}
+      </div></div>
+
+</div>

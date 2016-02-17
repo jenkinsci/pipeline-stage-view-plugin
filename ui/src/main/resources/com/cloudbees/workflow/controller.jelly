@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler">
+    <st:documentation>
+        <st:attribute name="name" use="required">
+            The name of Pipeline controller to use for rendering.
+        </st:attribute>
+        <st:attribute name="fragCaption">
+            Optional fragment caption, passed through to the controller.
+        </st:attribute>
+    </st:documentation>
+    <div class="cbwf-stage-view">
+        <div cbwf-controller="${name}" objectUrl="${rootURL}/${it.target.url}" fragCaption="${fragCaption}" />
+        <st:adjunct includes="org.jenkinsci.pipeline.stageview_adjunct"/>
+    </div>
+</j:jelly>

@@ -1,0 +1,16 @@
+<div class="alert alert-info">
+    <div class="header">
+        Produced the following {{this.length}} artifact(s):
+    </div>
+    <div class="body">
+        <table>
+            {{#each this}}
+                <tr class="artifact">
+                    <td class="name"><a href="{{this.url}}" title="Download"><span class="glyphicon glyphicon-file"></span> {{this.name}}</a></td>
+                    <td class="size">({{formatMem this.size}})</td>
+                    <td class="download"><a href="{{this.url}}" title="Download"><span class="glyphicon glyphicon-download"></span></a></td>
+                </tr>
+            {{/each}}
+        </table>
+    </div>
+</div>

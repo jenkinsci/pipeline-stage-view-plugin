@@ -1,0 +1,144 @@
+[
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/2/wfapi/describe"
+            },
+            "artifacts": {
+                "href": "/job/cd/2/wfapi/artifacts"
+            }
+        },
+        "id": "2014-10-26_10-11-40",
+        "name": "#2",
+        "status": "SUCCESS",
+        "startTimeMillis": 1414318300276,
+        "endTimeMillis": 1414318301305,
+        "durationMillis": 1029,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/2/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/2/execution/node/13/wfapi/describe"
+                    }
+                },
+                "id": "13",
+                "name": "QA",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/2/execution/node/27/wfapi/describe"
+                    }
+                },
+                "id": "27",
+                "name": "Staging",
+                "status": "NOT_EXECUTED",
+                "startTimeMillis": 0,
+                "durationMillis": 0,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/2/execution/node/33/wfapi/describe"
+                    }
+                },
+                "id": "33",
+                "name": "Production",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318300705,
+                "durationMillis": 600,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/1/wfapi/describe"
+            },
+            "artifacts": {
+                "href": "/job/cd/1/wfapi/artifacts"
+            }
+        },
+        "id": "2014-10-26_10-10-32",
+        "name": "#1",
+        "status": "SUCCESS",
+        "startTimeMillis": 1414318232950,
+        "endTimeMillis": 1414318288921,
+        "durationMillis": 55971,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Dev",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318237346,
+                "durationMillis": 3357,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/13/wfapi/describe"
+                    }
+                },
+                "id": "13",
+                "name": "QA",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318240703,
+                "durationMillis": 37342,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/27/wfapi/describe"
+                    }
+                },
+                "id": "27",
+                "name": "Staging",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318278045,
+                "durationMillis": 10247,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/33/wfapi/describe"
+                    }
+                },
+                "id": "33",
+                "name": "Production",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318288292,
+                "durationMillis": 629,
+                "pauseDurationMillis": 0
+            }
+        ]
+    }
+]

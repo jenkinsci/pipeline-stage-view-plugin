@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
+    <l:task href="${rootURL}/${action.target.url}${action.urlName}" icon="icon-workflow-stage icon-md" title="${action.displayName}"/>
+</j:jelly>

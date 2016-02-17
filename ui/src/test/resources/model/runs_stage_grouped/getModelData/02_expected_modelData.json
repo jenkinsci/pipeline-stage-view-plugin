@@ -1,0 +1,235 @@
+{
+    "stageData": [
+        {
+            "name": "Build",
+            "runs": 3,
+            "durationMillis": 9415,
+            "durationMillisNoPause": 9415,
+            "avgDurationMillis": 3138,
+            "avgDurationMillisNoPause": 3138
+        },
+        {
+            "name": "Test",
+            "runs": 1,
+            "durationMillis": 2695,
+            "durationMillisNoPause": 2695,
+            "avgDurationMillis": 2695,
+            "avgDurationMillisNoPause": 2695
+        },
+        {
+            "name": "Deploy",
+            "runs": 2,
+            "durationMillis": 5320,
+            "durationMillisNoPause": 5320,
+            "avgDurationMillis": 2660,
+            "avgDurationMillisNoPause": 2660
+        },
+        {
+            "name": "Test2",
+            "runs": 1,
+            "durationMillis": 3323,
+            "durationMillisNoPause": 3323,
+            "avgDurationMillis": 3323,
+            "avgDurationMillisNoPause": 3323
+        }
+    ],
+    "numRuns": 3,
+    "numStages": 7,
+    "durationMillis": 20753,
+    "durationMillisNoPause": 20753,
+    "avgDurationMillis": 6917,
+    "avgDurationMillisNoPause": 6917,
+    "runGroups": [
+        {
+            "runs": [
+                {
+                    "name": "#3",
+                    "status": "SUCCESS",
+                    "startTimeMillis": 1411556423000,
+                    "durationMillis": 8584,
+                    "pauseDurationMillis": 0,
+                    "stages": [
+                        {
+                            "name": "Build",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556423000,
+                            "durationMillis": 3065,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 3065,
+                            "emphasise": 1.1785298229263748,
+                            "endTimeMillis": 1411556426065
+                        },
+                        {
+                            "name": "Test",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556426065,
+                            "durationMillis": 2695,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 2695,
+                            "emphasise": 1.1569780987884437,
+                            "endTimeMillis": 1411556428760
+                        },
+                        {
+                            "name": "Deploy",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556428760,
+                            "durationMillis": 2824,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 2824,
+                            "emphasise": 1.1644920782851818,
+                            "endTimeMillis": 1411556431584
+                        }
+                    ],
+                    "durationMillisNoPause": 8584,
+                    "endTimeMillis": 1411556431584
+                }
+            ],
+            "stageData": [
+                {
+                    "name": "Build",
+                    "runs": 1,
+                    "durationMillis": 3065,
+                    "durationMillisNoPause": 3065,
+                    "avgDurationMillis": 3065,
+                    "avgDurationMillisNoPause": 3065
+                },
+                {
+                    "name": "Test",
+                    "runs": 1,
+                    "durationMillis": 2695,
+                    "durationMillisNoPause": 2695,
+                    "avgDurationMillis": 2695,
+                    "avgDurationMillisNoPause": 2695
+                },
+                {
+                    "name": "Deploy",
+                    "runs": 1,
+                    "durationMillis": 2824,
+                    "durationMillisNoPause": 2824,
+                    "avgDurationMillis": 2824,
+                    "avgDurationMillisNoPause": 2824
+                }
+            ],
+            "numRuns": 1,
+            "numStages": 3,
+            "durationMillis": 8584,
+            "durationMillisNoPause": 8584,
+            "avgDurationMillis": 8584,
+            "avgDurationMillisNoPause": 8584
+        },
+        {
+            "runs": [
+                {
+                    "name": "#2",
+                    "status": "SUCCESS",
+                    "startTimeMillis": 1411556089000,
+                    "durationMillis": 8949,
+                    "pauseDurationMillis": 0,
+                    "stages": [
+                        {
+                            "name": "Build",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556089000,
+                            "durationMillis": 3130,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 3130,
+                            "emphasise": 1.1748798748463516,
+                            "endTimeMillis": 1411556092130
+                        },
+                        {
+                            "name": "Test2",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556092130,
+                            "durationMillis": 3323,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 3323,
+                            "emphasise": 1.1856632025924685,
+                            "endTimeMillis": 1411556095453
+                        },
+                        {
+                            "name": "Deploy",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556095453,
+                            "durationMillis": 2496,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 2496,
+                            "emphasise": 1.13945692256118,
+                            "endTimeMillis": 1411556097949
+                        }
+                    ],
+                    "durationMillisNoPause": 8949,
+                    "endTimeMillis": 1411556097949
+                },
+                {
+                    "name": "#1",
+                    "status": "SUCCESS",
+                    "startTimeMillis": 1411552553000,
+                    "durationMillis": 3220,
+                    "pauseDurationMillis": 0,
+                    "stages": [
+                        {
+                            "name": "Build",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411552553000,
+                            "durationMillis": 3220,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 3220,
+                            "emphasise": 1.5,
+                            "endTimeMillis": 1411552556220
+                        },
+                        {
+                            "name": "Test2",
+                            "status": "NOT_EXECUTED",
+                            "startTimeMillis": 0,
+                            "endTimeMillis": 0,
+                            "durationMillis": 0,
+                            "emphasise": 1
+                        },
+                        {
+                            "name": "Deploy",
+                            "status": "NOT_EXECUTED",
+                            "startTimeMillis": 0,
+                            "endTimeMillis": 0,
+                            "durationMillis": 0,
+                            "emphasise": 1
+                        }
+                    ],
+                    "durationMillisNoPause": 3220,
+                    "endTimeMillis": 1411552556220
+                }
+            ],
+            "stageData": [
+                {
+                    "name": "Build",
+                    "runs": 2,
+                    "durationMillis": 6350,
+                    "durationMillisNoPause": 6350,
+                    "avgDurationMillis": 3175,
+                    "avgDurationMillisNoPause": 3175
+                },
+                {
+                    "name": "Test2",
+                    "runs": 1,
+                    "durationMillis": 3323,
+                    "durationMillisNoPause": 3323,
+                    "avgDurationMillis": 3323,
+                    "avgDurationMillisNoPause": 3323
+                },
+                {
+                    "name": "Deploy",
+                    "runs": 1,
+                    "durationMillis": 2496,
+                    "durationMillisNoPause": 2496,
+                    "avgDurationMillis": 2496,
+                    "avgDurationMillisNoPause": 2496
+                }
+            ],
+            "numRuns": 2,
+            "numStages": 4,
+            "durationMillis": 12169,
+            "durationMillisNoPause": 12169,
+            "avgDurationMillis": 6084,
+            "avgDurationMillisNoPause": 6084
+        }
+    ]
+}

@@ -1,0 +1,13 @@
+<div class="cbwf-popout-menu">
+    {{#if items}}
+    <div class="glyphicon glyphicon-align-justify">
+        <div class="cbwf-menu-items">
+            {{#each items}}
+                <div class="cbwf-menu-item">
+                    <div cbwf-controller="{{this.controller}}" descUrl="{{../descUrl}}"><span class="glyphicon glyphicon-{{this.icon}}"></span> {{this.label}}</div>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+    {{/if}}
+</div>

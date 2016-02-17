@@ -1,0 +1,26 @@
+// Alerts
+
+.alert-variant(@background; @border; @text-color; @dark-background) {
+  background-color: @background;
+  border-color: @border;
+  color: @text-color;
+
+  .btn {
+    color: #fff;
+    text-shadow: rgba(0, 0, 0, 0.1) 0 0px 5px, rgba(0, 0, 0, 0.33) 0 0 2px;
+    background:@dark-background
+  }
+  .btn:hover{
+    box-shadow:inset rgba(0,0,0,.1) 0 0 0 99em, inset rgba(0,0,0,.2) 0 2px 3px;
+  }
+  .btn:active{
+    box-shadow:inset rgba(0,0,0,.2) 0 0 0 1px,inset rgba(0,0,0,.15) 0 0 0 99em, inset rgba(0,0,0,.2) 0 2px 3px;
+  }
+
+  hr {
+    border-top-color: darken(@border, 5%);
+  }
+  .alert-link {
+    color: darken(@text-color, 10%);
+  }
+}

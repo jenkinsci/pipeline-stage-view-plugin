@@ -1,0 +1,47 @@
+{
+  "id": "Run-test-suites",
+  "proceedText": "Okay",
+  "message": "Workflow Configuration",
+  "inputs": [
+    {
+      "type": "BooleanParameterDefinition",
+      "name": "Run test suites?",
+      "description": "A checkbox option",
+      "definition": {
+        "defaultVal": true
+      }
+    },
+    {
+      "type": "StringParameterDefinition",
+      "name": "Enter some text",
+      "description": "A text option",
+      "definition": {
+        "defaultVal": "Hello"
+      }
+    },
+    {
+      "type": "PasswordParameterDefinition",
+      "name": "Enter a passord",
+      "description": "A password option",
+      "definition": {
+        "defaultVal": "MyPasswd"
+      }
+    },
+    {
+      "type": "ChoiceParameterDefinition",
+      "name": "Take your pick",
+      "description": "A select box option",
+      "definition": {
+        "choices": [
+          "Choice 1",
+          "Choice 2",
+          "Choice 3"
+        ],
+        "defaultVal": "Choice 1"
+      }
+    }
+  ],
+  "proceedUrl": "/jenkins/job/Workflow/24/wfapi/inputSubmit?inputId=Run-test-suites",
+  "abortUrl": "/jenkins/job/Workflow/24/input/Run-test-suites/abort",
+  "redirectApprovalUrl": "/jenkins/job/Workflow/24/input"
+}

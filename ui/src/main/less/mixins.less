@@ -1,0 +1,70 @@
+.caption {
+  font-size: 1.15em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.header {
+  margin-bottom: 10px;
+}
+.footer {
+  margin-top: 10px;
+  opacity: 0.6;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.text-muted {
+  color: @text-muted;
+}
+
+.remove {
+  .clickable;
+  position: absolute;
+  right: 6px;
+  top: 10px;
+}
+
+.remove.headless {
+  right: -16px;
+  top: 8px;
+}
+
+.inlineBox(@boxSize) {
+  display: inline-block;
+  width: @boxSize;
+  height: @boxSize;
+  background-size: @boxSize @boxSize;
+}
+
+.loading-bg {
+  background-image: url('@{root}/plugin/pipeline-stage-view/images/loading.gif');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.top-left-caret,
+.top-right-caret,
+.bottom-left-caret,
+.bottom-right-caret{
+    display: block;
+    position: absolute;
+    border:8px solid rgba(0,0,0,.75);
+    content:' ';
+    line-height:0;    
+}
+
+.bottom-left-caret {
+      bottom: -16px;  
+      left: 1em;
+      border-bottom: 8px solid transparent;
+      border-left: 8px solid transparent;
+}
+.top-right-caret
+{     
+    border-bottom-color:transparent;
+    border-right-color:transparent;
+    right:-16px; 
+    top:1.4em;
+}

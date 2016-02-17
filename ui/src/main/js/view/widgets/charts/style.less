@@ -1,0 +1,35 @@
+.stackedBarChart{
+  display:inline-block; text-align:center; width:100%;
+  .stackedBarChart.inner {
+
+      display:inline-block;
+      white-space:nowrap;
+      width:100%;
+      text-align:center;
+      font-size:0px;
+      margin-left:-5px;
+
+      .bar{
+        height:5px;
+        box-shadow:inset rgba(0,0,0,.25) 0 1px 3px;
+        background:rgba(0,0,0,.01);
+        margin-right:0px;
+        display:inline-block;
+        min-width:1px;
+        border-bottom:1px solid rgba(0,0,0,.1)
+      }
+      .bar.highlight{
+        background: #89AED1;
+        border-bottom:1px solid rgba(0,100,255,.2);
+        box-shadow:rgba(0,0,0,.25) 0 1px 3px -1px, inset rgba(0,50,200,5) 0 -2px 3px -2px;
+      }
+  }
+}
+.stackedBarChart td {
+    padding: 0px;
+    height: 5px;
+    background-color: #d7d7d7;
+}
+.stackedBarChart td.highlight {
+    background-color: #757575;
+}

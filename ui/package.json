@@ -1,0 +1,22 @@
+{
+  "name": "pipeline-stage-view",
+  "version": "0.0.1",
+  "dependencies": {
+    "jenkins-js-extp": "0.0.2",
+    "jenkins-js-modules": "^1.5.0",
+    "jquery-detached": "^2.1.4-v4",
+    "moment": "~2.8.3",
+    "window-handle": "^1.0.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-util": "^3.0.7",
+    "handlebars": "^3.0.3",
+    "hbsfy": "^2.4.1",
+    "jenkins-handlebars-rt": "^1.0.1",
+    "jenkins-js-builder": "0.0.40",
+    "jsdom": "^7.2.2",
+    "minifyify": "^7.2.1",
+    "require-uncached": "^1.0.2"
+  }
+}

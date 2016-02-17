@@ -1,0 +1,190 @@
+<div id="pipeline-staged" cbwf-controller="pipeline-staged" fragcaption="Stage View" objecturl="/job/cd" class="cbwf-widget cbwf-controller-applied pipeline-staged"><div><div id="pipeline-box">
+<h2>Stage View</h2>
+<div class="table-box"><div class="table-viewPort" style="max-width:40em">
+<table class="jobsTable" style="max-width:40em">
+  <colgroup>
+    <col class="start-group">
+      <col class="stage-group" style="width:%; max-width:10em;">
+      <col class="stage-group" style="width:%; max-width:10em;">
+      <col class="stage-group" style="width:%; max-width:10em;">
+      <col class="stage-group" style="width:%; max-width:10em;">
+  </colgroup>
+    <thead>
+    <tr class="header">
+        <th class="stage-start"></th>
+        <th class="stage-header-name-0">Dev</th>
+        <th class="stage-header-name-1">QA</th>
+        <th class="stage-header-name-2">Staging</th>
+        <th class="stage-header-name-3">Production</th>
+    </tr>
+    </thead>
+    <tbody class="totals-box">
+    <tr class="totals">
+        <td class="stage-start"><div class="cell-color">
+          Average stage times:<br>
+          (Average <span style="text-decoration: underline;" title="builds that run all stages">full</span> run time: ~55s)
+        </div></td>
+        <td class="stage-total-0">
+          <div class="cell-color">
+            <div class="duration">3s</div>
+            <div class="stackedBarChart"><div class="stackedBarChart inner clearfix"><div class="bar highlight" style="width: 6.980768388312086%;"></div><div class="bar posthighlight" style="width: 80.0915582424322%;"></div><div class="bar posthighlight" style="width: 11.549918955622728%;"></div><div class="bar posthighlight" style="width: 1.3777544136329785%;"></div><div class="clearfix"></div></div></div>
+          </div>
+        </td>
+        <td class="stage-total-1">
+          <div class="cell-color">
+            <div class="duration">36s</div>
+            <div class="stackedBarChart"><div class="stackedBarChart inner clearfix"><div class="bar prehighlight" style="width: 6.980768388312086%;"></div><div class="bar highlight" style="width: 80.0915582424322%;"></div><div class="bar posthighlight" style="width: 11.549918955622728%;"></div><div class="bar posthighlight" style="width: 1.3777544136329785%;"></div><div class="clearfix"></div></div></div>
+          </div>
+        </td>
+        <td class="stage-total-2">
+          <div class="cell-color">
+            <div class="duration">5s</div>
+            <div class="stackedBarChart"><div class="stackedBarChart inner clearfix"><div class="bar prehighlight" style="width: 6.980768388312086%;"></div><div class="bar prehighlight" style="width: 80.0915582424322%;"></div><div class="bar highlight" style="width: 11.549918955622728%;"></div><div class="bar posthighlight" style="width: 1.3777544136329785%;"></div><div class="clearfix"></div></div></div>
+          </div>
+        </td>
+        <td class="stage-total-3">
+          <div class="cell-color">
+            <div class="duration">629ms</div>
+            <div class="stackedBarChart"><div class="stackedBarChart inner clearfix"><div class="bar prehighlight" style="width: 6.980768388312086%;"></div><div class="bar prehighlight" style="width: 80.0915582424322%;"></div><div class="bar prehighlight" style="width: 11.549918955622728%;"></div><div class="bar highlight" style="width: 1.3777544136329785%;"></div><div class="clearfix"></div></div></div>
+          </div>
+        </td>
+    </tr>
+  </tbody>
+    <tbody class="tobsTable-body">
+    <tr class="job FAILED" data-runid="2014-10-26_10-12-29">
+        <td class="stage-start">
+          <div class="cell-color">
+            <div class="cell-box">
+              <div class="jobName"><span class="badge">#3</span></div>
+              <div class="stage-start-box">
+                <div class="stage-start-time">
+                  <div class="date">1414318349569 1414318349569</div>
+                  <div class="time">1414318349569</div>
+                </div>
+                                <div class="changeset-box no-changes">No Changes</div>
+                <div class="stage-end-icons extension-dock">
+                  <div cbwf-controller="build-artifacts-popup" objecturl="/job/cd/3/wfapi/artifacts" class="cbwf-widget cbwf-controller-applied build-artifacts-popup"><a class="link"><i class="glyphicon glyphicon-download" title="Download"></i></a></div>
+                </div>
+              </div>
+
+              <div class="clearfix"></div>
+
+            </div>
+          </div>
+        </td>
+        <td class="stage-cell stage-cell-0 SUCCESS" data-stageid="10">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1.0381754705525197em; opacity: 0.5381754705525197;">3s</span>
+                </div>
+                    <div cbwf-controller="stage-actions-popover" descurl="/job/cd/3/execution/node/10/wfapi/describe" notif="stage-actions-popover,stage-failed-popover" caption="Success" class="cbwf-widget cbwf-controller-applied stage-actions-popover"></div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+        <td class="stage-cell stage-cell-1 SUCCESS" data-stageid="13">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1.4526917628010525em; opacity: 0.9526917628010525;">35s</span>
+                </div>
+                    <div cbwf-controller="stage-actions-popover" descurl="/job/cd/3/execution/node/13/wfapi/describe" notif="stage-actions-popover,stage-failed-popover" caption="Success" class="cbwf-widget cbwf-controller-applied stage-actions-popover"></div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+        <td class="stage-cell stage-cell-2 FAILED" data-stageid="27">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1.0037947783849424em; opacity: 0.5037947783849424;">300ms</span>
+                </div>
+                    <div cbwf-controller="stage-failed-popover" descurl="/job/cd/3/execution/node/27/wfapi/describe" objecturl="/job/cd/3/execution/node/27/wfapi/describe" notif="stage-actions-popover,stage-failed-popover" class="cbwf-widget cbwf-controller-applied stage-failed-popover"></div>
+                    <div class="status">failed</div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+        <td class="stage-cell stage-cell-3 NOT_EXECUTED" data-stageid="">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1em; opacity: 0.5;">NaNy NaNd</span>
+                </div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+    </tr>
+    <tr class="job SUCCESS" data-runid="2014-10-26_10-10-32">
+        <td class="stage-start">
+          <div class="cell-color">
+            <div class="cell-box">
+              <div class="jobName"><span class="badge">#1</span></div>
+              <div class="stage-start-box">
+                <div class="stage-start-time">
+                  <div class="date">1414318232950 1414318232950</div>
+                  <div class="time">1414318232950</div>
+                </div>
+                                <div class="changeset-box no-changes">No Changes</div>
+                <div class="stage-end-icons extension-dock">
+                  <div cbwf-controller="build-artifacts-popup" objecturl="/job/cd/1/wfapi/artifacts" class="cbwf-widget cbwf-controller-applied build-artifacts-popup"><a class="link"><i class="glyphicon glyphicon-download" title="Download"></i></a></div>
+                </div>
+              </div>
+
+              <div class="clearfix"></div>
+
+            </div>
+          </div>
+        </td>
+        <td class="stage-cell stage-cell-0 SUCCESS" data-stageid="10">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1.0299887441710887em; opacity: 0.5299887441710887;">3s</span>
+                </div>
+                    <div cbwf-controller="stage-actions-popover" descurl="/job/cd/1/execution/node/10/wfapi/describe" notif="stage-actions-popover,stage-failed-popover" caption="Success" class="cbwf-widget cbwf-controller-applied stage-actions-popover"></div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+        <td class="stage-cell stage-cell-1 SUCCESS" data-stageid="13">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1.3335834628646979em; opacity: 0.8335834628646979;">37s</span>
+                </div>
+                    <div cbwf-controller="stage-actions-popover" descurl="/job/cd/1/execution/node/13/wfapi/describe" notif="stage-actions-popover,stage-failed-popover" caption="Success" class="cbwf-widget cbwf-controller-applied stage-actions-popover"></div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+        <td class="stage-cell stage-cell-2 SUCCESS" data-stageid="27">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1.0915384752818424em; opacity: 0.5915384752818424;">10s</span>
+                </div>
+                    <div cbwf-controller="stage-actions-popover" descurl="/job/cd/1/execution/node/27/wfapi/describe" notif="stage-actions-popover,stage-failed-popover" caption="Success" class="cbwf-widget cbwf-controller-applied stage-actions-popover"></div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+        <td class="stage-cell stage-cell-3 SUCCESS" data-stageid="33">
+          <div class="cell-color">
+            <div class="stage-wrapper">
+                <div class="duration">
+                    <span style="font-size: 1.0056189812581515em; opacity: 0.5056189812581515;">629ms</span>
+                </div>
+                    <div cbwf-controller="stage-actions-popover" descurl="/job/cd/1/execution/node/33/wfapi/describe" notif="stage-actions-popover,stage-failed-popover" caption="Success" class="cbwf-widget cbwf-controller-applied stage-actions-popover"></div>
+                <div class="extension-dock"></div>
+            </div>
+          </div>
+    </td>
+    </tr>
+  </tbody>
+
+</table>
+</div>
+</div></div></div></div>

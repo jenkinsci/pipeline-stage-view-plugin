@@ -1,0 +1,39 @@
+{
+    "stageData": [],
+    "numRuns": 1,
+    "numStages": 0,
+    "durationMillis": 0,
+    "durationMillisNoPause": 0,
+    "avgDurationMillis": 0,
+    "avgDurationMillisNoPause": 0,
+    "runGroups": [
+        {
+            "stageData": [],
+            "runs": [
+                {
+                    "_links": {
+                        "self": {
+                            "href": "/jenkins/job/Broken%20Workflow/1/wfapi/describe"
+                        }
+                    },
+                    "id": "2014-11-18_18-25-54",
+                    "name": "#1",
+                    "status": "SUCCESS",
+                    "startTimeMillis": 1416335154350,
+                    "endTimeMillis": 1416335154580,
+                    "durationMillis": 0,
+                    "queueDurationMillis": 808146,
+                    "pauseDurationMillis": 0,
+                    "stages": [],
+                    "durationMillisNoPause": 0
+                }
+            ],
+            "numRuns": 1,
+            "numStages": 0,
+            "durationMillis": 0,
+            "durationMillisNoPause": 0,
+            "avgDurationMillis": 0,
+            "avgDurationMillisNoPause": 0
+        }
+    ]
+}

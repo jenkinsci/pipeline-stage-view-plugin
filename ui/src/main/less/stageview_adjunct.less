@@ -1,0 +1,28 @@
+// The main container for CBWF Stage View
+.cbwf-stage-view {
+  clear: right;
+  padding: 15px 0;
+}
+
+// Selectively import some twitter bootstrap styles.  Namespace them too.
+.cbwf-widget {
+  @import "bootstrap";
+}
+
+@import "./variables";
+@import "./mixins";
+@import "./icons";
+
+// Widgets
+@import "../js/view/widgets/dialog/style";
+@import "../js/view/widgets/charts/style";
+@import "../js/view/widgets/popover/style";
+
+// Templates
+@import "../js/view/templates/info-action-popover";
+@import "../js/view/templates/pipeline-staged";
+@import "../js/view/templates/menu-popout";
+@import "../js/view/templates/stage-logs";
+@import "../js/view/templates/run-input-required";
+@import "../js/view/templates/build-artifacts";
+@import "../js/view/templates/run-changesets";

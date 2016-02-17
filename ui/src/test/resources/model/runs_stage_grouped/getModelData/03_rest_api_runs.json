@@ -1,0 +1,78 @@
+[
+    {
+        "name": "#3",
+        "status": "IN_PROGRESS",
+        "startTimeMillis": 1411556423000,
+        "durationMillis": 8584,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "name": "Build",
+                "status": "SUCCESS",
+                "startTimeMillis": 1411556423000,
+                "durationMillis": 3065,
+                "pauseDurationMillis": 0
+            },
+            {
+                "name": "Test",
+                "status": "SUCCESS",
+                "startTimeMillis": 1411556426065,
+                "durationMillis": 2695,
+                "pauseDurationMillis": 0
+            },
+            {
+                "name": "Deploy",
+                "status": "IN_PROGRESS",
+                "startTimeMillis": 1411556428760,
+                "durationMillis": 824,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "name": "#2",
+        "status": "SUCCESS",
+        "startTimeMillis": 1411556089000,
+        "durationMillis": 8949,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "name": "Build",
+                "status": "SUCCESS",
+                "startTimeMillis": 1411556089000,
+                "durationMillis": 3130,
+                "pauseDurationMillis": 0
+            },
+            {
+                "name": "Test",
+                "status": "SUCCESS",
+                "startTimeMillis": 1411556092130,
+                "durationMillis": 3323,
+                "pauseDurationMillis": 0
+            },
+            {
+                "name": "Deploy",
+                "status": "SUCCESS",
+                "startTimeMillis": 1411556095453,
+                "durationMillis": 2496,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "name": "#1",
+        "status": "IN_PROGRESS",
+        "startTimeMillis": 1411552553000,
+        "durationMillis": 2220,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "name": "Build",
+                "status": "IN_PROGRESS",
+                "startTimeMillis": 1411552553000,
+                "durationMillis": 2220,
+                "pauseDurationMillis": 0
+            }
+        ]
+    }
+]
