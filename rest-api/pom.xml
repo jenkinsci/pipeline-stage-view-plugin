@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>1.0-alpha-1</version>
+        <version>1.0-alpha-1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
