@@ -1,7 +1,7 @@
 # Pipeline REST API Plugin
 
 This module is a Jenkins Plugin that defines REST endpoints for securely accessing Pipeline data that can then be used
-in (e.g.) the CloudBees Pipeline Stage View.
+in (e.g.) the Pipeline Stage View.
 
 ## Resource Hyperlinks
 

@@ -1,16 +1,6 @@
 # Pipeline Stage View
 
-This plugin provides proprietary CloudBees Jenkins UI Pipeline "Visualizations":
-
-* Pipeline Stage View
-* More to come !!
-
-<a href="http://youtu.be/Yh05trpVw5U"><img src="http://img.youtube.com/vi/Yh05trpVw5U/0.jpg" /></a>
-
-Related docs:
-
-* [Harpreet's doc on Pipeline Visualization](https://docs.google.com/a/cloudbees.com/document/d/1HELgtSqCwqvv0l5p_xg0Vq7CG6cWAHQpU5WcIyUjnR4/edit?usp=sharing)
-* [KK's doc on Thoughtworks GO](https://docs.google.com/a/cloudbees.com/document/d/1z59MMRwCvlBuyannE_1pjlKPeU7IaaGR689HLC3JCJ4/edit#)
+This plugin provides Jenkins UI Pipeline "Visualizations":
 
 ## Working with Pipeline Visualizations
 
