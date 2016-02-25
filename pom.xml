@@ -33,7 +33,7 @@
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>1.0-alpha-3-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Pipeline Stage View Plugin: Parent POM</name>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Stage+View+Plugin</url>
@@ -47,7 +47,7 @@
 
     <properties>
         <jenkins.version>1.609.3</jenkins.version> <!-- but see Jenkins-Version override below -->
-        <workflow.version>1.14-beta-1</workflow.version>
+        <workflow.version>1.14</workflow.version>
     </properties>
 
     <repositories>
