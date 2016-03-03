@@ -35,20 +35,38 @@
     <artifactId>pipeline-stage-view</artifactId>
     <version>1.1-SNAPSHOT</version>
     <name>Pipeline: Stage View Plugin</name>
+    <description>Provides a swimlane view of the different stages in a pipeline.
+    </description>
     <packaging>hpi</packaging>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Stage+View+Plugin</url>
     <properties>
-         <!-- TODO: Update to use the new parent pom, then remove all this. -->
-        <node.version>4.0.0</node.version>
-        <npm.version>2.13.1</npm.version>
         <npm.loglevel>--silent</npm.loglevel>
     </properties>
 
     <dependencies>
         <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>pipeline-rest-api</artifactId>
             <version>${project.version}</version>
+            <type>hpi</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>pipeline-rest-api</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <version>${workflow.version}</version>
+            <classifier>tests</classifier>
         </dependency>
 
         <dependency>
@@ -132,63 +150,7 @@
     </build>
 
     <profiles>
-
-        <!-- TODO: Update to use the new parent pom, then remove all this. -->
-        <profile>
-            <id>node-classifier-linux</id>
-            <activation><os><family>Linux</family><arch>amd64</arch></os></activation>
-            <properties><node.download.file>node-v${node.version}-linux-x64.tar.gz</node.download.file></properties>
-        </profile>
-        <profile>
-            <id>node-classifier-mac</id>
-            <activation><os><family>mac</family></os></activation>
-            <properties><node.download.file>node-v${node.version}-darwin-x64.tar.gz</node.download.file></properties>
-        </profile>
-        <profile>
-            <id>node-classifier-windows</id>
-            <activation><os><family>windows</family></os></activation>
-            <properties><node.download.file>win-x64/node.exe</node.download.file></properties>
-        </profile>
-        <profile>
-            <id>node-download</id>
-            <activation><file><exists>package.json</exists></file></activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.googlecode.maven-download-plugin</groupId>
-                        <artifactId>download-maven-plugin</artifactId>
-                        <version>1.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>get-node</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>wget</goal>
-                                </goals>
-                                <configuration>
-                                    <url>https://nodejs.org/dist/v${node.version}/${node.download.file}</url>
-                                    <unpack>false</unpack>
-                                    <outputDirectory>${project.build.directory}/frontend/v${node.version}</outputDirectory>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>get-npm</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>wget</goal>
-                                </goals>
-                                <configuration>
-                                    <url>http://registry.npmjs.org/npm/-/npm-${npm.version}.tgz</url>
-                                    <unpack>false</unpack>
-                                    <outputDirectory>${project.build.directory}/frontend/</outputDirectory>
-                                    <outputFileName>npm-${npm.version}.tgz</outputFileName>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+        <!-- Below MIGHT be removable due to something in parent pom but can't find it -->
         <profile>
             <id>node-npm-check</id>
             <activation>
