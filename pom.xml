@@ -48,6 +48,7 @@
     <properties>
         <jenkins.version>1.609.3</jenkins.version>
         <workflow.version>1.14</workflow.version>
+        <jenkins-test-harness.version>2.1</jenkins-test-harness.version>
     </properties>
 
     <repositories>
