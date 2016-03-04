@@ -103,12 +103,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.3.2</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
