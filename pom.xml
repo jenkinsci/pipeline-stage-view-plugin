@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.609.3</version>
+        <version>2.3</version>
     </parent>
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
@@ -46,8 +46,9 @@
     </scm>
 
     <properties>
-        <jenkins.version>1.609.3</jenkins.version> <!-- but see Jenkins-Version override below -->
+        <jenkins.version>1.609.3</jenkins.version>
         <workflow.version>1.14</workflow.version>
+        <jenkins-test-harness.version>2.1</jenkins-test-harness.version>
     </properties>
 
     <repositories>
@@ -67,41 +68,15 @@
         <module>rest-api</module>
         <module>ui</module>
     </modules>
-
-    <dependencies>
-        <dependency> <!-- May not need this -->
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-aggregator</artifactId>
-            <version>${workflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-aggregator</artifactId>
-            <version>${workflow.version}</version>
-            <classifier>tests</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-job</artifactId>
-            <version>${workflow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-basic-steps</artifactId>
-            <version>${workflow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-durable-task-step</artifactId>
-            <version>${workflow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-support</artifactId>
-            <version>${workflow.version}</version>
-            <classifier>tests</classifier>
-        </dependency>
-    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <tagNameFormat>pipeline-stage-view-@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
