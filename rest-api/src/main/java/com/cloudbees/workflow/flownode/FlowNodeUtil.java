@@ -33,9 +33,12 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 
+import javax.annotation.CheckForNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -50,6 +53,15 @@ public class FlowNodeUtil {
     }
 
     public static long getNodeExecDuration(FlowNode node) {
+
+        /*long startTime = TimingAction.getStartTime(node);
+        if (startTime == 0) {
+            // The node is running and the time has not been marked on it yet.  Return 0 as the duration for now.
+            return 0;
+        }*/
+
+        // Find the last node descended from this parent node, to
+
         List<FlowNode> childNodes = getChildNodes(node);
         if (!childNodes.isEmpty()) {
             long startTime = TimingAction.getStartTime(node);
@@ -297,17 +309,23 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    public static List<FlowNode> getChildNodes(final FlowNode parentNode) {
-        final List<FlowNode> nodes = new ArrayList<FlowNode>();
+    /** Find last child node (by ID) descended from this parent node */
+    @CheckForNull
+    public static FlowNode getLastChildNode(final FlowNode parentNode) {
+        return null;
+    }
 
+    public static List<FlowNode> getChildNodes(final FlowNode parentNode) {
+        //final HashSet<FlowNode> nodes = new HashSet<FlowNode>();
+        final List<FlowNode> nodes = new ArrayList<FlowNode>();
         FlowGraphWalker walker = new FlowGraphWalker(parentNode.getExecution());
         for (FlowNode node : walker) {
             if (node.getParents().contains(parentNode) && !nodes.contains(node)) {
                 nodes.add(node);
             }
         }
+        //ArrayList<FlowNode> sorted = new ArrayList<FlowNode>(nodes);
         sortNodesById(nodes);
-
         return nodes;
     }
 
