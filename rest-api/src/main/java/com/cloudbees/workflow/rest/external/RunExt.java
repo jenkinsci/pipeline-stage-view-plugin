@@ -23,8 +23,6 @@
  */
 package com.cloudbees.workflow.rest.external;
 
-import com.cloudbees.workflow.flownode.FlowNodeNavigationListener;
-import com.cloudbees.workflow.flownode.FlowNodeNavigator;
 import com.cloudbees.workflow.rest.endpoints.RunAPI;
 import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
@@ -32,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
+import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -211,25 +210,22 @@ public class RunExt {
                 runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
             }
 
-            FlowNodeNavigator nodeNavigator = new FlowNodeNavigator(new FlowNodeNavigationListener() {
-                @Override
-                public void onNode(FlowNode node) {
-                    long nodeTime = TimingAction.getStartTime(node);
+            FlowGraphWalker walker = new FlowGraphWalker(run.getExecution());
+            for (FlowNode node : walker) {
+                long nodeTime = TimingAction.getStartTime(node);
 
-                    if (nodeTime > runExt.getEndTimeMillis()) {
-                        // Use the most resent FlowNode timestamp as being
-                        // the end time for the run.
-                        runExt.setEndTimeMillis(nodeTime);
-                    }
-
-                    if (StageNodeExt.isStageNode(node)) {
-                        StageNodeExt stage = StageNodeExt.create(node);
-                        runExt.addStage(stage);
-                        runExt.setPauseDurationMillis(runExt.getPauseDurationMillis() + stage.getPauseDurationMillis());
-                    }
+                if (nodeTime > runExt.getEndTimeMillis()) {
+                    // Use the most resent FlowNode timestamp as being
+                    // the end time for the run.
+                    runExt.setEndTimeMillis(nodeTime);
                 }
-            });
-            nodeNavigator.navigate(execution.getCurrentHeads());
+
+                if (StageNodeExt.isStageNode(node)) {
+                    StageNodeExt stage = StageNodeExt.create(node);
+                    runExt.addStage(stage);
+                    runExt.setPauseDurationMillis(runExt.getPauseDurationMillis() + stage.getPauseDurationMillis());
+                }
+            }
 
             if (!runExt.getStages().isEmpty()) {
                 runExt.sortStages();

@@ -29,6 +29,7 @@ import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.actions.WorkspaceAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
+import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 
@@ -299,15 +300,12 @@ public class FlowNodeUtil {
     public static List<FlowNode> getChildNodes(final FlowNode parentNode) {
         final List<FlowNode> nodes = new ArrayList<FlowNode>();
 
-        FlowNodeNavigator nodeNavigator = new FlowNodeNavigator(new FlowNodeNavigationListener() {
-            @Override
-            public void onNode(FlowNode navNode) {
-                if (navNode.getParents().contains(parentNode) && !nodes.contains(navNode)) {
-                    nodes.add(navNode);
-                }
+        FlowGraphWalker walker = new FlowGraphWalker(parentNode.getExecution());
+        for (FlowNode node : walker) {
+            if (node.getParents().contains(parentNode) && !nodes.contains(node)) {
+                nodes.add(node);
             }
-        });
-        nodeNavigator.navigate(parentNode.getExecution().getCurrentHeads());
+        }
         sortNodesById(nodes);
 
         return nodes;
@@ -347,16 +345,13 @@ public class FlowNodeUtil {
 
         // Gather all the nodes from the workflow
         final List<FlowNode> unsortedNodes = new ArrayList<FlowNode>();
-        FlowNodeNavigator nodeNavigator = new FlowNodeNavigator(new FlowNodeNavigationListener() {
-            @Override
-            public void onNode(FlowNode node) {
-                if (!unsortedNodes.contains(node)) {
-                    unsortedNodes.add(node);
-                }
+        FlowGraphWalker walker = new FlowGraphWalker(nodeList.get(0).getExecution());
+        for (FlowNode node : walker) {
+            if (!unsortedNodes.contains(node)) {
+                unsortedNodes.add(node);
             }
-        });
+        }
 
-        nodeNavigator.navigate(nodeList);
         cacheAction.unsortedNodeList = unsortedNodes;
 
         return cacheAction.unsortedNodeList;
