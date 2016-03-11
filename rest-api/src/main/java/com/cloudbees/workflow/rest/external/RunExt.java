@@ -210,7 +210,7 @@ public class RunExt {
                 runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
             }
 
-            FlowGraphWalker walker = new FlowGraphWalker(run.getExecution());
+            FlowGraphWalker walker = new FlowGraphWalker(execution);
             for (FlowNode node : walker) {
                 long nodeTime = TimingAction.getStartTime(node);
 

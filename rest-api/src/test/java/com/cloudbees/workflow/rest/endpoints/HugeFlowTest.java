@@ -37,6 +37,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.ErrorStep;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -51,6 +52,7 @@ import static org.hamcrest.Matchers.containsString;
  * Test performance and behavior with gigantic flow graphs
  * @author svanoort
  */
+@Ignore // For benchmark only
 public class HugeFlowTest {
 
     @Rule

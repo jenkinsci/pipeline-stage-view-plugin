@@ -40,6 +40,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -54,28 +55,18 @@ public class FlowNodeUtil {
 
     public static long getNodeExecDuration(FlowNode node) {
 
-        /*long startTime = TimingAction.getStartTime(node);
+        long startTime = TimingAction.getStartTime(node);
         if (startTime == 0) {
             // The node is running and the time has not been marked on it yet.  Return 0 as the duration for now.
-            return 0;
-        }*/
-
-        // Find the last node descended from this parent node, to
-
-        List<FlowNode> childNodes = getChildNodes(node);
-        if (!childNodes.isEmpty()) {
-            long startTime = TimingAction.getStartTime(node);
-            long endTime = TimingAction.getStartTime(childNodes.get(childNodes.size() - 1));
-
-            if (startTime == 0) {
-                // The node is running and the time has not been marked on it yet.  Return 0 as the duration for now.
-                return 0;
-            }
-
-            return (endTime - startTime);
-        } else {
             return 0L;
         }
+
+        FlowNode last = getLastChildNode(node);
+        if (last != null) {
+            long endTime = TimingAction.getStartTime(last);
+            return endTime - startTime;
+        }
+        return 0L;
     }
 
     public static ExecDuration getStageExecDuration(FlowNode stageStartNode) {
@@ -309,10 +300,34 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    /** Find last child node (by ID) descended from this parent node */
+    /** Find last child node (by ID) descended from this parent node, which will be last one executed by it */
     @CheckForNull
     public static FlowNode getLastChildNode(final FlowNode parentNode) {
-        return null;
+        String parentNodeId = parentNode.getId();
+        FlowGraphWalker walker = new FlowGraphWalker(parentNode.getExecution());
+        HashSet<String> parentSet = new HashSet<String>();
+
+        int lastId = -1;
+        FlowNode last = null;
+        for(FlowNode node : walker) {
+            parentSet.clear();
+            parentSet.addAll(node.getParentIds());
+
+            if (parentSet.contains(parentNodeId)) {
+                int id = -1;
+                try {
+                    id = Integer.parseInt(node.getId());
+                } catch (NumberFormatException e) {
+                    LOGGER.severe("Failed to parse FlowNode ID '" + node.getId() + "' on step '" + node.getDisplayName() + "'.  Expecting iota to be an integer value.");
+                    id = -1;
+                }
+                if(id > lastId) {
+                    lastId = id;
+                    last = node;
+                }
+            }
+        }
+        return last;
     }
 
     public static List<FlowNode> getChildNodes(final FlowNode parentNode) {
@@ -362,7 +377,7 @@ public class FlowNodeUtil {
         }
 
         // Gather all the nodes from the workflow
-        final List<FlowNode> unsortedNodes = new ArrayList<FlowNode>();
+        final Set<FlowNode> unsortedNodes = new HashSet<FlowNode>();
         FlowGraphWalker walker = new FlowGraphWalker(nodeList.get(0).getExecution());
         for (FlowNode node : walker) {
             if (!unsortedNodes.contains(node)) {
@@ -370,7 +385,7 @@ public class FlowNodeUtil {
             }
         }
 
-        cacheAction.unsortedNodeList = unsortedNodes;
+        cacheAction.unsortedNodeList = new ArrayList<FlowNode>(unsortedNodes);
 
         return cacheAction.unsortedNodeList;
     }
