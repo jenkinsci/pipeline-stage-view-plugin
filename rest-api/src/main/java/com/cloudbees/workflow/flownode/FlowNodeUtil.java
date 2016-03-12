@@ -283,7 +283,7 @@ public class FlowNodeUtil {
         if (allNodesSorted.size() > BINARY_SEARCH_THRESHOLD) {
             stageStartNodeIndex = Collections.binarySearch(allNodesSorted, stageStartNode, sortComparator);
         } else {
-            stageStartNodeIndex = allNodesSorted.indexOf(stageStartNodeIndex);
+            stageStartNodeIndex = allNodesSorted.indexOf(stageStartNode);
         }
         return stageStartNodeIndex;
     }
