@@ -67,8 +67,7 @@ public class FlowNodeUtil {
     }
 
     // Stores ExecutionInfo
-    static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder()
-            .weakKeys().weakValues().expireAfterAccess(6, TimeUnit.HOURS).build();
+    static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder().maximumSize(100).weakValues().build();
 
     static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(1, TimeUnit.HOURS).build();
 
@@ -100,15 +99,26 @@ public class FlowNodeUtil {
             return 0L;
         }
 
-        // This can be replaced by *just* finding the last child node, but it does not seem to help performance
-        List<FlowNode> childNodes = getChildNodes(node);
-        if (!childNodes.isEmpty()) {
-            long endTime = TimingAction.getStartTime(childNodes.get(childNodes.size() - 1));
-
+        // All we need to calculate exec duration is the last child node
+        FlowNode lastChild = getLastChildNode(node);
+        if (lastChild != null) {
+            long endTime = TimingAction.getStartTime(lastChild);
             return (endTime - startTime);
         } else {
             return 0L;
         }
+    }
+
+    public static FlowNode getLastChildNode(FlowNode node) {
+        List<FlowNode> allNodes = getIdSortedExecutionNodeList(node.getExecution());
+        FlowNode last = null;
+        for(int i=allNodes.size()-1; i>=0; i--) {
+            FlowNode f = allNodes.get(i);
+            if (f.getParents().contains(node)) {
+                return f;
+            }
+        }
+        return null;
     }
 
     public static ExecDuration getStageExecDuration(FlowNode stageStartNode) {
@@ -232,6 +242,8 @@ public class FlowNodeUtil {
 
         execNodeName = "master";
         List<FlowNode> parents = flowNode.getParents();
+
+        // Queue is used because we've hit some stack overflows with complex graphs
         ArrayDeque<FlowNode> testNodes = new ArrayDeque<FlowNode>();
         if (parents != null && !parents.isEmpty()) {
             // Don't need to iterate all parents. Working back through one ancestral line
@@ -375,22 +387,8 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    // This entirely exists in order to find the last child node for measuring execution time
-    // The walker can throw a ConcurrentModificationException if the flow graph changes
-    public static List<FlowNode> getChildNodes(final FlowNode parentNode) throws ConcurrentModificationException {
-        final List<FlowNode> nodes = new ArrayList<FlowNode>();
-        FlowGraphWalker walker = new FlowGraphWalker(parentNode.getExecution());
-        for (FlowNode node : walker) {
-            if (node.getParents().contains(parentNode)) {  // The walker removes duplicates
-                nodes.add(node);
-            }
-        }
-        sortNodesById(nodes);
-        return nodes;
-    }
-
     // Throws ConcurrentModificationException if FlowGraph changes under the iterator
-    public synchronized static List<FlowNode> getIdSortedExecutionNodeList(FlowExecution execution) throws ConcurrentModificationException {
+    public static List<FlowNode> getIdSortedExecutionNodeList(FlowExecution execution) throws ConcurrentModificationException {
         if (execution == null || execution.getCurrentHeads().isEmpty()) {
             return Collections.EMPTY_LIST;
         }

@@ -65,7 +65,7 @@ public class FlowNodeUtilTest {
     }
 
     @Test
-    public void test_getChildNodes() {
+    public void test_getLastChildNode() {
         FlowGraphBuilder graphBuilder = new FlowGraphBuilder();
 
         graphBuilder.addNode("Start")
@@ -82,16 +82,16 @@ public class FlowNodeUtilTest {
                 .addNode("End")
         ;
 
-        Assert.assertEquals("[Git]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("Build")).toString());
-        Assert.assertEquals("[Mvn - build]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("Git")).toString());
-        Assert.assertEquals("[Test]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("Mvn - build")).toString());
+        Assert.assertEquals("Git", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("Build")).toString());
+        Assert.assertEquals("Mvn - build", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("Git")).toString());
+        Assert.assertEquals("Test", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("Mvn - build")).toString());
         // "Test" has 3 kids ... all tests kicked off in parallel
-        Assert.assertEquals("[tests1, tests2, tests3]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("Test")).toString());
+        Assert.assertEquals("tests3", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("Test")).toString());
         // The test steps all have "Deploy" as their child... I think this is correct!! TODO
-        Assert.assertEquals("[Deploy]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("tests1")).toString());
-        Assert.assertEquals("[Deploy]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("tests2")).toString());
-        Assert.assertEquals("[Deploy]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("tests3")).toString());
-        Assert.assertEquals("[Mvn - release]", FlowNodeUtil.getChildNodes(graphBuilder.getNode("Deploy")).toString());
+        Assert.assertEquals("Deploy", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("tests1")).toString());
+        Assert.assertEquals("Deploy", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("tests2")).toString());
+        Assert.assertEquals("Deploy", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("tests3")).toString());
+        Assert.assertEquals("Mvn - release", FlowNodeUtil.getLastChildNode(graphBuilder.getNode("Deploy")).toString());
     }
 
     @Test
