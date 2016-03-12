@@ -25,10 +25,12 @@ package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
+import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import hudson.model.Queue;
 import hudson.model.Run;
+import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.actions.WorkspaceAction;
@@ -295,6 +297,18 @@ public class FlowNodeUtil {
         }
 
         return nodes;
+    }
+
+    // Enables us to get the status of a node without creating a bunch of objects
+    public static StatusExt getStatus(FlowNode node) {
+        boolean isExecuted = NotExecutedNodeAction.isExecuted(node);
+
+        if (isExecuted) {
+            ErrorAction errorAction = node.getError();
+            return StatusExt.valueOf(errorAction);
+        } else {
+            return StatusExt.NOT_EXECUTED;
+        }
     }
 
     public static List<FlowNode> getStageNodes(FlowNode node) {
