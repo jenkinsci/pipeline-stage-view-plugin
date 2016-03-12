@@ -41,6 +41,9 @@ public class StageNodeExt extends FlowNodeExt {
 
     private List<AtomFlowNodeExt> stageFlowNodes;
 
+    // Limit the size of child nodes returned
+    static final int MAX_CHILD_NODES = 100;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public List<AtomFlowNodeExt> getStageFlowNodes() {
         return stageFlowNodes;
@@ -90,16 +93,24 @@ public class StageNodeExt extends FlowNodeExt {
     }
 
     private void addStageAtomNodeData(List<FlowNode> atomFlowNodes) {
-        this.setStageFlowNodes(new ArrayList<AtomFlowNodeExt>());
+        List<AtomFlowNodeExt> newNodes = new ArrayList<AtomFlowNodeExt>();
+
         for (FlowNode stageNode : atomFlowNodes) {
             if (stageNode instanceof AtomNode) {
-                AtomFlowNodeExt atomFlowNodeExt = AtomFlowNodeExt.create(stageNode);
-                this.getStageFlowNodes().add(atomFlowNodeExt);
-                if (atomFlowNodeExt.getStatus() == StatusExt.FAILED) {
+                // We're capping the number of nodes to prevent major performance issues
+                if (newNodes.size() <= MAX_CHILD_NODES) {
+                    AtomFlowNodeExt atomFlowNodeExt = AtomFlowNodeExt.create(stageNode);
+                    if (atomFlowNodeExt.getStatus() == StatusExt.FAILED) {
+                        this.setStatus(StatusExt.FAILED);
+                    }
+                    newNodes.add(atomFlowNodeExt);
+                } // Just scan for status code
+                if (FlowNodeUtil.getStatus(stageNode) == StatusExt.FAILED) {
                     this.setStatus(StatusExt.FAILED);
                 }
             }
         }
+        this.setStageFlowNodes(newNodes);
     }
 
 }
