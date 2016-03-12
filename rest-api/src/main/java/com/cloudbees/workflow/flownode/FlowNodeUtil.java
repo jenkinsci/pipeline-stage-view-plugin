@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -67,9 +68,27 @@ public class FlowNodeUtil {
     static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder()
             .weakKeys().weakValues().expireAfterAccess(6, TimeUnit.HOURS).build();
 
+    static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().build();
+
     private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
     private FlowNodeUtil() {
+    }
+
+    public static boolean isNotPartOfRunningBuild(FlowExecution execution) {
+        Queue.Executable executable = null;
+        try {
+            executable = execution.getOwner().getExecutable();
+        } catch (NullPointerException e) {
+            LOGGER.log(Level.FINE, "NullPointerException getting Workflow Queue.Executable. Probably running in a mocked test.");
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unexpected error getting Workflow Queue.Executable.", e);
+        }
+
+        if (executable != null && executable instanceof Run && !((Run)executable).isBuilding()) {
+            return true;
+        }
+        return false;
     }
 
     public static long getNodeExecDuration(FlowNode node) {
@@ -79,6 +98,7 @@ public class FlowNodeUtil {
             return 0L;
         }
 
+        // This can be replaced by *just* finding the last child node, but it does not seem to help performance
         List<FlowNode> childNodes = getChildNodes(node);
         if (!childNodes.isEmpty()) {
             long endTime = TimingAction.getStartTime(childNodes.get(childNodes.size() - 1));
@@ -200,7 +220,7 @@ public class FlowNodeUtil {
      * @return The name of the node on which the supplied FlowNode executed.
      */
     public static String getExecNodeName(FlowNode flowNode) {
-        String execNodeName = FlowNodeExecutorNameCache.getExecNodeName(flowNode);
+        String execNodeName = execNodeNameCache.getIfPresent(flowNode);
         if (execNodeName != null) {
             return execNodeName;
         }
@@ -223,7 +243,7 @@ public class FlowNodeUtil {
             }
         }
 
-        FlowNodeExecutorNameCache.cache(execNodeName, flowNode);
+        execNodeNameCache.put(flowNode, execNodeName);
 
         return execNodeName;
     }
@@ -332,21 +352,22 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    public static List<FlowNode> getChildNodes(final FlowNode parentNode) {
-        //final HashSet<FlowNode> nodes = new HashSet<FlowNode>();
+    // This entirely exists in order to find the last child node for measuring execution time
+    // The walker can throw a ConcurrentModificationException if the flow graph changes
+    public static List<FlowNode> getChildNodes(final FlowNode parentNode) throws ConcurrentModificationException {
         final List<FlowNode> nodes = new ArrayList<FlowNode>();
         FlowGraphWalker walker = new FlowGraphWalker(parentNode.getExecution());
         for (FlowNode node : walker) {
-            if (node.getParents().contains(parentNode) && !nodes.contains(node)) {
+            if (node.getParents().contains(parentNode)) {  // The walker removes duplicates
                 nodes.add(node);
             }
         }
-        //ArrayList<FlowNode> sorted = new ArrayList<FlowNode>(nodes);
         sortNodesById(nodes);
         return nodes;
     }
 
-    public synchronized static List<FlowNode> getIdSortedExecutionNodeList(FlowExecution execution) {
+    // Throws ConcurrentModificationException if FlowGraph changes under the iterator
+    public synchronized static List<FlowNode> getIdSortedExecutionNodeList(FlowExecution execution) throws ConcurrentModificationException {
         if (execution == null || execution.getCurrentHeads().isEmpty()) {
             return Collections.EMPTY_LIST;
         }
@@ -365,17 +386,7 @@ public class FlowNodeUtil {
             }
         }
 
-        // I am not sure if all of this is necessary, but better safe than sorry
-        Queue.Executable executable = null;
-        try {
-            executable = execution.getOwner().getExecutable();
-        } catch (NullPointerException e) {
-            LOGGER.log(Level.FINE, "NullPointerException getting Workflow Queue.Executable. Probably running in a mocked test.");
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unexpected error getting Workflow Queue.Executable.", e);
-        }
-
-        if (executable != null && executable instanceof Run && !((Run)executable).isBuilding()) {
+        if (isNotPartOfRunningBuild(execution)) {
             isCacheable = true;
         }
 
