@@ -25,6 +25,10 @@ package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import hudson.model.Queue;
+import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.actions.WorkspaceAction;
@@ -32,8 +36,11 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.CheckForNull;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,12 +48,22 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class FlowNodeUtil {
+
+    static class ExecutionCache {
+        List<FlowNode> idSortedExecutionNodeList;
+    }
+
+    // Stores ExecutionInfo
+    static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder()
+            .weakKeys().weakValues().expireAfterAccess(6, TimeUnit.HOURS).build();
 
     private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
@@ -315,53 +332,57 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    public static List<FlowNode> getIdSortedExecutionNodeList(FlowExecution execution) {
-        return getIdSortedExecutionNodeList(execution.getCurrentHeads());
-    }
-
-    public static List<FlowNode> getIdSortedExecutionNodeList(List<FlowNode> nodeList) {
-        if (nodeList == null || nodeList.isEmpty()) {
+    public synchronized static List<FlowNode> getIdSortedExecutionNodeList(FlowExecution execution) {
+        if (execution == null || execution.getCurrentHeads().isEmpty()) {
             return Collections.EMPTY_LIST;
         }
 
-        FlowNodeListCacheAction cacheAction = FlowNodeListCacheAction.get(nodeList.get(0));
-        if (cacheAction.idSortedNodeList == null) {
-            List<FlowNode> unsortedNodes = getUnsortedSortedExecutionNodeList(nodeList);
-            cacheAction.idSortedNodeList = sortNodesById(unsortedNodes);
+        String executionUrl = null;
+        boolean isCacheable = false;
+        try {
+            executionUrl = execution.getUrl();
+        } catch (IOException ioe) {
+            LOGGER.severe("Can't get execution url for execution, IOException!");
         }
-
-        return cacheAction.idSortedNodeList;
-    }
-
-    public static List<FlowNode> getUnsortedSortedExecutionNodeList(FlowExecution execution) {
-        return getUnsortedSortedExecutionNodeList(execution.getCurrentHeads());
-    }
-
-    static List<FlowNode> getUnsortedSortedExecutionNodeList(List<FlowNode> nodeList) {
-        if (nodeList == null || nodeList.isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
-
-        FlowNodeListCacheAction cacheAction = FlowNodeListCacheAction.get(nodeList.get(0));
-        if (cacheAction.unsortedNodeList != null) {
-            return cacheAction.unsortedNodeList;
-        }
-
-        // Gather all the nodes from the workflow
-        final Set<FlowNode> unsortedNodes = new HashSet<FlowNode>();
-        FlowGraphWalker walker = new FlowGraphWalker(nodeList.get(0).getExecution());
-        for (FlowNode node : walker) {
-            if (!unsortedNodes.contains(node)) {
-                unsortedNodes.add(node);
+        if (executionUrl != null) {
+            ExecutionCache myCache = executionCache.getIfPresent(executionUrl);
+            if (myCache != null) {
+                return myCache.idSortedExecutionNodeList;
             }
         }
 
-        cacheAction.unsortedNodeList = new ArrayList<FlowNode>(unsortedNodes);
+        // I am not sure if all of this is necessary, but better safe than sorry
+        Queue.Executable executable = null;
+        try {
+            executable = execution.getOwner().getExecutable();
+        } catch (NullPointerException e) {
+            LOGGER.log(Level.FINE, "NullPointerException getting Workflow Queue.Executable. Probably running in a mocked test.");
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unexpected error getting Workflow Queue.Executable.", e);
+        }
 
-        return cacheAction.unsortedNodeList;
+        if (executable != null && executable instanceof Run && !((Run)executable).isBuilding()) {
+            isCacheable = true;
+        }
+
+        // Not in cache or can't cache
+        FlowGraphWalker walker = new FlowGraphWalker(execution);
+        ArrayList<FlowNode> nodes = new ArrayList<FlowNode>();
+        for (FlowNode node : walker) {
+            nodes.add(node);
+        }
+        sortNodesById(nodes);
+
+        if (isCacheable && executionUrl != null) {
+            ExecutionCache cacheEntry = new ExecutionCache();
+            cacheEntry.idSortedExecutionNodeList = nodes;
+            executionCache.put(executionUrl, cacheEntry);
+        }
+        return nodes;
     }
 
-    private static List<FlowNode> sortNodesById(List<FlowNode> nodes) {
+    @Restricted(NoExternalUse.class)
+    protected static List<FlowNode> sortNodesById(List<FlowNode> nodes) {
         Comparator<FlowNode> sortComparator = new Comparator<FlowNode>() {
             @Override
             public int compare(FlowNode node1, FlowNode node2) {

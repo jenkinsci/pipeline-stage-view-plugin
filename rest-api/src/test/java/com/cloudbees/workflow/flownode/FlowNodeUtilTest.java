@@ -25,10 +25,13 @@ package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.flownode.mock.FlowGraphBuilder;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
+import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -40,29 +43,25 @@ public class FlowNodeUtilTest {
     public void test_node_sorting() {
         FlowGraphBuilder graphBuilder = new FlowGraphBuilder();
 
-        graphBuilder.addNode("Start")
-                .addStageNode("Build")
-                .addInStageNode("Git")
-                .addInStageNode("Mvn - build")
-                .addStageNode("Test")
-                .addInStageNode("Mvn - tests")
-                .addInStageNode("Mvn - more tests")
-                .addStageNode("Deploy")
-                .addInStageNode("Mvn - release")
-                .addInStageNode("Notify XYZ")
-                .addNode("End")
+        graphBuilder.addNode("1")
+                .addStageNode("2")
+                .addInStageNode("3")
+                .addInStageNode("4")
+                .addStageNode("5")
+                .addInStageNode("6")
+                .addInStageNode("7")
+                .addStageNode("8")
+                .addInStageNode("9")
+                .addInStageNode("10")
+                .addNode("11")
         ;
 
-        List<FlowNode> unsortedNodeList = FlowNodeUtil.getUnsortedSortedExecutionNodeList(graphBuilder.flowExecution);
-        Assert.assertEquals(
-                "[End, Notify XYZ, Mvn - release, Deploy, Mvn - more tests, Mvn - tests, Test, Mvn - build, Git, Build, Start]",
-                unsortedNodeList.toString());
+        ArrayList<FlowNode> nodeList = new ArrayList<FlowNode>(graphBuilder.nodeMap.values());
+        FlowNodeUtil.sortNodesById(nodeList);
 
-        List<FlowNode> sortedNodeList = FlowNodeUtil.getIdSortedExecutionNodeList(graphBuilder.flowExecution);
         Assert.assertEquals(
-                "[Start, Build, Git, Mvn - build, Test, Mvn - tests, Mvn - more tests, Deploy, Mvn - release, Notify XYZ, End]",
-                sortedNodeList.toString());
-
+                "[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]",
+                nodeList.toString());
     }
 
     @Test
@@ -112,7 +111,8 @@ public class FlowNodeUtilTest {
                 .addNode("End")
         ;
 
-        List<FlowNode> buildNodes = FlowNodeUtil.getStageNodes(graphBuilder.getNode("Build"));
+        FlowNode n = graphBuilder.getNode("Build");
+        List<FlowNode> buildNodes = FlowNodeUtil.getStageNodes(n);
         Assert.assertEquals("[Git, Mvn - build]", buildNodes.toString());
 
         List<FlowNode> testNodes = FlowNodeUtil.getStageNodes(graphBuilder.getNode("Test"));
