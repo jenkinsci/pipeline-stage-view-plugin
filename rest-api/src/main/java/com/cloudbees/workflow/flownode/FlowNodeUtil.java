@@ -44,6 +44,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -59,6 +60,9 @@ import java.util.logging.Logger;
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class FlowNodeUtil {
+
+    /** When there are at least this elements and we're using a sorted list, switch to binary search */
+    static final int BINARY_SEARCH_THRESHOLD = 100;
 
     static class ExecutionCache {
         List<FlowNode> idSortedExecutionNodeList;
@@ -113,7 +117,7 @@ public class FlowNodeUtil {
         if (StageNodeExt.isStageNode(stageStartNode)) {
             FlowExecution execution = stageStartNode.getExecution();
             List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-            int stageStartNodeIndex = allNodesSorted.indexOf(stageStartNode);
+            int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
             FlowNode firstExecutedNode;
 
             // Locate the first node in the stage that was actually executed.  This can
@@ -155,7 +159,7 @@ public class FlowNodeUtil {
                     // Calculate the stage pause duration.
                     int nextStageIndex;
                     if (nextStageNode != null) {
-                        nextStageIndex = allNodesSorted.indexOf(nextStageNode);
+                        nextStageIndex = findStageStartNodeIndex(allNodesSorted, nextStageNode);
                     } else {
                         nextStageIndex = allNodesSorted.size(); // +1 from end of list
                     }
@@ -190,7 +194,7 @@ public class FlowNodeUtil {
     public static FlowNode getStageExecStartNode(FlowNode stageStartNode) {
         FlowExecution execution = stageStartNode.getExecution();
         List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-        int stageStartNodeIndex = allNodesSorted.indexOf(stageStartNode);
+        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
 
         return getStageExecStartNode(allNodesSorted, stageStartNodeIndex);
     }
@@ -256,7 +260,8 @@ public class FlowNodeUtil {
     public static FlowNode getNextStageNode(FlowNode stageStartNode) {
         FlowExecution execution = stageStartNode.getExecution();
         List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-        int stageStartNodeIndex = allNodesSorted.indexOf(stageStartNode);
+
+        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
 
         return getNextStageNode(allNodesSorted, stageStartNodeIndex);
     }
@@ -272,6 +277,17 @@ public class FlowNodeUtil {
         return null;
     }
 
+    // Convenience method and optimization, use binary search if more than BINARY_SEARCH_THRESHOLD nodes
+    private static int findStageStartNodeIndex(List<FlowNode> allNodesSorted, FlowNode stageStartNode) {
+        int stageStartNodeIndex = -1;
+        if (allNodesSorted.size() > BINARY_SEARCH_THRESHOLD) {
+            stageStartNodeIndex = Collections.binarySearch(allNodesSorted, stageStartNode, sortComparator);
+        } else {
+            stageStartNodeIndex = allNodesSorted.indexOf(stageStartNodeIndex);
+        }
+        return stageStartNodeIndex;
+    }
+
     /**
      * Get the last stage executed in the stage.
      * @param stageStartNode The stage start node.
@@ -280,7 +296,8 @@ public class FlowNodeUtil {
     public static FlowNode getStageEndNode(FlowNode stageStartNode) {
         FlowExecution execution = stageStartNode.getExecution();
         List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-        int stageStartNodeIndex = allNodesSorted.indexOf(stageStartNode);
+
+        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
 
         for (int i = (stageStartNodeIndex + 1); i < allNodesSorted.size(); i++) {
             FlowNode node = allNodesSorted.get(i);
@@ -334,7 +351,8 @@ public class FlowNodeUtil {
     public static List<FlowNode> getStageNodes(FlowNode node) {
         List<FlowNode> nodes = new ArrayList<FlowNode>();
         List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(node.getExecution());
-        int stageStartNodeIndex = allNodesSorted.indexOf(node);
+
+        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, node);
 
         if (StageNodeExt.isStageNode(node)) {
             // Starting at the node after the supplied node, add all sorted nodes up to the
@@ -406,31 +424,32 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    @Restricted(NoExternalUse.class)
-    protected static List<FlowNode> sortNodesById(List<FlowNode> nodes) {
-        Comparator<FlowNode> sortComparator = new Comparator<FlowNode>() {
-            @Override
-            public int compare(FlowNode node1, FlowNode node2) {
-                int node1Iota = parseIota(node1);
-                int node2Iota = parseIota(node2);
+    static final Comparator<FlowNode> sortComparator = new Comparator<FlowNode>() {
+        @Override
+        public int compare(FlowNode node1, FlowNode node2) {
+            int node1Iota = parseIota(node1);
+            int node2Iota = parseIota(node2);
 
-                if (node1Iota < node2Iota) {
-                    return -1;
-                } else if (node1Iota > node2Iota) {
-                    return 1;
-                }
+            if (node1Iota < node2Iota) {
+                return -1;
+            } else if (node1Iota > node2Iota) {
+                return 1;
+            }
+            return 0;
+        }
+
+        private int parseIota(FlowNode node) {
+            try {
+                return Integer.parseInt(node.getId());
+            } catch (NumberFormatException e) {
+                LOGGER.severe("Failed to parse FlowNode ID '" + node.getId() + "' on step '" + node.getDisplayName() + "'.  Expecting iota to be an integer value.");
                 return 0;
             }
+        }
+    };
 
-            private int parseIota(FlowNode node) {
-                try {
-                    return Integer.parseInt(node.getId());
-                } catch (NumberFormatException e) {
-                    LOGGER.severe("Failed to parse FlowNode ID '" + node.getId() + "' on step '" + node.getDisplayName() + "'.  Expecting iota to be an integer value.");
-                    return 0;
-                }
-            }
-        };
+    @Restricted(NoExternalUse.class)
+    protected static List<FlowNode> sortNodesById(List<FlowNode> nodes) {
         Collections.sort(nodes, sortComparator);
         return nodes;
     }

@@ -53,19 +53,17 @@ public class Describe {
     public static StageNodeExt getCachedStageNodeExt(FlowNode node) {
         String globalId = null;
         try {
-            globalId = node.getExecution().getUrl()+node.getId();
+            globalId = node.getExecution().getUrl() + node.getId();
         } catch (IOException ioe) {
             LOGGER.severe("Can't load node execution due to IOExceotion");
             return null;
         }
-        if (globalId != null) {
-            StageNodeExt ext = stageExtCache.getIfPresent(globalId);
-            if(ext != null) {
-                System.out.println("Serving StageExt " + ext.getId() + "from cache");
-            }
-            return ext;
+
+        StageNodeExt ext = stageExtCache.getIfPresent(globalId);
+        if (ext != null) {
+            System.out.println("Serving StageExt " + ext.getId() + "from cache");
         }
-        return null;
+        return ext;
     }
 
     public static String getUrl(FlowNode node) {
@@ -74,20 +72,20 @@ public class Describe {
 
     public static FlowNodeExt get(FlowNode node) {
         if (StageNodeExt.isStageNode(node)) {
-            StageNodeExt cached = getCachedStageNodeExt(node);
+            /*StageNodeExt cached = getCachedStageNodeExt(node);
             if(cached != null) {
                 // return cached;
-            }
+            }*/
             StageNodeExt stageNodeExt = StageNodeExt.create(node);
             stageNodeExt.addStageFlowNodes(node);
-            if (FlowNodeUtil.isNotPartOfRunningBuild(node.getExecution())) {
+            /*if (FlowNodeUtil.isNotPartOfRunningBuild(node.getExecution())) {
                 try {
                     String globalId = node.getExecution().getUrl()+node.getId();
-//                    stageExtCache.put(globalId,stageNodeExt);
+                    stageExtCache.put(globalId,stageNodeExt);
                 } catch (IOException ioe) {
                     LOGGER.severe("Can't load node execution due to IOExceotion");
                 }
-            }
+            }*/
             return stageNodeExt;
         } else if (node instanceof AtomNode) {
             return AtomFlowNodeExt.create(node);
