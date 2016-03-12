@@ -43,6 +43,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.CheckForNull;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,9 +62,6 @@ import java.util.logging.Logger;
  */
 public class FlowNodeUtil {
 
-    /** When there are at least this elements and we're using a sorted list, switch to binary search */
-    static final int BINARY_SEARCH_THRESHOLD = 100;
-
     static class ExecutionCache {
         List<FlowNode> idSortedExecutionNodeList;
     }
@@ -72,7 +70,7 @@ public class FlowNodeUtil {
     static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder()
             .weakKeys().weakValues().expireAfterAccess(6, TimeUnit.HOURS).build();
 
-    static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().build();
+    static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(1, TimeUnit.HOURS).build();
 
     private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
@@ -224,26 +222,39 @@ public class FlowNodeUtil {
      * @return The name of the node on which the supplied FlowNode executed.
      */
     public static String getExecNodeName(FlowNode flowNode) {
+        if (flowNode == null) {
+            return "master";
+        }
         String execNodeName = execNodeNameCache.getIfPresent(flowNode);
         if (execNodeName != null) {
             return execNodeName;
         }
 
-        List<FlowNode> parents = flowNode.getParents();
-
         execNodeName = "master";
+        List<FlowNode> parents = flowNode.getParents();
+        ArrayDeque<FlowNode> testNodes = new ArrayDeque<FlowNode>();
         if (parents != null && !parents.isEmpty()) {
             // Don't need to iterate all parents. Working back through one ancestral line
             // should get us to the node containing the WorkspaceAction.
-            FlowNode parent = parents.get(0);
+            testNodes.push(parents.get(0));
+        }
+        while (testNodes.size() > 0) {
+            FlowNode parent = testNodes.pop();
+            if (parent == null) {
+                break;
+            }
             WorkspaceAction executorAction = parent.getAction(WorkspaceAction.class);
             if (executorAction != null) {
                 String node = executorAction.getNode();
                 if (node.length() > 0) {
                     execNodeName = node;
                 }
-            } else {
-                execNodeName = getExecNodeName(parent);
+                break;
+            }
+            List<FlowNode> newParents = parent.getParents();
+            if (newParents != null && !newParents.isEmpty()) {
+                // See above
+                testNodes.push(newParents.get(0));
             }
         }
 
@@ -277,15 +288,9 @@ public class FlowNodeUtil {
         return null;
     }
 
-    // Convenience method and optimization, use binary search if more than BINARY_SEARCH_THRESHOLD nodes
+    // Convenience method, supposed to make things faster by binary search and it does not
     private static int findStageStartNodeIndex(List<FlowNode> allNodesSorted, FlowNode stageStartNode) {
-        int stageStartNodeIndex = -1;
-        if (allNodesSorted.size() > BINARY_SEARCH_THRESHOLD) {
-            stageStartNodeIndex = Collections.binarySearch(allNodesSorted, stageStartNode, sortComparator);
-        } else {
-            stageStartNodeIndex = allNodesSorted.indexOf(stageStartNode);
-        }
-        return stageStartNodeIndex;
+        return  allNodesSorted.indexOf(stageStartNode);
     }
 
     /**
