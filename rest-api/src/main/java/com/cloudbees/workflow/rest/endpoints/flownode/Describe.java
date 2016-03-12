@@ -45,47 +45,14 @@ import java.util.logging.Logger;
 public class Describe {
     private static final Logger LOGGER = Logger.getLogger(Describe.class.getName());
 
-    // Cached because stages are shown *often* and this will greatly boost performance
-    // Fixed size because we've limited the number of objects
-    static final Cache<String,StageNodeExt> stageExtCache = CacheBuilder.newBuilder().maximumSize(300).expireAfterAccess(1, TimeUnit.HOURS).build();
-
-    @CheckForNull
-    public static StageNodeExt getCachedStageNodeExt(FlowNode node) {
-        String globalId = null;
-        try {
-            globalId = node.getExecution().getUrl() + node.getId();
-        } catch (IOException ioe) {
-            LOGGER.severe("Can't load node execution due to IOExceotion");
-            return null;
-        }
-
-        StageNodeExt ext = stageExtCache.getIfPresent(globalId);
-        if (ext != null) {
-            System.out.println("Serving StageExt " + ext.getId() + "from cache");
-        }
-        return ext;
-    }
-
     public static String getUrl(FlowNode node) {
         return FlowNodeAPI.getUrl(node) + "/describe";
     }
 
     public static FlowNodeExt get(FlowNode node) {
         if (StageNodeExt.isStageNode(node)) {
-            /*StageNodeExt cached = getCachedStageNodeExt(node);
-            if(cached != null) {
-                // return cached;
-            }*/
             StageNodeExt stageNodeExt = StageNodeExt.create(node);
             stageNodeExt.addStageFlowNodes(node);
-            /*if (FlowNodeUtil.isNotPartOfRunningBuild(node.getExecution())) {
-                try {
-                    String globalId = node.getExecution().getUrl()+node.getId();
-                    stageExtCache.put(globalId,stageNodeExt);
-                } catch (IOException ioe) {
-                    LOGGER.severe("Can't load node execution due to IOExceotion");
-                }
-            }*/
             return stageNodeExt;
         } else if (node instanceof AtomNode) {
             return AtomFlowNodeExt.create(node);
