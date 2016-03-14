@@ -26,6 +26,7 @@ package com.cloudbees.workflow.rest.endpoints.flownode;
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
 import com.cloudbees.workflow.rest.external.FlowNodeExt;
+import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.endpoints.FlowNodeAPI;
 import com.google.common.cache.Cache;
@@ -51,6 +52,16 @@ public class Describe {
 
     public static FlowNodeExt get(FlowNode node) {
         if (StageNodeExt.isStageNode(node)) {
+
+            RunExt cachedRunData = FlowNodeUtil.getCachedRun(node.getExecution());
+            if (cachedRunData != null) {
+                for (StageNodeExt stage : cachedRunData.getStages()) {
+                    if (stage.getId().equals(node.getId())) {
+                        return stage;
+                    }
+                }
+            }
+
             StageNodeExt stageNodeExt = StageNodeExt.create(node);
             stageNodeExt.addStageFlowNodes(node);
             return stageNodeExt;

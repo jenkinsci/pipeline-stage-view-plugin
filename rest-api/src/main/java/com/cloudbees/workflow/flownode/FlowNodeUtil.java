@@ -24,10 +24,12 @@
 package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.ExecDuration;
+import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheStats;
 import hudson.model.Queue;
 import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
@@ -45,14 +47,10 @@ import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,13 +65,83 @@ public class FlowNodeUtil {
     }
 
     // Stores ExecutionInfo
-    static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder().maximumSize(100).weakValues().build();
+    static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder().maximumSize(100).build();
 
-    static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(1, TimeUnit.HOURS).build();
+    // Larger cache of run data, for completed runs, keyed by flowexecution url, useful for serving info
+    // Actually can be used to serve Stage data too
+    // Because the RunExt caps the total elements returned, and this is fully realized, this is the fastest way
+    static final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build();
+
+    static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(1, TimeUnit.HOURS).build();
 
     private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
     private FlowNodeUtil() {
+    }
+
+    public static class CacheResults {
+        private CacheStats executionCacheStats;
+        private CacheStats runDataCacheStats;
+        private CacheStats execNodeNameCacheStats;
+
+        public CacheStats getExecutionCacheStats() {
+            return executionCacheStats;
+        }
+
+        public void setExecutionCacheStats(CacheStats executionCacheStats) {
+            this.executionCacheStats = executionCacheStats;
+        }
+
+        public CacheStats getRunDataCacheStats() {
+            return runDataCacheStats;
+        }
+
+        public void setRunDataCacheStats(CacheStats runDataCacheStats) {
+            this.runDataCacheStats = runDataCacheStats;
+        }
+
+        public CacheStats getExecNodeNameCacheStats() {
+            return execNodeNameCacheStats;
+        }
+
+        public void setExecNodeNameCacheStats(CacheStats execNodeNameCacheStats) {
+            this.execNodeNameCacheStats = execNodeNameCacheStats;
+        }
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="URF_UNREAD_FIELD")  // Findbugs being silly
+    public static CacheResults getCacheResults() {
+        CacheResults output = new CacheResults();
+        output.setExecutionCacheStats(executionCache.stats());
+        output.setRunDataCacheStats(runData.stats());
+        output.setExecNodeNameCacheStats(execNodeNameCache.stats());
+        return output;
+    }
+
+    @CheckForNull
+    public static RunExt getCachedRun(FlowExecution ex) {
+        try {
+            if (ex != null) {
+                return runData.getIfPresent(ex.getUrl());
+            }
+            return null;
+        } catch (IOException ioe) {
+            LOGGER.severe("Can't get execution url for execution, IOException!");
+            return null;
+        }
+    }
+
+    public static void cacheRunIfEligible(RunExt run, FlowExecution source) {
+        if(run != null && source != null && isNotPartOfRunningBuild(source)) {
+            try {
+                String url = source.getUrl();
+                if (url != null && !url.isEmpty()) {
+                    runData.put(url, run);
+                }
+            } catch (IOException ioe) {
+                LOGGER.severe("Can't get execution url for execution, IOException!");
+            }
+        }
     }
 
     public static boolean isNotPartOfRunningBuild(FlowExecution execution) {
@@ -111,7 +179,6 @@ public class FlowNodeUtil {
 
     public static FlowNode getLastChildNode(FlowNode node) {
         List<FlowNode> allNodes = getIdSortedExecutionNodeList(node.getExecution());
-        FlowNode last = null;
         for(int i=allNodes.size()-1; i>=0; i--) {
             FlowNode f = allNodes.get(i);
             if (f.getParents().contains(node)) {

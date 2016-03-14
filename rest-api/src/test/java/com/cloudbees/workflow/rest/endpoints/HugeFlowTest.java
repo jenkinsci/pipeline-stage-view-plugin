@@ -108,18 +108,5 @@ public class HugeFlowTest {
         jsonResponse = nodePage.getWebResponse().getContentAsString();
         requestEnd = System.nanoTime();
         System.out.println("Stage took "+(requestEnd-requestStart)+ " ns"); // Initially 10213394000 ns
-
-        /*
-        JSONReadWrite jsonReadWrite = new JSONReadWrite();
-        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
-
-        Assert.assertEquals(1, workflowRuns.length);
-        Assert.assertEquals("#1", workflowRuns[0].getName());
-        Assert.assertEquals(StatusExt.SUCCESS, workflowRuns[0].getStatus());
-
-        // Test the endpoints
-        assert_describe_ok(webClient, jsonReadWrite, workflowRuns);
-        assert_log_ok(webClient, jsonReadWrite, workflowRuns);
-        */
     }
 }
