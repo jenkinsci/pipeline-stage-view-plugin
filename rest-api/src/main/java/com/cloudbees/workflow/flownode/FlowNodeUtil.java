@@ -70,7 +70,7 @@ public class FlowNodeUtil {
     // Larger cache of run data, for completed runs, keyed by flowexecution url, useful for serving info
     // Actually can be used to serve Stage data too
     // Because the RunExt caps the total elements returned, and this is fully realized, this is the fastest way
-    static final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build();
+    static final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(1, TimeUnit.HOURS).build();
 
@@ -145,19 +145,7 @@ public class FlowNodeUtil {
     }
 
     public static boolean isNotPartOfRunningBuild(FlowExecution execution) {
-        Queue.Executable executable = null;
-        try {
-            executable = execution.getOwner().getExecutable();
-        } catch (NullPointerException e) {
-            LOGGER.log(Level.FINE, "NullPointerException getting Workflow Queue.Executable. Probably running in a mocked test.");
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unexpected error getting Workflow Queue.Executable.", e);
-        }
-
-        if (executable != null && executable instanceof Run && !((Run)executable).isBuilding()) {
-            return true;
-        }
-        return false;
+        return (execution != null && execution.isComplete());
     }
 
     public static long getNodeExecDuration(FlowNode node) {

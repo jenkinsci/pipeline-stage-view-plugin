@@ -23,6 +23,7 @@
  */
 package com.cloudbees.workflow.rest.external;
 
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.endpoints.RunAPI;
 import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
@@ -37,6 +38,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputAction;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputStepExecution;
 
+import javax.annotation.CheckForNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -184,10 +186,18 @@ public class RunExt {
     }
 
     public static RunExt create(WorkflowRun run) {
-        final RunExt runExt = new RunExt();
-
         FlowExecution execution = run.getExecution();
 
+        // Use cache if eligible
+        boolean isNotRunning = FlowNodeUtil.isNotPartOfRunningBuild(execution);
+        if (isNotRunning) {
+            RunExt myRun = FlowNodeUtil.getCachedRun(execution);
+            if (myRun != null) {
+                return myRun;
+            }
+        }
+
+        final RunExt runExt = new RunExt();
         runExt.set_links(new RunLinks());
         runExt.get_links().initSelf(RunAPI.getDescribeUrl(run));
 
@@ -252,6 +262,9 @@ public class RunExt {
             runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
         }
 
+        if (isNotRunning) {
+            FlowNodeUtil.cacheRunIfEligible(runExt, execution);
+        }
         return runExt;
     }
 

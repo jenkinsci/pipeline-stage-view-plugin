@@ -102,17 +102,6 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     @ServeJson
     public RunExt doDescribe() {
         WorkflowRun myRun = getRun();
-        FlowExecution exec = myRun.getExecution();
-
-        if (exec != null) {
-            RunExt cached = FlowNodeUtil.getCachedRun(exec);
-            if (cached != null) {
-                return  cached;
-            } else {
-                RunExt storeme = RunExt.create(getRun());
-                FlowNodeUtil.cacheRunIfEligible(storeme, exec);
-            }
-        }
         return RunExt.create(getRun());
     }
 
