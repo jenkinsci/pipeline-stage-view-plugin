@@ -24,6 +24,7 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.Util;
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.FlowNodeLogExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
@@ -59,6 +60,7 @@ public class FlowNodeAPITest {
 
     @Test
     public void test_success_flow() throws Exception {
+        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
         String jobRunsUrl = job.getUrl() + "wfapi/runs/";
 
@@ -144,6 +146,7 @@ public class FlowNodeAPITest {
 
     @Test
     public void test_failed_flow() throws Exception {
+        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
         String jobRunsUrl = job.getUrl() + "wfapi/runs/";
 

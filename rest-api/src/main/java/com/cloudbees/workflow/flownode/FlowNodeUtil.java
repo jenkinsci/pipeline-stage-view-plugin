@@ -1,3 +1,4 @@
+
 /*
  * The MIT License
  *
@@ -30,8 +31,13 @@ import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheStats;
+import hudson.Extension;
+import hudson.ExtensionPoint;
+import hudson.Util;
+import hudson.model.Item;
 import hudson.model.Queue;
 import hudson.model.Run;
+import hudson.model.listeners.ItemListener;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
@@ -39,6 +45,7 @@ import org.jenkinsci.plugins.workflow.actions.WorkspaceAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -60,12 +67,8 @@ import java.util.logging.Logger;
  */
 public class FlowNodeUtil {
 
-    static class ExecutionCache {
-        List<FlowNode> idSortedExecutionNodeList;
-    }
+    protected static final Cache<String,List<FlowNode>> executionCache = CacheBuilder.newBuilder().maximumSize(100).build();
 
-    // Stores ExecutionInfo
-    static final Cache<String,ExecutionCache> executionCache = CacheBuilder.newBuilder().maximumSize(100).build();
 
     // Larger cache of run data, for completed runs, keyed by flowexecution url, useful for serving info
     // Actually can be used to serve Stage data too
@@ -131,18 +134,23 @@ public class FlowNodeUtil {
         }
     }
 
-    public static void cacheRunIfEligible(RunExt run, FlowExecution source) {
-        if(run != null && source != null && isNotPartOfRunningBuild(source)) {
+    public static void cacheRun(FlowExecution exec, RunExt run) {
+        if (exec != null && runData != null && exec.isComplete()) {
             try {
-                String url = source.getUrl();
-                if (url != null && !url.isEmpty()) {
-                    runData.put(url, run);
-                }
+                runData.put(exec.getUrl(), run);
             } catch (IOException ioe) {
                 LOGGER.severe("Can't get execution url for execution, IOException!");
             }
         }
     }
+
+    /** The nuclear option: clear all caches */
+    public static void invalidateAllCaches() {
+        FlowNodeUtil.executionCache.invalidateAll();
+        FlowNodeUtil.runData.invalidateAll();
+        FlowNodeUtil.execNodeNameCache.invalidateAll();
+    }
+
 
     public static boolean isNotPartOfRunningBuild(FlowExecution execution) {
         return (execution != null && execution.isComplete());
@@ -456,9 +464,9 @@ public class FlowNodeUtil {
             LOGGER.severe("Can't get execution url for execution, IOException!");
         }
         if (executionUrl != null) {
-            ExecutionCache myCache = executionCache.getIfPresent(executionUrl);
-            if (myCache != null) {
-                return myCache.idSortedExecutionNodeList;
+            List<FlowNode> sortedList = executionCache.getIfPresent(executionUrl);
+            if (sortedList != null) {
+                return sortedList;
             }
         }
 
@@ -475,11 +483,25 @@ public class FlowNodeUtil {
         sortNodesById(nodes);
 
         if (isCacheable && executionUrl != null) {
-            ExecutionCache cacheEntry = new ExecutionCache();
-            cacheEntry.idSortedExecutionNodeList = nodes;
-            executionCache.put(executionUrl, cacheEntry);
+            executionCache.put(executionUrl, nodes);
         }
         return nodes;
+    }
+
+    @Extension
+    /** This is used to cover an obscure case where a WorkflowJob is renamed BUT
+     *  a previous WorkflowJob existed with cached execution data.
+     *  Otherwise the previous job's cached data would be returned.
+     **/
+    public static class RenameHandler extends ItemListener {
+        @Override
+        public void onLocationChanged(Item item, String oldFullName, String newFullName) {
+            if (item instanceof WorkflowJob) {
+                // It's a cache, we can rebuild it... we have the technology.
+                executionCache.invalidateAll();
+                runData.invalidateAll();
+            }
+        }
     }
 
     static final Comparator<FlowNode> sortComparator = new Comparator<FlowNode>() {

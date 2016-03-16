@@ -101,7 +101,6 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     @Restricted(DoNotUse.class) // WebMethod
     @ServeJson
     public RunExt doDescribe() {
-        WorkflowRun myRun = getRun();
         return RunExt.create(getRun());
     }
 

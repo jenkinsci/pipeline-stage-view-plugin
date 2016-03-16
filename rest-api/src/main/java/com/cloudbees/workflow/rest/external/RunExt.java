@@ -232,6 +232,7 @@ public class RunExt {
 
                 if (StageNodeExt.isStageNode(node)) {
                     StageNodeExt stage = StageNodeExt.create(node);
+                    stage.addStageFlowNodes(node);
                     runExt.addStage(stage);
                     runExt.setPauseDurationMillis(runExt.getPauseDurationMillis() + stage.getPauseDurationMillis());
                 }
@@ -263,7 +264,7 @@ public class RunExt {
         }
 
         if (isNotRunning) {
-            FlowNodeUtil.cacheRunIfEligible(runExt, execution);
+            FlowNodeUtil.cacheRun(execution, runExt);
         }
         return runExt;
     }
