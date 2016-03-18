@@ -57,7 +57,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -389,20 +393,31 @@ public class FlowNodeUtil {
         return allNodesSorted.get(allNodesSorted.size() - 1);
     }
 
+    @CheckForNull
     /**
      * Get the last node to start in a flow.
      * @param execution The flow execution.
      * @return The last node to start in the flow.
      */
     public static FlowNode getFlowEndNode(FlowExecution execution) {
+        if (execution == null) {
+            return null;
+        }
+
         // If there's no next stage, then use the last node in the workflow.
         List<FlowNode> endNodes = new ArrayList<FlowNode>(execution.getCurrentHeads());
         sortNodesById(endNodes);
 
+        // We do not actually need to sort this, we can just the get the head of the execution
         return endNodes.get(endNodes.size() - 1);
     }
 
     public static List<FlowNode> getStageNodes(FlowExecution execution) {
+
+        if (execution == null) {
+            return Collections.EMPTY_LIST;
+        }
+
         List<FlowNode> nodes = new ArrayList<FlowNode>();
         List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
 
@@ -504,7 +519,7 @@ public class FlowNodeUtil {
         }
     }
 
-    static final Comparator<FlowNode> sortComparator = new Comparator<FlowNode>() {
+    public static final Comparator<FlowNode> sortComparator = new Comparator<FlowNode>() {
         @Override
         public int compare(FlowNode node1, FlowNode node2) {
             int node1Iota = parseIota(node1);
