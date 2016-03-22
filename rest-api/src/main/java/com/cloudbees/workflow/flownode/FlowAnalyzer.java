@@ -1,11 +1,9 @@
 package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.ExecDuration;
-import com.cloudbees.workflow.rest.external.FlowNodeExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.collect.Lists;
-import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -15,9 +13,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.ConcurrentModificationException;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -61,8 +57,12 @@ public class FlowAnalyzer  {
         public FlowNode firstExecutedNode;
         public FlowNode lastChild;
         public ExecDuration duration = new ExecDuration();
-        public StatusExt status = StatusExt.SUCCESS;
+        public StatusExt status = null;
         public List<FlowNode> children = new ArrayList<FlowNode>();
+    }
+
+    public List<StageEntry> getStages() {
+        return stages;
     }
 
     /**
@@ -131,8 +131,10 @@ public class FlowAnalyzer  {
             currentStage = new StageEntry();
         } else if (parents.size() == 1) {
             addHead(parents.get(0));
+            // TODO Parent node needs the time from this, to calc duration
         } else {
             addHeads(parents);
+            // TODO Parent node needs the time from this, to calc duration
             branchStart(n, parents);
         }
     }
@@ -190,41 +192,42 @@ public class FlowAnalyzer  {
     protected void updateStageStats(StageEntry entry, FlowNode n ){
         entry.firstChild = n;
 
-        StatusExt st = FlowNodeUtil.getStatus(n);
-
+        // Handle children of stage
+        StatusExt st = null;
         if (entry.nodeCount == 0) { // Final node
             entry.lastChild = n;
-            // Optimization: if we're on the last node, we don't need to check status for the others
-            if (st == StatusExt.NOT_EXECUTED) {
-                entry.status = StatusExt.PAUSED_PENDING_INPUT;
-            } else if (st == StatusExt.SUCCESS) {
-                entry.status = StatusExt.SUCCESS;
-            }
+            st = FlowNodeUtil.getStatus(n);
+            entry.status = st;  // Stage status comes from last node
         }
 
         entry.nodeCount++;
         if (keepChildren) {
             currentStage.children.add(n);
+            // Create AtomFlowNodeExts for these?
         }
 
-        // Optimization: we can avoid status checks once we hit the first NotExecutedNodeAction
-        // (all previous ones don't execute).
-        // Similarly, if it's success, then all previous ones passed too.
-        if (st != StatusExt.NOT_EXECUTED) {
-            entry.firstExecutedNode = n;
-            // FIXME do not compute duration
+        // Optimization: if the whole stage succeeded or was not executed, we don't need to check status
+        // Or at least not for some basic cases
+        StatusExt stageStatus = entry.status;
+        if (stageStatus !=  StatusExt.SUCCESS && stageStatus != StatusExt.NOT_EXECUTED) {
+            // Now we care about status of the node
+            st = FlowNodeUtil.getStatus(n);
+            if (st != StatusExt.NOT_EXECUTED) {
+                entry.firstExecutedNode = n;
+                // FIXME do not compute duration
+            }
         }
 
+
+        long pauseMillis = PauseAction.getPauseDuration(n);
         long pause = PauseAction.getPauseDuration(n);
         entry.duration.setPauseDurationMillis(entry.duration.getPauseDurationMillis()+pause);
-
-
     }
 
     /**
      * Finish analyzing the existing execution, to be called when all nodes in the FlowExecution are exhausted
      */
-    public void completeAnalysis() {
+    protected void finishAnalysis() {
 
         if (currentStage.nodeCount != 0) {
             // TODO how do I need to handle this? There shouldn't be any left when we hit the null parent;
@@ -252,6 +255,6 @@ public class FlowAnalyzer  {
             FlowNode n = q.pop();
             handleNode(n);
         }
-        completeAnalysis();
+        finishAnalysis();
     }
 }

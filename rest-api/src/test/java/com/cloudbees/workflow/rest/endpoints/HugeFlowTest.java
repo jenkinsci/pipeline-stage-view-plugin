@@ -24,6 +24,8 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.Util;
+import com.cloudbees.workflow.flownode.FlowAnalyzer;
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.FlowNodeLogExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
@@ -33,6 +35,8 @@ import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.Result;
 import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
+import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
+import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.ErrorStep;
@@ -77,6 +81,28 @@ public class HugeFlowTest {
         String runsUrl = job.getLastBuild().getUrl();
 
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        FlowGraphWalker w = new FlowGraphWalker(job.getLastBuild().getExecution());
+        FlowNode root; // Keep a ref in memory
+        for (FlowNode node : w) {
+            if (node.getParents() == null || node.getParents().isEmpty()) {
+                root = node;
+            }
+        }
+        long analyzeStart = System.nanoTime();
+        List<FlowNode> nodes = FlowNodeUtil.getStageNodes(job.getBuilds().getLastBuild().getExecution());
+        for (FlowNode f : nodes) {
+            FlowNodeUtil.getStageExecDuration(f);
+        }
+        long analyzeEnd = System.nanoTime();
+        System.out.println("Run time to create a run: " + (analyzeEnd - analyzeStart));
+
+        analyzeStart = System.nanoTime();
+        FlowAnalyzer an = new FlowAnalyzer(job.getLastBuild().getExecution());
+        an.analyzeAll();
+        analyzeEnd = System.nanoTime();
+        System.out.println("Run time to run analysis: " + (analyzeEnd - analyzeStart));
+        List<FlowAnalyzer.StageEntry> stageEntries = an.getStages();
 
         long requestStart = System.nanoTime();
         Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
