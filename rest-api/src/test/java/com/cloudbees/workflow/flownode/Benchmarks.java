@@ -100,9 +100,10 @@ public class Benchmarks {
     public void newStageScan() {
         FlowAnalyzer analyzer = new FlowAnalyzer();
         analyzer.reinitialize(basis);
+        analyzer.setKeepChildren(true);
         analyzer.analyzeAll();
         for(FlowAnalyzer.StageEntry ent : analyzer.getStages()) {
-            List<FlowNode> children = ent.children;
+            List children = ent.children;
             if (children.isEmpty()) {
                 throw new RuntimeException("No children found when expected");
             }

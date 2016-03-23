@@ -189,8 +189,8 @@ public class FlowNodeUtil {
     }
 
     public static ExecDuration getStageExecDuration(FlowNode stageStartNode) {
-        if (StageNodeExt.isStageNode(stageStartNode)) {
-            FlowExecution execution = stageStartNode.getExecution();
+        FlowExecution execution = stageStartNode.getExecution();
+        if (execution != null && StageNodeExt.isStageNode(stageStartNode)) {
             List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
             int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
             FlowNode firstExecutedNode;
@@ -216,7 +216,7 @@ public class FlowNodeUtil {
                     // If the node is running then we might want to use the "now" time as the end time.
                     // Otherwise we are using the start time of the node that is running, which is not
                     // changing i.e. will look as though the node is not running.
-                    if (flowEndNode.isRunning() && !execution.isComplete()) {
+                    if (flowEndNode != null && flowEndNode.isRunning() && !execution.isComplete()) {
                         // But only do this if the node is not paused e.g. for input.
                         if (!isPauseNode(flowEndNode)) {
                             long currentTime = System.currentTimeMillis();

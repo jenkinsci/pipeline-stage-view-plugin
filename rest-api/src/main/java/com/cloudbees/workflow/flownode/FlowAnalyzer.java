@@ -46,14 +46,13 @@ public class FlowAnalyzer  {
 
     protected List<StageEntry> stages = new ArrayList<StageEntry>();
 
-    protected RunExt run = new RunExt();
-
     protected StageEntry currentStage = new StageEntry();
 
     protected long lastStartTime = System.currentTimeMillis();
 
     protected boolean keepChildren = true;
 
+    /** Maximum number of child nodes to store under a stage, if none are stored, it is -1 */
     private int maxChildNodes = 100;
 
     /** If true, collect child FlowNodes, otherwise do not */
@@ -77,6 +76,9 @@ public class FlowAnalyzer  {
     /** Holds partially-digested information about a stage
      *  This can be used to avoid a lot of backtracking
      */
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(
+            value={"UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD", "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"},
+            justification="StageEntry objects collect run information that may be used many ways")
     public static class StageEntry {
         public boolean hasForks = false;
         public int nodeCount = 0;
@@ -117,7 +119,7 @@ public class FlowAnalyzer  {
         stages.clear();
         visited.clear();
         currentStage = new StageEntry();
-        run = new RunExt();
+        currentStage.endTime = System.currentTimeMillis();
         lastStartTime = System.currentTimeMillis();
     }
 
@@ -153,12 +155,16 @@ public class FlowAnalyzer  {
             return;
         }
 
+        // End of current stage, cap it off and start a new that ends where this one began
         if(StageNodeExt.isStageNode(n)) {
             // Cap off the current stage and start a new one
             currentStage.stageNode = n;
             stages.add(currentStage);
             visited.put(n, currentStage);
+            long stageStartTime = TimingAction.getStartTime(n);
+            currentStage.startTime = stageStartTime; // Node begins with its stage node
             currentStage = new StageEntry();
+            currentStage.endTime = stageStartTime;
         } else {
             updateStageStats(currentStage, n);
             visited.put(n, currentStage);
@@ -170,10 +176,9 @@ public class FlowAnalyzer  {
             currentStage = new StageEntry();
         } else if (parents.size() == 1) {
             addHead(parents.get(0));
-            // TODO Parent node needs the time from this, to calc duration
         } else {
             addHeads(parents);
-            // TODO Parent node needs the time from this, to calc duration
+            // Don't need to worry about duration because either of the steps gives a solid estimate
             branchStart(n, parents);
         }
     }
@@ -198,24 +203,26 @@ public class FlowAnalyzer  {
         if (sideBranch == null || sideBranch.nodeCount == 0) {
             return;  // No branch content
         }
-        // FIXME handle calculation of durations for side branches
-        // FIXME is being called when it shouldn't be, with a 0 size?
 
         // Adds the information from a stage side-branch to the main entry
         mainEntry.hasForks = true;
         mainEntry.nodeCount += sideBranch.nodeCount;
 
+        // Add child nodes in, sort, and remove all nodes over our cap
         if (keepChildren) {
             mainEntry.children.addAll(sideBranch.children);
             Collections.sort(mainEntry.children, FlowAnalyzer.startTimeComparator);
+            if (maxChildNodes != -1) {
+                mainEntry.children = mainEntry.children.subList(0, maxChildNodes);
+            }
         }
 
-        // TODO status code computation
+        // We don't need to recompute duration or status, or start/end nodes
+        //   because those are taken from the stage's start and end blocks
+        //   ... and stages are not permitted inside in parallel steps
 
-        // Recompute the pause duration and main duration by combining these
-        // Recompute the status code from these
-        // Recompute the first and last nodes
-        // Recompute if all notexecuted
+        // FIXME this is wrong, we need to stack the parallel branches inside the block I think?
+        mainEntry.duration.setPauseDurationMillis(mainEntry.duration.getPauseDurationMillis() + sideBranch.duration.getPauseDurationMillis());;
     }
 
     // Note that a parallel branch set is beginning, currently unused but can be...
@@ -231,6 +238,7 @@ public class FlowAnalyzer  {
     protected void updateStageStats(StageEntry entry, FlowNode n ){
         entry.firstChild = n;
 
+        // We can do optimizations to avoid computing these, but it is considerably more complex
         StatusExt st = FlowNodeUtil.getStatus(n);
         long pauseMillis = PauseAction.getPauseDuration(n);
         long startTime = TimingAction.getStartTime(n);
@@ -242,13 +250,16 @@ public class FlowAnalyzer  {
         entry.nodeCount++;
 
         // Only create child nodes if we're going to use them
-        if (keepChildren && entry.children.size() < maxChildNodes) {
+        if (keepChildren && (maxChildNodes <0 || entry.children.size() < maxChildNodes)) {
             ExecDuration dur = new ExecDuration();
             dur.setPauseDurationMillis(pauseMillis);
             dur.setTotalDurationMillis(lastStartTime - startTime);
 
-            // FIMXE compute exec node, and don't fetch ErrorAction again
-            AtomFlowNodeExt childNode = AtomFlowNodeExt.create(n, NO_EXEC_NODE, dur, startTime, st, n.getError());
+            // FIXME use a better algorithm to compute execNodeName, this is O(n) and in fact *wrong*
+            // Because it just looks for preceding nodes, while disregarding block scoping
+            // We need to track a Stack of block scopes, using the pointers in the BlockEndNodes
+            String execNodeName = FlowNodeUtil.getExecNodeName(n);
+            AtomFlowNodeExt childNode = AtomFlowNodeExt.create(n, execNodeName, dur, startTime, st, n.getError());
             currentStage.children.add(childNode);
         }
 
@@ -262,6 +273,7 @@ public class FlowAnalyzer  {
 
     /**
      * Finish analyzing the existing execution, to be called when all nodes in the FlowExecution are exhausted
+     * Note: we are retaining an implicit empty stage for nodes before first stage statement
      */
     protected void finishAnalysis() {
 
@@ -269,28 +281,40 @@ public class FlowAnalyzer  {
             // TODO how do I need to handle this? There shouldn't be any left when we hit the null parent;
         }
 
-        StageEntry finalStage = stages.get(stages.size()-1);
-        if (finalStage.stageNode == null) {
-            // Cleanup: remove the ultimate stage, if it has a null node, meaning no stage defined
-            stages.remove(stages.size()-1);
-        }
-
+        // Reverse children, since they're added in reverse order
         for(StageEntry s: stages) {
             if (keepChildren && s.children != null && !s.children.isEmpty()) {
                 s.children = Lists.reverse(s.children);
             }
         }
 
+        // Fixes for the last node
+        if (!stages.isEmpty()) {
+            StageEntry last = stages.get(stages.size()-1);
+            if (last.lastChild.isRunning() && !FlowNodeUtil.isPauseNode(last.lastChild)) {
+                // If the last node is running and we're not paused, the end time is right now
+                last.endTime = System.currentTimeMillis();
+            } else {
+                // Final stage ends when the last running node starts (it's a FlowEndNode, heh)
+                last.endTime = TimingAction.getStartTime(last.lastChild);
+            }
+        }
+
+        // TIMING COMPUTATION: use first executed node to last time
+        for(StageEntry s : stages) {
+            ExecDuration dur = s.duration;
+            dur.setPauseDurationMillis(Math.min(dur.getPauseDurationMillis(), dur.getTotalDurationMillis()));
+            if (s.status != StatusExt.NOT_EXECUTED) {
+                long startTime = TimingAction.getStartTime(s.firstExecutedNode);
+                s.startTime = startTime;
+                dur.setTotalDurationMillis(s.endTime-startTime);
+            } else {
+                dur.setTotalDurationMillis(0);
+            }
+        }
+
         // They're added in reverse order
         stages = Lists.reverse(stages);
-
-        // CHECKME is this the right place to do this? I think not, we should have done it earlier.
-        List<StageNodeExt> materializedNodes = new ArrayList<StageNodeExt>();
-        for (StageEntry st : stages) {
-            StageNodeExt ext = new StageNodeExt();
-            materializedNodes.add(ext);
-        }
-        run.setStages(materializedNodes);
     }
 
     /** Run through all points and analyze them */
@@ -306,23 +330,28 @@ public class FlowAnalyzer  {
      * Analyze a workflow run and create a RunExt from it
      * @param run Run to analyze
      * @param storeChildNodes If true, return StageNodeExt objects with child nodes, otherwise do not
-     * @param childNodeLimit
-     * @return
+     * @param childNodeLimit Max number of child nodes to store per StageNodeExt object
+     * @return Fully realized RunExt
      */
     public static RunExt analyzeRunToExt(WorkflowRun run, boolean storeChildNodes, int childNodeLimit) {
         RunExt output = new RunExt();
         RunExt.createMinimal(run);
-        FlowAnalyzer analyzer = new FlowAnalyzer(run.getExecution());
-        analyzer.run = output;
-        analyzer.setKeepChildren(storeChildNodes);
-        analyzer.setMaxChildNodes(childNodeLimit);
-        analyzer.analyzeAll();
+        FlowExecution exec = run.getExecution();
+        if (exec != null) {
+            FlowAnalyzer analyzer = new FlowAnalyzer(exec);
+            analyzer.setKeepChildren(storeChildNodes);
+            analyzer.setMaxChildNodes(childNodeLimit);
+            analyzer.analyzeAll();
 
-        List<StageNodeExt> realizedStages = new ArrayList<StageNodeExt>(analyzer.stages.size());
-        for (StageEntry entry : analyzer.stages) {
-            realizedStages.add(entry.toStageNodeExt());
+            List<StageNodeExt> realizedStages = new ArrayList<StageNodeExt>(analyzer.stages.size());
+            for (StageEntry entry : analyzer.stages) {
+                if (entry.stageNode != null) {
+                    realizedStages.add(entry.toStageNodeExt());
+                }
+            }
+            output.setStages(realizedStages);
         }
-        output.setStages(realizedStages);
+
         RunExt.computeTimings(output);
         return output;
     }
