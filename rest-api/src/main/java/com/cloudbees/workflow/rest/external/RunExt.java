@@ -23,6 +23,7 @@
  */
 package com.cloudbees.workflow.rest.external;
 
+import com.cloudbees.workflow.flownode.FlowAnalyzer;
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.endpoints.RunAPI;
 import com.cloudbees.workflow.rest.hal.Link;
@@ -183,6 +184,74 @@ public class RunExt {
         public void setArtifacts(Link artifacts) {
             this.artifacts = artifacts;
         }
+    }
+
+    /** Computes timings after the stages have been set up
+     *  That means timing of the stage has been computed, and the stages are sorted
+     */
+    public static RunExt computeTimings(RunExt runExt) {
+
+        // Pause is the sum of stage pauses
+        for (StageNodeExt stage : runExt.getStages()) {
+            runExt.setDurationMillis(runExt.getPauseDurationMillis() + stage.getPauseDurationMillis());
+        }
+
+        if (!runExt.getStages().isEmpty()) {
+            // We're done when the last stage is, and it is the result of the overall run
+            FlowNodeExt lastStage = runExt.getLastStage();
+            runExt.setEndTimeMillis(lastStage.getStartTimeMillis()+lastStage.getDurationMillis());
+            lastStage.setStatus(runExt.getStatus());
+        }
+
+        long currentTimeMillis = System.currentTimeMillis();
+
+        if (runExt.getStatus() == StatusExt.IN_PROGRESS || runExt.getStatus() == StatusExt.PAUSED_PENDING_INPUT) {
+            runExt.setEndTimeMillis(currentTimeMillis);
+        }
+
+        // FIXME this seems really questionable, we can have *no* stages defined
+        //  in which case QueueDuration should be the delay between the first FlowNode executed and the run start time
+        if (runExt.getStages().isEmpty()) {
+            runExt.setQueueDurationMillis(currentTimeMillis - runExt.getStartTimeMillis());
+        } else {
+            StageNodeExt firstExecutedStage = runExt.getFirstExecutedStage();
+            if (firstExecutedStage != null) {
+                runExt.setQueueDurationMillis(firstExecutedStage.getStartTimeMillis() - runExt.getStartTimeMillis());
+            }
+        }
+
+        runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
+        return runExt;
+    }
+
+    /** Get basics set up: everything but status/timing/node walking for a run, no cache use */
+    public static RunExt createMinimal(WorkflowRun run) {
+        FlowExecution execution = run.getExecution();
+
+        final RunExt runExt = new RunExt();
+        runExt.set_links(new RunLinks());
+        runExt.get_links().initSelf(RunAPI.getDescribeUrl(run));
+
+        runExt.setId(run.getId());
+        runExt.setName(run.getDisplayName());
+        runExt.initStatus(run);
+        runExt.setStartTimeMillis(run.getStartTimeInMillis());
+        runExt.setStages(new ArrayList<StageNodeExt>());
+
+        if (execution != null) {
+            if (ChangeSetExt.hasChanges(run)) {
+                runExt.get_links().setChangesets(Link.newLink(RunAPI.getChangeSetsUrl(run)));
+            }
+            if (isPendingInput(run)) {
+                runExt.get_links().setPendingInputActions(Link.newLink(RunAPI.getPendingInputActionsUrl(run)));
+                runExt.get_links().setNextPendingInputAction(Link.newLink(RunAPI.getNextPendingInputActionUrl(run)));
+            }
+            List<Run<WorkflowJob, WorkflowRun>.Artifact> artifacts = run.getArtifactsUpTo(MAX_ARTIFACTS_COUNT);
+            if (artifacts != null && !artifacts.isEmpty()) {
+                runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
+            }
+        }
+        return runExt;
     }
 
     public static RunExt create(WorkflowRun run) {

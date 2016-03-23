@@ -38,8 +38,6 @@ import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class FlowNodeExt {
-
-
     private FlowNodeLinks _links;
     private String id;
     private String name;
@@ -144,6 +142,13 @@ public class FlowNodeExt {
         return flowNodeExt;
     }
 
+    public static FlowNodeExt create(FlowNode node, String execNodeName, ExecDuration duration, long startTimeMillis,
+                                     StatusExt status, ErrorAction error) {
+        FlowNodeExt flowNodeExt = new FlowNodeExt();
+        flowNodeExt.addBasicNodeData(node, execNodeName, duration, startTimeMillis, status, error);
+        return flowNodeExt;
+    }
+
     protected void calculateTimings(FlowNode node) {
         if (getStatus() != StatusExt.NOT_EXECUTED) {
             setStartTimeMillis(TimingAction.getStartTime(node));
@@ -153,26 +158,41 @@ public class FlowNodeExt {
         }
     }
 
-    protected void addBasicNodeData(FlowNode node) {
-        boolean isExecuted = NotExecutedNodeAction.isExecuted(node);
+    // Allows for passing in a node with all the key information filled in
+    public void addBasicNodeData(FlowNode node, String execNodeName, ExecDuration duration, long startTimeMillis, StatusExt status, ErrorAction error) {
 
         setId(node.getId());
         setName(node.getDisplayName());
-        setExecNode(FlowNodeUtil.getExecNodeName(node));
+        setExecNode(execNodeName);
         set_links(new FlowNodeLinks());
         get_links().initSelf(Describe.getUrl(node));
-        if (isExecuted) {
-            ErrorAction errorAction = node.getError();
-            setStatus(StatusExt.valueOf(errorAction));
-            setError(ErrorExt.create(errorAction));
-        } else {
-            setStatus(StatusExt.NOT_EXECUTED);
+        setStatus(status);
+        if (status != StatusExt.NOT_EXECUTED) {
+            setError(ErrorExt.create(error));
         }
 
-        calculateTimings(node);
-        if (getStartTimeMillis() == 0) {
-            setDurationMillis(0);
+        this.setStartTimeMillis(startTimeMillis);
+        if (duration != null) {
+            this.setPauseDurationMillis(duration.getPauseDurationMillis());
+            this.setDurationMillis(duration.getTotalDurationMillis());
         }
+    }
+
+    protected void addBasicNodeData(FlowNode node) {
+        String execNodeName = FlowNodeUtil.getExecNodeName(node);
+        boolean isExecuted = NotExecutedNodeAction.isExecuted(node);
+        StatusExt status = null;
+        ErrorAction errorAction = null;
+        if (isExecuted) {
+            errorAction = node.getError();
+            status = StatusExt.valueOf(errorAction);
+        } else {
+            status = StatusExt.NOT_EXECUTED;
+        }
+
+        // Placeholders are used for timing data until calculated explicitly
+        addBasicNodeData(node, execNodeName, null, 0L, status, errorAction);
+        calculateTimings(node);
     }
 
     @Override public String toString() {
