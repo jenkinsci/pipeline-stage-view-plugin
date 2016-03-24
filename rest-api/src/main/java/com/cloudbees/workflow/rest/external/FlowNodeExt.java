@@ -33,6 +33,7 @@ import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
+import org.kohsuke.stapler.Stapler;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
@@ -164,8 +165,10 @@ public class FlowNodeExt {
         setId(node.getId());
         setName(node.getDisplayName());
         setExecNode(execNodeName);
-        set_links(new FlowNodeLinks());
-        get_links().initSelf(Describe.getUrl(node));
+        if (Stapler.getCurrentRequest() != null) {
+            set_links(new FlowNodeLinks());
+            get_links().initSelf(Describe.getUrl(node));
+        }
         setStatus(status);
         if (status != StatusExt.NOT_EXECUTED) {
             setError(ErrorExt.create(error));

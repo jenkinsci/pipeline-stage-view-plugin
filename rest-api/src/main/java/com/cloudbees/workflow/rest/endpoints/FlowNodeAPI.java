@@ -30,7 +30,9 @@ import com.cloudbees.workflow.util.ModelUtil;
 import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.kohsuke.stapler.Stapler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +48,23 @@ import java.util.List;
 public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
 
     public static String getUrl(FlowNode node) {
-        return ModelUtil.getFullItemUrl(node) + FlowNodeAPI.URL_BASE;
+        // Allows for testing creation without an active stapler request
+        try {
+            StringBuilder returnUrl = new StringBuilder();
+            if (Stapler.getCurrentRequest() != null) {
+                returnUrl.append(ModelUtil.getRootUrl());
+            }
+            returnUrl.append('/');
+            String itemUrl = node.getUrl();
+            returnUrl.append(itemUrl);
+            if (!itemUrl.endsWith("/")) {
+                returnUrl.append('/');
+            }
+            returnUrl.append(FlowNodeAPI.URL_BASE);
+            return returnUrl.toString();
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Unable to get URL for a FlowNode");
+        }
     }
 
     @ServeJson

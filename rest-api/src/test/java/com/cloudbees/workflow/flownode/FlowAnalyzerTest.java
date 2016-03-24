@@ -38,18 +38,28 @@ public class FlowAnalyzerTest {
 
         Assert.assertTrue(analyzer.q.isEmpty());
         List<FlowAnalyzer.StageEntry> stages = analyzer.stages;
-        Assert.assertEquals(3, stages.size());
+        Assert.assertEquals(4, stages.size());
+
+        // Headless stage before our first stage block
+        FlowAnalyzer.StageEntry st = stages.get(0);
+        Assert.assertNull(st.stageNode);
+        Assert.assertEquals(2, st.children.size());
+        Assert.assertFalse(st.hasForks);
+        Assert.assertEquals(graphBuilder.getNode("Start"), st.firstChild);
+        Assert.assertEquals(graphBuilder.getNode("Prestage"), st.lastChild);
 
         // Check the individual stages
-        FlowAnalyzer.StageEntry st = stages.get(0);
+        st = stages.get(1);
         Assert.assertEquals(graphBuilder.getNode("Build"), st.stageNode);
+        Assert.assertFalse(st.hasForks);
         Assert.assertEquals(2, st.nodeCount);
         Assert.assertEquals(graphBuilder.getNode("Git"), st.firstChild);
         Assert.assertEquals(graphBuilder.getNode("Git"), st.firstExecutedNode);
         Assert.assertEquals(graphBuilder.getNode("Mvn - build"), st.lastChild);
 
-        st = stages.get(1);
+        st = stages.get(2);
         Assert.assertEquals(3, st.nodeCount);
+        Assert.assertTrue(st.hasForks);
         Assert.assertEquals(graphBuilder.getNode("Test"), st.stageNode);
 
         // Candidate nodes can be be first OR last because they are parallel
@@ -62,8 +72,9 @@ public class FlowAnalyzerTest {
         Assert.assertTrue(candidates.contains(st.firstExecutedNode));
 
 
-        st = stages.get(2);
+        st = stages.get(3);
         Assert.assertEquals(2, st.nodeCount);
+        Assert.assertFalse(st.hasForks);
         Assert.assertEquals(graphBuilder.getNode("Mvn - release"), st.firstChild);
         Assert.assertEquals(graphBuilder.getNode("Mvn - release"), st.firstExecutedNode);
         Assert.assertEquals(graphBuilder.getNode("Notify XYZ"), st.lastChild);

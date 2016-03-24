@@ -212,7 +212,7 @@ public class FlowAnalyzer  {
         if (keepChildren) {
             mainEntry.children.addAll(sideBranch.children);
             Collections.sort(mainEntry.children, FlowAnalyzer.startTimeComparator);
-            if (maxChildNodes != -1) {
+            if (maxChildNodes != -1 && mainEntry.children.size() > maxChildNodes) {
                 mainEntry.children = mainEntry.children.subList(0, maxChildNodes);
             }
         }
