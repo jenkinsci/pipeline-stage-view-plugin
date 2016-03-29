@@ -62,7 +62,6 @@ public class RunExt {
     private long queueDurationMillis;
     private long pauseDurationMillis;
     private List<StageNodeExt> stages;
-
     public RunLinks get_links() {
         return _links;
     }
@@ -265,7 +264,7 @@ public class RunExt {
                 return myRun;
             }
         }
-        RunExt myRun = createNew(run);
+        RunExt myRun = createOld(run);
         if (isNotRunning) {
             FlowNodeUtil.cacheRun(execution, myRun);
         }

@@ -28,6 +28,7 @@ import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
+import com.cloudbees.workflow.util.ModelUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheStats;
@@ -49,8 +50,10 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.Stapler;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -155,6 +158,30 @@ public class FlowNodeUtil {
         FlowNodeUtil.execNodeNameCache.invalidateAll();
     }
 
+    @Nonnull
+    /**
+     * Helper method to fit DRY, handles cases where you are unit testing with Ext objects
+     *  and no Stapler request is available
+     * @param itemUrl Url fragment for item
+     * @param apiBaseUrl API suffix for item
+     * @return StringBuilder with the constructed URL
+     */
+    public static StringBuilder buildAPIUrl(String itemUrl, String apiBaseUrl) {
+        // Allows for testing without an active stapler request
+        StringBuilder returnUrl = new StringBuilder();
+        if (Stapler.getCurrentRequest() != null) {
+            returnUrl.append(ModelUtil.getRootUrl());
+        }
+        returnUrl.append('/');
+        returnUrl.append(itemUrl);
+        if (!itemUrl.endsWith("/")) {
+            returnUrl.append('/');
+        }
+        if (apiBaseUrl != null) {
+            returnUrl.append(apiBaseUrl);
+        }
+        return returnUrl;
+    }
 
     public static boolean isNotPartOfRunningBuild(FlowExecution execution) {
         return (execution != null && execution.isComplete());

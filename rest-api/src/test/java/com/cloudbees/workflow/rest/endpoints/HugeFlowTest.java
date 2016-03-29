@@ -23,34 +23,21 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
-import com.cloudbees.workflow.Util;
 import com.cloudbees.workflow.flownode.FlowAnalyzer;
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
-import com.cloudbees.workflow.rest.external.FlowNodeLogExt;
-import com.cloudbees.workflow.rest.external.RunExt;
-import com.cloudbees.workflow.rest.external.StageNodeExt;
-import com.cloudbees.workflow.rest.external.StatusExt;
-import com.cloudbees.workflow.util.JSONReadWrite;
 import com.gargoylesoftware.htmlunit.Page;
-import hudson.model.Result;
 import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.jenkinsci.plugins.workflow.steps.ErrorStep;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.util.List;
-
-import static org.hamcrest.Matchers.containsString;
 
 /**
  * Test performance and behavior with gigantic flow graphs
@@ -106,7 +93,7 @@ public class HugeFlowTest {
         an.analyzeAll();
         analyzeEnd = System.nanoTime();
         System.out.println("Run time to run analysis: " + (analyzeEnd - analyzeStart));
-        List<FlowAnalyzer.StageEntry> stageEntries = an.getStages();
+        List<FlowAnalyzer.FlowSegment> stageEntries = an.getStages();
 
         long requestStart = System.nanoTime();
         Page runsPage = webClient.goTo(jobRunsUrl, "application/json");

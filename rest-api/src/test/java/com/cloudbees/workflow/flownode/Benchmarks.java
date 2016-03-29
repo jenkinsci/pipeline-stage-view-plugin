@@ -3,7 +3,6 @@ package com.cloudbees.workflow.flownode;
 import com.cloudbees.workflow.flownode.mock.FlowGraphBuilder;
 import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
-import com.cloudbees.workflow.rest.external.StatusExt;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -105,7 +104,7 @@ public class Benchmarks {
         analyzer.reinitialize(basis);
         analyzer.setKeepChildren(true);
         analyzer.analyzeAll();
-        for(FlowAnalyzer.StageEntry ent : analyzer.getStages()) {
+        for(FlowAnalyzer.FlowSegment ent : analyzer.getStages()) {
             List children = ent.children;
             if (children.isEmpty()) {
                 //throw new RuntimeException("No children found when expected");

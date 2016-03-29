@@ -23,6 +23,7 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.AbstractFlowNodeActionHandler;
 import com.cloudbees.workflow.rest.endpoints.flownode.Describe;
 import com.cloudbees.workflow.rest.endpoints.flownode.Log;
@@ -50,18 +51,8 @@ public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
     public static String getUrl(FlowNode node) {
         // Allows for testing creation without an active stapler request
         try {
-            StringBuilder returnUrl = new StringBuilder();
-            if (Stapler.getCurrentRequest() != null) {
-                returnUrl.append(ModelUtil.getRootUrl());
-            }
-            returnUrl.append('/');
-            String itemUrl = node.getUrl();
-            returnUrl.append(itemUrl);
-            if (!itemUrl.endsWith("/")) {
-                returnUrl.append('/');
-            }
-            returnUrl.append(FlowNodeAPI.URL_BASE);
-            return returnUrl.toString();
+            return FlowNodeUtil.buildAPIUrl(node.getUrl(), FlowNodeAPI.URL_BASE)
+                    .toString();
         } catch (IOException ioe) {
             throw new IllegalStateException("Unable to get URL for a FlowNode");
         }

@@ -23,6 +23,7 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.AbstractWorkflowJobActionHandler;
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
@@ -31,7 +32,9 @@ import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.Stapler;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -46,7 +49,9 @@ import java.util.List;
 public class JobAPI extends AbstractWorkflowJobActionHandler {
 
     public static String getUrl(WorkflowJob job) {
-        return ModelUtil.getFullItemUrl(job.getUrl()) + URL_BASE + "/";
+        return FlowNodeUtil.buildAPIUrl(job.getUrl(), URL_BASE)
+                .append('/')
+                .toString();
     }
 
     public static String getDescribeUrl(WorkflowJob job) {

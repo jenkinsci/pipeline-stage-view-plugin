@@ -36,17 +36,16 @@ import java.util.ListIterator;
  * @author <a href="mailto:samvanoort@gmail.com">samvanoort@gmail.com</a>
  */
 public class FlowAnalyzer  {
-    public static final String NO_EXEC_NODE = "NOEXECNODE";
 
     // queue of nodes to visit, outperforms a stack in general use
     protected ArrayDeque<FlowNode> q = new ArrayDeque<>();
 
     // Maps nodes to their stage *and* tracks visiting of nodes
-    protected IdentityHashMap<FlowNode,StageEntry> visited = new IdentityHashMap<FlowNode,StageEntry>();
+    protected IdentityHashMap<FlowNode,FlowSegment> visited = new IdentityHashMap<FlowNode,FlowSegment>();
 
-    protected List<StageEntry> stages = new ArrayList<StageEntry>();
+    protected List<FlowSegment> stages = new ArrayList<FlowSegment>();
 
-    protected StageEntry currentStage = new StageEntry();
+    protected FlowSegment currentStage = new FlowSegment();
 
     protected long lastStartTime = System.currentTimeMillis();
 
@@ -78,8 +77,8 @@ public class FlowAnalyzer  {
      */
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(
             value={"UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD", "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"},
-            justification="StageEntry objects collect run information that may be used many ways")
-    public static class StageEntry {
+            justification="FlowSegment objects collect run information that may be used many ways")
+    public static class FlowSegment {
         public boolean hasForks = false;
         public int nodeCount = 0;
         public FlowNode stageNode;
@@ -100,7 +99,7 @@ public class FlowAnalyzer  {
         }
     }
 
-    public List<StageEntry> getStages() {
+    public List<FlowSegment> getStages() {
         return stages;
     }
 
@@ -118,7 +117,7 @@ public class FlowAnalyzer  {
         addHeads(heads);
         stages.clear();
         visited.clear();
-        currentStage = new StageEntry();
+        currentStage = new FlowSegment();
         currentStage.endTime = System.currentTimeMillis();
         lastStartTime = System.currentTimeMillis();
     }
@@ -144,14 +143,14 @@ public class FlowAnalyzer  {
 
     /** Process a node at a time, adding to stages as appropriate */
     protected void handleNode(FlowNode n) {
-        StageEntry stageWithNode = visited.get(n); // Stage associated with this node, if already visited
+        FlowSegment stageWithNode = visited.get(n); // Stage associated with this node, if already visited
 
         // We've just finished walking through a side branch that rejoined a previous-visited path
         // Combine our current stats from the side-branch into the main one
         if (stageWithNode != null) {
             branchEnd(n);
             mergeSideBranchIntoStage(stageWithNode, this.currentStage);
-            currentStage = new StageEntry();
+            currentStage = new FlowSegment();
             return;
         }
 
@@ -163,7 +162,7 @@ public class FlowAnalyzer  {
             visited.put(n, currentStage);
             long stageStartTime = TimingAction.getStartTime(n);
             currentStage.startTime = stageStartTime; // Node begins with its stage node
-            currentStage = new StageEntry();
+            currentStage = new FlowSegment();
             currentStage.endTime = stageStartTime;
         } else {
             updateStageStats(currentStage, n);
@@ -173,7 +172,7 @@ public class FlowAnalyzer  {
         List<FlowNode> parents = n.getParents();
         if (parents == null || parents.size() == 0) { // End of the line, bub.  Now we move on to parallel branches.
             stages.add(currentStage);  // has a null stageNode, because we aren't in a defined stage
-            currentStage = new StageEntry();
+            currentStage = new FlowSegment();
         } else if (parents.size() == 1) {
             addHead(parents.get(0));
         } else {
@@ -198,7 +197,7 @@ public class FlowAnalyzer  {
     };
 
     /** For parallel branches, we need to combine the stage statistics from each  */
-    protected void mergeSideBranchIntoStage(StageEntry mainEntry, StageEntry sideBranch) {
+    protected void mergeSideBranchIntoStage(FlowSegment mainEntry, FlowSegment sideBranch) {
 
         if (sideBranch == null || sideBranch.nodeCount == 0) {
             return;  // No branch content
@@ -235,7 +234,7 @@ public class FlowAnalyzer  {
     }
 
     /** Modify a stage's stats using the node */
-    protected void updateStageStats(StageEntry entry, FlowNode n ){
+    protected void updateStageStats(FlowSegment entry, FlowNode n ){
         entry.firstChild = n;
 
         // We can do optimizations to avoid computing these, but it is considerably more complex
@@ -283,7 +282,7 @@ public class FlowAnalyzer  {
         }
 
         // Reverse children, since they're added in reverse order
-        for(StageEntry s: stages) {
+        for(FlowSegment s: stages) {
             if (keepChildren && s.children != null && !s.children.isEmpty()) {
                 s.children = Lists.reverse(s.children);
             }
@@ -291,7 +290,7 @@ public class FlowAnalyzer  {
 
         // Fixes for the last node
         if (!stages.isEmpty()) {
-            StageEntry last = stages.get(stages.size()-1);
+            FlowSegment last = stages.get(stages.size()-1);
             if (last.lastChild.isRunning() && !FlowNodeUtil.isPauseNode(last.lastChild)) {
                 // If the last node is running and we're not paused, the end time is right now
                 last.endTime = System.currentTimeMillis();
@@ -302,7 +301,7 @@ public class FlowAnalyzer  {
         }
 
         // TIMING COMPUTATION: use first executed node to last time
-        for(StageEntry s : stages) {
+        for(FlowSegment s : stages) {
             ExecDuration dur = s.duration;
             dur.setPauseDurationMillis(Math.min(dur.getPauseDurationMillis(), dur.getTotalDurationMillis()));
             if (s.status != StatusExt.NOT_EXECUTED) {
@@ -344,7 +343,7 @@ public class FlowAnalyzer  {
             analyzer.analyzeAll();
 
             List<StageNodeExt> realizedStages = new ArrayList<StageNodeExt>(analyzer.stages.size());
-            for (StageEntry entry : analyzer.stages) {
+            for (FlowSegment entry : analyzer.stages) {
                 if (entry.stageNode != null) {
                     realizedStages.add(entry.toStageNodeExt());
                 }

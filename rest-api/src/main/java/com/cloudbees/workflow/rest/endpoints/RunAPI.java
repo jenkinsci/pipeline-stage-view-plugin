@@ -61,7 +61,9 @@ import java.util.List;
 public class RunAPI extends AbstractWorkflowRunActionHandler {
 
     public static String getUrl(WorkflowRun run) {
-        return ModelUtil.getFullItemUrl(run.getUrl()) + URL_BASE + "/";
+        return FlowNodeUtil.buildAPIUrl(run.getUrl(), URL_BASE)
+                .append('/')
+                .toString();
     }
 
     public static String getDescribeUrl(WorkflowRun run) {
