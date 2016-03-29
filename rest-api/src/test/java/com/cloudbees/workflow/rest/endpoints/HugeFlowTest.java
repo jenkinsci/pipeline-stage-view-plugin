@@ -82,6 +82,7 @@ public class HugeFlowTest {
 
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
 
+        long startWalk = System.nanoTime();
         FlowGraphWalker w = new FlowGraphWalker(job.getLastBuild().getExecution());
         FlowNode root; // Keep a ref in memory
         for (FlowNode node : w) {
@@ -89,6 +90,9 @@ public class HugeFlowTest {
                 root = node;
             }
         }
+        long endWalk = System.nanoTime();
+        System.out.println("Walking time (ns): "+(endWalk-startWalk));
+
         long analyzeStart = System.nanoTime();
         List<FlowNode> nodes = FlowNodeUtil.getStageNodes(job.getBuilds().getLastBuild().getExecution());
         for (FlowNode f : nodes) {

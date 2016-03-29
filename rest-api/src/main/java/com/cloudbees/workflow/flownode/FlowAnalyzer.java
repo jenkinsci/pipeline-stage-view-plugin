@@ -259,6 +259,7 @@ public class FlowAnalyzer  {
             // Because it just looks for preceding nodes, while disregarding block scoping
             // We need to track a Stack of block scopes, using the pointers in the BlockEndNodes
             String execNodeName = FlowNodeUtil.getExecNodeName(n);
+            //String execNodeName = "master";
             AtomFlowNodeExt childNode = AtomFlowNodeExt.create(n, execNodeName, dur, startTime, st, n.getError());
             currentStage.children.add(childNode);
         }
@@ -334,8 +335,7 @@ public class FlowAnalyzer  {
      * @return Fully realized RunExt
      */
     public static RunExt analyzeRunToExt(WorkflowRun run, boolean storeChildNodes, int childNodeLimit) {
-        RunExt output = new RunExt();
-        RunExt.createMinimal(run);
+        RunExt output = RunExt.createMinimal(run);
         FlowExecution exec = run.getExecution();
         if (exec != null) {
             FlowAnalyzer analyzer = new FlowAnalyzer(exec);

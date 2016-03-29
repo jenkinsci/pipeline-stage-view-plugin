@@ -134,7 +134,7 @@ public class FlowNodeUtil {
             return null;
         } catch (IOException ioe) {
             LOGGER.severe("Can't get execution url for execution, IOException!");
-            return null;
+            throw new IllegalStateException(ioe);
         }
     }
 
@@ -312,6 +312,7 @@ public class FlowNodeUtil {
 
         // Queue is used because we've hit some stack overflows with complex graphs
         ArrayDeque<FlowNode> testNodes = new ArrayDeque<FlowNode>();
+        ArrayDeque<FlowNode> ancestry = new ArrayDeque<FlowNode>(); // For these nodes, add cache entries
         if (parents != null && !parents.isEmpty()) {
             // Don't need to iterate all parents. Working back through one ancestral line
             // should get us to the node containing the WorkspaceAction.
@@ -322,6 +323,12 @@ public class FlowNodeUtil {
             if (parent == null) {
                 break;
             }
+            String cachedExecNodeName = execNodeNameCache.getIfPresent(parent);
+            if (cachedExecNodeName != null) {
+                execNodeName = cachedExecNodeName;
+                break;
+            }
+            ancestry.push(parent);
             WorkspaceAction executorAction = parent.getAction(WorkspaceAction.class);
             if (executorAction != null) {
                 String node = executorAction.getNode();
@@ -337,8 +344,11 @@ public class FlowNodeUtil {
             }
         }
 
+        // Cache so we don't have to go through this pain again
         execNodeNameCache.put(flowNode, execNodeName);
-
+        for (FlowNode f : ancestry) {
+            execNodeNameCache.put(f, execNodeName);
+        }
         return execNodeName;
     }
 

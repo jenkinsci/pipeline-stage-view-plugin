@@ -265,6 +265,20 @@ public class RunExt {
                 return myRun;
             }
         }
+        RunExt myRun = createNew(run);
+        if (isNotRunning) {
+            FlowNodeUtil.cacheRun(execution, myRun);
+        }
+        return myRun;
+    }
+
+    public static RunExt createNew(WorkflowRun run) {
+        RunExt myRun = FlowAnalyzer.analyzeRunToExt(run, true, 100);
+        return myRun;
+    }
+
+    public static RunExt createOld(WorkflowRun run) {
+        FlowExecution execution = run.getExecution();
 
         final RunExt runExt = new RunExt();
         runExt.set_links(new RunLinks());
@@ -330,10 +344,6 @@ public class RunExt {
             }
 
             runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
-        }
-
-        if (isNotRunning) {
-            FlowNodeUtil.cacheRun(execution, runExt);
         }
         return runExt;
     }
