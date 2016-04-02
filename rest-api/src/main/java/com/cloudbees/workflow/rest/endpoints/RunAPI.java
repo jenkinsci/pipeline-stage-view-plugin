@@ -61,9 +61,7 @@ import java.util.List;
 public class RunAPI extends AbstractWorkflowRunActionHandler {
 
     public static String getUrl(WorkflowRun run) {
-        return FlowNodeUtil.buildAPIUrl(run.getUrl(), URL_BASE)
-                .append('/')
-                .toString();
+        return ModelUtil.getFullItemUrl(run.getUrl()) + URL_BASE + "/";
     }
 
     public static String getDescribeUrl(WorkflowRun run) {
@@ -103,7 +101,7 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     @Restricted(DoNotUse.class) // WebMethod
     @ServeJson
     public RunExt doDescribe() {
-        return RunExt.create(getRun());
+        return RunExt.create(getRun()).createWrapper();
     }
 
     @Restricted(DoNotUse.class) // WebMethod

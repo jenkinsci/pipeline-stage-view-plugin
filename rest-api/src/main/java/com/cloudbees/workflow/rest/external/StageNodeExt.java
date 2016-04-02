@@ -74,6 +74,35 @@ public class StageNodeExt extends FlowNodeExt {
         return stageNodeExt;
     }
 
+    /** Hides child nodes, so we store a complete image but only return the minimal amount of data */
+
+    protected static class ChildHidingWrapper extends StageNodeExt {
+        protected StageNodeExt myNode;
+
+        public FlowNodeLinks get_links() {return myNode.get_links();}
+        public String getId() {return myNode.getId();}
+        public String getName() {return myNode.getName();}
+        public String getExecNode() {return myNode.getExecNode();}
+        public StatusExt getStatus() {return myNode.getStatus();}
+        public ErrorExt getError() {return myNode.getError();}
+        public long getStartTimeMillis() {return myNode.getStartTimeMillis();}
+        public long getDurationMillis() {return myNode.getDurationMillis();}
+        public long getPauseDurationMillis() {return myNode.getPauseDurationMillis();}
+
+        @Override
+        public List<AtomFlowNodeExt> getStageFlowNodes() {
+            return null;
+        }
+
+        protected ChildHidingWrapper(StageNodeExt stage) {
+            this.myNode = stage;
+        }
+    }
+
+    public StageNodeExt myWrapper() {
+        return new ChildHidingWrapper(this);
+    }
+
     public void addStageFlowNodes(FlowNode node) {
         List<FlowNode> stageFlowNodes = FlowNodeUtil.getStageNodes(node);
         addStageAtomNodeData(stageFlowNodes);

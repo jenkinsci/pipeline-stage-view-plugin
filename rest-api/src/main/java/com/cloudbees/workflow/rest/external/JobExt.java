@@ -123,7 +123,7 @@ public class JobExt {
         for (WorkflowRun run : runs) {
 
             // TODO Optimize this if UI supports it: avoid returning a run if no change
-            RunExt runExt = RunExt.create(run);
+            RunExt runExt = RunExt.create(run).createWrapper();
             runsExt.add(runExt);
             if (since != null && runExt.getName().equals(since)) {
                 break;

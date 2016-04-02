@@ -49,9 +49,7 @@ import java.util.List;
 public class JobAPI extends AbstractWorkflowJobActionHandler {
 
     public static String getUrl(WorkflowJob job) {
-        return FlowNodeUtil.buildAPIUrl(job.getUrl(), URL_BASE)
-                .append('/')
-                .toString();
+        return ModelUtil.getFullItemUrl(job.getUrl()) + URL_BASE + "/";
     }
 
     public static String getDescribeUrl(WorkflowJob job) {

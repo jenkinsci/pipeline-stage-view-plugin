@@ -158,31 +158,6 @@ public class FlowNodeUtil {
         FlowNodeUtil.execNodeNameCache.invalidateAll();
     }
 
-    @Nonnull
-    /**
-     * Helper method to fit DRY, handles cases where you are unit testing with Ext objects
-     *  and no Stapler request is available
-     * @param itemUrl Url fragment for item
-     * @param apiBaseUrl API suffix for item
-     * @return StringBuilder with the constructed URL
-     */
-    public static StringBuilder buildAPIUrl(String itemUrl, String apiBaseUrl) {
-        // Allows for testing without an active stapler request
-        StringBuilder returnUrl = new StringBuilder();
-        if (Stapler.getCurrentRequest() != null) {
-            returnUrl.append(ModelUtil.getRootUrl());
-        }
-        returnUrl.append('/');
-        returnUrl.append(itemUrl);
-        if (!itemUrl.endsWith("/")) {
-            returnUrl.append('/');
-        }
-        if (apiBaseUrl != null) {
-            returnUrl.append(apiBaseUrl);
-        }
-        return returnUrl;
-    }
-
     public static boolean isNotPartOfRunningBuild(FlowExecution execution) {
         return (execution != null && execution.isComplete());
     }

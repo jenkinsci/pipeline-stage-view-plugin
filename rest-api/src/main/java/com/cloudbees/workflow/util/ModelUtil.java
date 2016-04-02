@@ -56,6 +56,6 @@ public class ModelUtil {
 
     public static String getRootUrl() {
         StaplerRequest currentRequest = Stapler.getCurrentRequest();
-        return currentRequest.getContextPath();
+        return (currentRequest != null) ? currentRequest.getContextPath() : "/";
     }
 }

@@ -39,16 +39,19 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputAction;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputStepExecution;
 
-import javax.annotation.CheckForNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
+ * External API response object for pipeline run
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class RunExt {
+
+    static final Logger LOGGER = Logger.getLogger(RunExt.class.getName());
 
     private static final int MAX_ARTIFACTS_COUNT = 100;
 
@@ -253,6 +256,42 @@ public class RunExt {
         return runExt;
     }
 
+    /** Creates a wrapper of this that hides the full stage nodes
+     *  Use case: returning a minimal view of the run, while using a cached, fully-realized version
+     */
+    public RunExt createWrapper() {
+        return new ChildHidingWrapper(this);
+    }
+
+    protected static class ChildHidingWrapper extends RunExt {
+        protected RunExt myRun;
+        protected List<StageNodeExt> wrappedStages;
+
+        public RunLinks get_links() {return myRun.get_links();}
+        public String getId() {return myRun.getId();}
+        public String getName() {return myRun.getName();}
+        public StatusExt getStatus() {return myRun.getStatus();}
+        public long getStartTimeMillis() {return myRun.getStartTimeMillis();}
+        public long getEndTimeMillis() {return myRun.getEndTimeMillis();}
+        public long getDurationMillis() {return myRun.getDurationMillis();}
+        public long getQueueDurationMillis() {return myRun.getQueueDurationMillis();}
+        public long getPauseDurationMillis() {return myRun.getPauseDurationMillis();}
+        public List<StageNodeExt> getStages() {return Collections.unmodifiableList(wrappedStages);}
+
+        protected ChildHidingWrapper(RunExt run) {
+            this.myRun = run;
+            List<StageNodeExt> myWrappedStages = new ArrayList<StageNodeExt>();
+            if (wrappedStages == null) {
+                for(StageNodeExt stage : run.getStages()) {
+                    myWrappedStages.add(stage.myWrapper());
+                }
+                this.wrappedStages = myWrappedStages;
+            } else {
+                wrappedStages = null;
+            }
+        }
+    }
+
     public static RunExt create(WorkflowRun run) {
         FlowExecution execution = run.getExecution();
 
@@ -264,6 +303,7 @@ public class RunExt {
                 return myRun;
             }
         }
+        // Compute the entire flow
         RunExt myRun = createOld(run);
         if (isNotRunning) {
             FlowNodeUtil.cacheRun(execution, myRun);
@@ -277,6 +317,7 @@ public class RunExt {
     }
 
     public static RunExt createOld(WorkflowRun run) {
+        long startTime = System.currentTimeMillis();
         FlowExecution execution = run.getExecution();
 
         final RunExt runExt = new RunExt();
@@ -344,6 +385,8 @@ public class RunExt {
 
             runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
         }
+        long endTime = System.currentTimeMillis();
+        LOGGER.severe("Create time (ms) by old method: "+(endTime-startTime));
         return runExt;
     }
 

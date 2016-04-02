@@ -49,13 +49,7 @@ import java.util.List;
 public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
 
     public static String getUrl(FlowNode node) {
-        // Allows for testing creation without an active stapler request
-        try {
-            return FlowNodeUtil.buildAPIUrl(node.getUrl(), FlowNodeAPI.URL_BASE)
-                    .toString();
-        } catch (IOException ioe) {
-            throw new IllegalStateException("Unable to get URL for a FlowNode");
-        }
+        return  ModelUtil.getFullItemUrl(node) + FlowNodeAPI.URL_BASE;
     }
 
     @ServeJson
