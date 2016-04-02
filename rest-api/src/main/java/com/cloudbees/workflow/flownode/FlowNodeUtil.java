@@ -301,37 +301,26 @@ public class FlowNodeUtil {
      * @return The name of the node on which the supplied FlowNode executed.
      */
     public static String getExecNodeName(FlowNode flowNode) {
-        if (flowNode == null) {
-            return "master";
+        String execNodeName = null;
+        if (flowNode != null) {
+            execNodeName = execNodeNameCache.getIfPresent(flowNode);
         }
-        String execNodeName = execNodeNameCache.getIfPresent(flowNode);
         if (execNodeName != null) {
             return execNodeName;
         }
 
-        execNodeName = "master";
-        List<FlowNode> parents = flowNode.getParents();
-
-        // Queue is used because we've hit some stack overflows with complex graphs
-        ArrayDeque<FlowNode> testNodes = new ArrayDeque<FlowNode>();
+        // It is sufficient to walk through just the ancestry
         ArrayDeque<FlowNode> ancestry = new ArrayDeque<FlowNode>(); // For these nodes, add cache entries
-        if (parents != null && !parents.isEmpty()) {
-            // Don't need to iterate all parents. Working back through one ancestral line
-            // should get us to the node containing the WorkspaceAction.
-            testNodes.push(parents.get(0));
-        }
-        while (testNodes.size() > 0) {
-            FlowNode parent = testNodes.pop();
-            if (parent == null) {
+
+        while (flowNode != null) {
+            // Always hit the cache first
+            execNodeName = execNodeNameCache.getIfPresent(flowNode);
+            if (execNodeName != null) {
                 break;
             }
-            String cachedExecNodeName = execNodeNameCache.getIfPresent(parent);
-            if (cachedExecNodeName != null) {
-                execNodeName = cachedExecNodeName;
-                break;
-            }
-            ancestry.push(parent);
-            WorkspaceAction executorAction = parent.getAction(WorkspaceAction.class);
+
+            // Then we check for the node itself
+            WorkspaceAction executorAction = flowNode.getAction(WorkspaceAction.class);
             if (executorAction != null) {
                 String node = executorAction.getNode();
                 if (node.length() > 0) {
@@ -339,15 +328,20 @@ public class FlowNodeUtil {
                 }
                 break;
             }
-            List<FlowNode> newParents = parent.getParents();
-            if (newParents != null && !newParents.isEmpty()) {
-                // See above
-                testNodes.push(newParents.get(0));
+
+            // Next look at ancestors
+            ancestry.push(flowNode);
+            List<FlowNode> parents = flowNode.getParents();
+            if (parents != null && parents.isEmpty()) {
+                flowNode = parents.get(0);
+            } else {
+                break;
             }
         }
-
-        // Cache so we don't have to go through this pain again
-        execNodeNameCache.put(flowNode, execNodeName);
+        // Ran on master if no executor workspace
+        if (execNodeName == null) {
+            execNodeName = "master";
+        }
         for (FlowNode f : ancestry) {
             execNodeNameCache.put(f, execNodeName);
         }
