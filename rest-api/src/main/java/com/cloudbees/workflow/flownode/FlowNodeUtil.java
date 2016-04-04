@@ -332,7 +332,7 @@ public class FlowNodeUtil {
             // Next look at ancestors
             ancestry.push(flowNode);
             List<FlowNode> parents = flowNode.getParents();
-            if (parents != null && parents.isEmpty()) {
+            if (parents != null && !parents.isEmpty()) {
                 flowNode = parents.get(0);
             } else {
                 break;
