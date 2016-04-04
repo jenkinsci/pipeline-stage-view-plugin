@@ -43,15 +43,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * External API response object for pipeline run
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class RunExt {
-
-    static final Logger LOGGER = Logger.getLogger(RunExt.class.getName());
 
     private static final int MAX_ARTIFACTS_COUNT = 100;
 
@@ -317,7 +314,6 @@ public class RunExt {
     }
 
     public static RunExt createOld(WorkflowRun run) {
-        long startTime = System.currentTimeMillis();
         FlowExecution execution = run.getExecution();
 
         final RunExt runExt = new RunExt();
@@ -385,8 +381,6 @@ public class RunExt {
 
             runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
         }
-        long endTime = System.currentTimeMillis();
-        LOGGER.severe("Create time (ms) by old method: "+(endTime-startTime));
         return runExt;
     }
 
