@@ -61,15 +61,14 @@ import java.util.logging.Logger;
  */
 public class FlowNodeUtil {
 
-    protected static final Cache<String,List<FlowNode>> executionCache = CacheBuilder.newBuilder().maximumSize(100).build();
-
+    protected static final Cache<String,List<FlowNode>> executionCache = CacheBuilder.newBuilder().weakValues().maximumSize(100).build();
 
     // Larger cache of run data, for completed runs, keyed by flowexecution url, useful for serving info
     // Actually can be used to serve Stage data too
     // Because the RunExt caps the total elements returned, and this is fully realized, this is the fastest way
-    public static final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).build();
+    protected static final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-    static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(1, TimeUnit.HOURS).build();
+    protected static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(1, TimeUnit.HOURS).build();
 
     private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
@@ -497,8 +496,7 @@ public class FlowNodeUtil {
         }
     };
 
-    @Restricted(NoExternalUse.class)
-    protected static List<FlowNode> sortNodesById(List<FlowNode> nodes) {
+    public static List<FlowNode> sortNodesById(List<FlowNode> nodes) {
         Collections.sort(nodes, sortComparator);
         return nodes;
     }
