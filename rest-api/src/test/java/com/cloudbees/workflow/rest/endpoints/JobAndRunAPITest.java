@@ -23,10 +23,8 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
-import com.cloudbees.workflow.Util;
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.BuildArtifactExt;
-import com.cloudbees.workflow.rest.external.CacheStatsExt;
 import com.cloudbees.workflow.rest.external.ChangeSetExt;
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
@@ -84,33 +82,11 @@ public class JobAndRunAPITest {
         assertDescribeEndpointOkay(job, webClient);
         assertArtifactsEndpointOkay(job, webClient);
         assertChangesetsEndpointOkay(job, webClient);
-        assertCacheUrlsWork(job, webClient);
-
 
         // Run another build and then test resultset narrowing using the 'since' query parameter
         build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
         assertSinceQueryParamOkay(job, webClient);
-    }
-
-    private void assertCacheUrlsWork(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
-        String cacheResponse = webClient.goTo(job.getUrl()+"wfapi/cacheStats/").getWebResponse().getContentAsString();
-        JSONReadWrite jsonReadWrite = new JSONReadWrite();
-
-        FlowNodeUtil.CacheResultsExt utilCache = jsonReadWrite.fromString(cacheResponse, FlowNodeUtil.CacheResultsExt.class);
-        Assert.assertNotEquals(0, utilCache.getRunDataCacheStats().getCacheEntryCount());
-        Assert.assertNotEquals(0, utilCache.getExecutionCacheStats().getCacheEntryCount());
-        Assert.assertNotEquals(0, utilCache.getExecNodeNameCacheStats().getCacheEntryCount());
-
-        // Try cache invalidation, verify caches cleared
-        int val = Util.postToJenkins(jenkinsRule.getInstance(),job.getUrl()+"wfapi/invalidateAllCaches/");
-        Assert.assertEquals(200, val);
-
-        cacheResponse = webClient.goTo(job.getUrl()+"/wfapi/cacheStats/").getWebResponse().getContentAsString();
-        utilCache = jsonReadWrite.fromString(cacheResponse, FlowNodeUtil.CacheResultsExt.class);
-        Assert.assertEquals(0, utilCache.getRunDataCacheStats().getCacheEntryCount());
-        Assert.assertEquals(0, utilCache.getExecutionCacheStats().getCacheEntryCount());
-        Assert.assertEquals(0, utilCache.getExecNodeNameCacheStats().getCacheEntryCount());
     }
 
     private void assertBasicJobInfoOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
