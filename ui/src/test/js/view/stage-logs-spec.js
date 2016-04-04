@@ -76,6 +76,7 @@ describe("view/stage-logs", function () {
 
             // logDetails of that log should be filled in...
             expect($('.log-details .console-output', firstLogNode).text()).toBe('build');
+            expect($('.log-details .console-output', firstLogNode).is(':visible')).toBe(true);
 
             // console.log($('body').html());
 

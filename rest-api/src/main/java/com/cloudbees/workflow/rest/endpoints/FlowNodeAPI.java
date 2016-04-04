@@ -23,7 +23,6 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
-import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.AbstractFlowNodeActionHandler;
 import com.cloudbees.workflow.rest.endpoints.flownode.Describe;
 import com.cloudbees.workflow.rest.endpoints.flownode.Log;
@@ -31,11 +30,6 @@ import com.cloudbees.workflow.util.ModelUtil;
 import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
-import org.kohsuke.stapler.Stapler;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * API Action handler to return {@link FlowNode} information.
@@ -49,7 +43,7 @@ import java.util.List;
 public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
 
     public static String getUrl(FlowNode node) {
-        return  ModelUtil.getFullItemUrl(node) + FlowNodeAPI.URL_BASE;
+        return ModelUtil.getFullItemUrl(node) + FlowNodeAPI.URL_BASE;
     }
 
     @ServeJson

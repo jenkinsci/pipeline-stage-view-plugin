@@ -54,20 +54,12 @@ exports.render = function (stageDescription, onElement) {
                     var nodeLogFrame = nodeNameBar.parent();
                     var active = nodeLogFrame.hasClass('active');
 
-                    // remove active state from all log frames
-                    nodeLogFrames.removeClass('active');
-                    nodeLogFrames.removeClass('inactive');
-
                     // add active state to the clicked log frame if was previously inactive
                     if (!active) {
-                        nodeLogFrames.addClass('inactive');
-                        nodeLogFrame.removeClass('inactive');
+                        // Hide any other log box
+                        nodeLogFrames.removeClass('active');
+                        // Show this one
                         nodeLogFrame.addClass('active');
-
-                        // set the height of the log-details window so it scrolls properly
-                        var logDetails = $('.log-details', nodeLogFrame);
-                        var position = logDetails.position();
-                        logDetails.height(dialogHeight - header.outerHeight() - position.top - (parseFloat(stageLogsDom.css("border-bottom-width")) * 2));
                     }
                 });
 
