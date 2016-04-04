@@ -24,20 +24,15 @@
  */
 package com.cloudbees.workflow.flownode;
 
+import com.cloudbees.workflow.rest.external.CacheStatsExt;
 import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
-import com.cloudbees.workflow.util.ModelUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheStats;
 import hudson.Extension;
-import hudson.ExtensionPoint;
-import hudson.Util;
 import hudson.model.Item;
-import hudson.model.Queue;
-import hudson.model.Run;
 import hudson.model.listeners.ItemListener;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
@@ -50,23 +45,16 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.Stapler;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -80,7 +68,7 @@ public class FlowNodeUtil {
     // Larger cache of run data, for completed runs, keyed by flowexecution url, useful for serving info
     // Actually can be used to serve Stage data too
     // Because the RunExt caps the total elements returned, and this is fully realized, this is the fastest way
-    static final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).build();
+    public static final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     static final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(1, TimeUnit.HOURS).build();
 
@@ -89,42 +77,46 @@ public class FlowNodeUtil {
     private FlowNodeUtil() {
     }
 
-    public static class CacheResults {
-        private CacheStats executionCacheStats;
-        private CacheStats runDataCacheStats;
-        private CacheStats execNodeNameCacheStats;
+    // Used to return information about caches used for FlowNodeUtil
+    public static class CacheResultsExt {
+        protected CacheStatsExt executionCacheStats;
+        protected CacheStatsExt runDataCacheStats;
+        protected CacheStatsExt execNodeNameCacheStats;
 
-        public CacheStats getExecutionCacheStats() {
+        public CacheStatsExt getExecutionCacheStats() {
             return executionCacheStats;
         }
 
-        public void setExecutionCacheStats(CacheStats executionCacheStats) {
+        public void setExecutionCacheStats(CacheStatsExt executionCacheStats) {
             this.executionCacheStats = executionCacheStats;
         }
 
-        public CacheStats getRunDataCacheStats() {
+        public CacheStatsExt getRunDataCacheStats() {
             return runDataCacheStats;
         }
 
-        public void setRunDataCacheStats(CacheStats runDataCacheStats) {
+        public void setRunDataCacheStats(CacheStatsExt runDataCacheStats) {
             this.runDataCacheStats = runDataCacheStats;
         }
 
-        public CacheStats getExecNodeNameCacheStats() {
+        public CacheStatsExt getExecNodeNameCacheStats() {
             return execNodeNameCacheStats;
         }
 
-        public void setExecNodeNameCacheStats(CacheStats execNodeNameCacheStats) {
+        public void setExecNodeNameCacheStats(CacheStatsExt execNodeNameCacheStats) {
             this.execNodeNameCacheStats = execNodeNameCacheStats;
+        }
+
+        public CacheResultsExt(Cache runDataCache, Cache executionCache, Cache execNodeNameCache) {
+            this.setRunDataCacheStats(new CacheStatsExt(runDataCache));
+            this.setExecutionCacheStats(new CacheStatsExt(executionCache));
+            this.setExecNodeNameCacheStats(new CacheStatsExt(execNodeNameCache));
         }
     }
 
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="URF_UNREAD_FIELD")  // Findbugs being silly
-    public static CacheResults getCacheResults() {
-        CacheResults output = new CacheResults();
-        output.setExecutionCacheStats(executionCache.stats());
-        output.setRunDataCacheStats(runData.stats());
-        output.setExecNodeNameCacheStats(execNodeNameCache.stats());
+    public static CacheResultsExt getCacheResults() {
+        CacheResultsExt output = new CacheResultsExt(runData, executionCache, execNodeNameCache);
         return output;
     }
 

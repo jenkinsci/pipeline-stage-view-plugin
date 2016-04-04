@@ -55,11 +55,4 @@ public abstract class AbstractAPIActionHandler<T> extends TransientActionFactory
         // No display
         return null;
     }
-
-    @ServeJson
-    @Restricted(DoNotUse.class)  // Web method
-    public FlowNodeUtil.CacheResults getCacheStats() {
-        return FlowNodeUtil.getCacheResults();
-    }
-
 }
