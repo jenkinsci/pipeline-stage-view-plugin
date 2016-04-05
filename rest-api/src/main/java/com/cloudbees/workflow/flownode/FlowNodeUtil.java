@@ -171,6 +171,8 @@ public class FlowNodeUtil {
         return null;
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+        justification = "Precondition of block ensures that null cannot be returned (FlowExecution checked)")
     public static ExecDuration getStageExecDuration(FlowNode stageStartNode) {
         FlowExecution execution = stageStartNode.getExecution();
         if (execution != null && StageNodeExt.isStageNode(stageStartNode)) {
