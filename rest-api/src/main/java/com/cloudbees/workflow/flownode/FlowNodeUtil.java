@@ -199,7 +199,7 @@ public class FlowNodeUtil {
                     // If the node is running then we might want to use the "now" time as the end time.
                     // Otherwise we are using the start time of the node that is running, which is not
                     // changing i.e. will look as though the node is not running.
-                    if (flowEndNode != null && flowEndNode.isRunning() && !execution.isComplete()) {
+                    if (flowEndNode.isRunning() && !execution.isComplete()) {
                         // But only do this if the node is not paused e.g. for input.
                         if (!isPauseNode(flowEndNode)) {
                             long currentTime = System.currentTimeMillis();
