@@ -60,7 +60,6 @@ public class FlowNodeAPITest {
 
     @Test
     public void test_success_flow() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
         String jobRunsUrl = job.getUrl() + "wfapi/runs/";
 
@@ -146,7 +145,6 @@ public class FlowNodeAPITest {
 
     @Test
     public void test_failed_flow() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
         String jobRunsUrl = job.getUrl() + "wfapi/runs/";
 

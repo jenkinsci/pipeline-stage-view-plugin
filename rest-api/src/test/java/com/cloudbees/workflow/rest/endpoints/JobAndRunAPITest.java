@@ -54,7 +54,6 @@ public class JobAndRunAPITest {
 
     @Test
     public void test() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
         job.setDefinition(new CpsFlowDefinition("" +

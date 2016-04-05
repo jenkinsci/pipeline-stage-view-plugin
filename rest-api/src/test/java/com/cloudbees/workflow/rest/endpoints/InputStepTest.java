@@ -56,7 +56,6 @@ public class InputStepTest {
 
     @Test
     public void test_basic() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
         job.setDefinition(new CpsFlowDefinition("" +
@@ -112,7 +111,6 @@ public class InputStepTest {
 
     @Test
     public void test_with_params() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Job-With-Inputs");
 
         InputStream sampleFlowRes = getClass().getResourceAsStream("sample-flow.groovy");

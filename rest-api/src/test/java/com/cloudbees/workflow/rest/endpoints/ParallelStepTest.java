@@ -47,7 +47,6 @@ public class ParallelStepTest {
 
     @Test
     public void test_success_flow() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
         String script = "node {" +
