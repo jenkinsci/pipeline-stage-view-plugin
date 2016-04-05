@@ -24,7 +24,6 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.Util;
-import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.PendingInputActionsExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StatusExt;

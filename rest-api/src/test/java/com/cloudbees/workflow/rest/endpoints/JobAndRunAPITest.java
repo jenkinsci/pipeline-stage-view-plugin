@@ -23,7 +23,6 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
-import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.BuildArtifactExt;
 import com.cloudbees.workflow.rest.external.ChangeSetExt;
 import com.cloudbees.workflow.rest.external.JobExt;

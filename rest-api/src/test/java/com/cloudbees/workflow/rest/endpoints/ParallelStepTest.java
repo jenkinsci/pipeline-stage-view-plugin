@@ -23,7 +23,6 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
-import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.util.JSONReadWrite;

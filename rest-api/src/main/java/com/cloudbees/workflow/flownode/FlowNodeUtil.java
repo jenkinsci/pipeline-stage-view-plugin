@@ -117,7 +117,10 @@ public class FlowNodeUtil {
     public static RunExt getCachedRun(FlowExecution ex) {
         try {
             if (ex != null) {
-                CacheExtension.all().get(0).getRunCache().getIfPresent(ex.getUrl());
+                RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(ex.getUrl());
+                if (cachedRun != null) {
+                    return cachedRun;
+                }
             }
             return null;
         } catch (IOException ioe) {
@@ -394,7 +397,6 @@ public class FlowNodeUtil {
         List<FlowNode> endNodes = new ArrayList<FlowNode>(execution.getCurrentHeads());
         sortNodesById(endNodes);
 
-        // We do not actually need to sort this, we can just the get the head of the execution
         return endNodes.get(endNodes.size() - 1);
     }
 
@@ -490,11 +492,12 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    @Extension
+
     /** This is used to cover an obscure case where a WorkflowJob is renamed BUT
      *  a previous WorkflowJob existed with cached execution data.
      *  Otherwise the previous job's cached data would be returned.
      **/
+    @Extension
     public static class RenameHandler extends ItemListener {
         @Override
         public void onLocationChanged(Item item, String oldFullName, String newFullName) {
