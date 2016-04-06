@@ -127,6 +127,25 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>display-info</id>
+                        <configuration>
+                            <rules>
+                                <enforceBytecodeVersion>
+                                    <excludes combine.children="append">
+                                        <exclude>org.jenkins-ci.plugins:pipeline-input-step</exclude> <!-- if you are running it, this is Java 7 -->
+                                        <exclude>org.jenkins-ci.plugins.workflow:workflow-step-api</exclude> <!-- seems to be pulled in from the above -->
+                                        <exclude>org.jenkins-ci.plugins.workflow:workflow-support</exclude> <!-- ditto -->
+                                    </excludes>
+                                </enforceBytecodeVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
