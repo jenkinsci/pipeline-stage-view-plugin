@@ -72,6 +72,7 @@
             <artifactId>workflow-support</artifactId>
             <version>${workflow.version}</version>
             <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
 
         <!-- May be able to remove these due to core -->
