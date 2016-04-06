@@ -56,6 +56,12 @@
             <version>${workflow.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>pipeline-input-step</artifactId>
+            <version>2.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
             <version>${workflow.version}</version>
