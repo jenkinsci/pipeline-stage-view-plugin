@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
  ~ The MIT License
@@ -29,12 +28,12 @@
     <parent>
         <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>1.3-SNAPSHOT</version>
+        <version>1.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>pipeline-stage-view</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3</version>
     <name>Pipeline: Stage View Plugin</name>
     <description>Provides a swimlane view of the different stages in a pipeline.
     </description>
