@@ -51,5 +51,4 @@ public abstract class AbstractAPIActionHandler<T> extends TransientActionFactory
         // No display
         return null;
     }
-
 }

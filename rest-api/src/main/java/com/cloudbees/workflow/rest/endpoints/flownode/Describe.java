@@ -23,18 +23,28 @@
  */
 package com.cloudbees.workflow.rest.endpoints.flownode;
 
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
 import com.cloudbees.workflow.rest.external.FlowNodeExt;
+import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.endpoints.FlowNodeAPI;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+
+import javax.annotation.CheckForNull;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * {@link FlowNode} "describe" endpoint.
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class Describe {
+    private static final Logger LOGGER = Logger.getLogger(Describe.class.getName());
 
     public static String getUrl(FlowNode node) {
         return FlowNodeAPI.getUrl(node) + "/describe";
@@ -42,6 +52,16 @@ public class Describe {
 
     public static FlowNodeExt get(FlowNode node) {
         if (StageNodeExt.isStageNode(node)) {
+
+            RunExt cachedRunData = FlowNodeUtil.getCachedRun(node.getExecution());
+            if (cachedRunData != null) {
+                for (StageNodeExt stage : cachedRunData.getStages()) {
+                    if (stage.getId().equals(node.getId())) {
+                        return stage;
+                    }
+                }
+            }
+
             StageNodeExt stageNodeExt = StageNodeExt.create(node);
             stageNodeExt.addStageFlowNodes(node);
             return stageNodeExt;

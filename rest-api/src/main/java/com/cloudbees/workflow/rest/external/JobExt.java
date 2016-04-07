@@ -121,7 +121,9 @@ public class JobExt {
 
         List<RunExt> runsExt = new ArrayList<RunExt>();
         for (WorkflowRun run : runs) {
-            RunExt runExt = RunExt.create(run);
+
+            // TODO Optimize this if UI supports it: avoid returning a run if no change
+            RunExt runExt = RunExt.create(run).createWrapper();
             runsExt.add(runExt);
             if (since != null && runExt.getName().equals(since)) {
                 break;

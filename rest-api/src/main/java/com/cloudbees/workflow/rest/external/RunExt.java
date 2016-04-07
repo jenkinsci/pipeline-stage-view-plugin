@@ -23,6 +23,7 @@
  */
 package com.cloudbees.workflow.rest.external;
 
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.endpoints.RunAPI;
 import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
@@ -43,6 +44,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
+ * External API response object for pipeline run
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class RunExt {
@@ -59,7 +61,6 @@ public class RunExt {
     private long queueDurationMillis;
     private long pauseDurationMillis;
     private List<StageNodeExt> stages;
-
     public RunLinks get_links() {
         return _links;
     }
@@ -183,11 +184,49 @@ public class RunExt {
         }
     }
 
-    public static RunExt create(WorkflowRun run) {
-        final RunExt runExt = new RunExt();
+    /** Computes timings after the stages have been set up
+     *  That means timing of the stage has been computed, and the stages are sorted
+     */
+    public static RunExt computeTimings(RunExt runExt) {
 
+        // Pause is the sum of stage pauses
+        for (StageNodeExt stage : runExt.getStages()) {
+            runExt.setDurationMillis(runExt.getPauseDurationMillis() + stage.getPauseDurationMillis());
+        }
+
+        if (!runExt.getStages().isEmpty()) {
+            // We're done when the last stage is, and it is the result of the overall run
+            FlowNodeExt lastStage = runExt.getLastStage();
+            runExt.setEndTimeMillis(lastStage.getStartTimeMillis()+lastStage.getDurationMillis());
+            lastStage.setStatus(runExt.getStatus());
+        }
+
+        long currentTimeMillis = System.currentTimeMillis();
+
+        if (runExt.getStatus() == StatusExt.IN_PROGRESS || runExt.getStatus() == StatusExt.PAUSED_PENDING_INPUT) {
+            runExt.setEndTimeMillis(currentTimeMillis);
+        }
+
+        // FIXME this seems really questionable, we can have *no* stages defined
+        //  in which case QueueDuration should be the delay between the first FlowNode executed and the run start time
+        if (runExt.getStages().isEmpty()) {
+            runExt.setQueueDurationMillis(currentTimeMillis - runExt.getStartTimeMillis());
+        } else {
+            StageNodeExt firstExecutedStage = runExt.getFirstExecutedStage();
+            if (firstExecutedStage != null) {
+                runExt.setQueueDurationMillis(firstExecutedStage.getStartTimeMillis() - runExt.getStartTimeMillis());
+            }
+        }
+
+        runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
+        return runExt;
+    }
+
+    /** Get basics set up: everything but status/timing/node walking for a run, no cache use */
+    public static RunExt createMinimal(WorkflowRun run) {
         FlowExecution execution = run.getExecution();
 
+        final RunExt runExt = new RunExt();
         runExt.set_links(new RunLinks());
         runExt.get_links().initSelf(RunAPI.getDescribeUrl(run));
 
@@ -209,8 +248,92 @@ public class RunExt {
             if (artifacts != null && !artifacts.isEmpty()) {
                 runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
             }
+        }
+        return runExt;
+    }
 
-            FlowGraphWalker walker = new FlowGraphWalker(run.getExecution());
+    /** Creates a wrapper of this that hides the full stage nodes
+     *  Use case: returning a minimal view of the run, while using a cached, fully-realized version
+     */
+    public RunExt createWrapper() {
+        return new ChildHidingWrapper(this);
+    }
+
+    protected static class ChildHidingWrapper extends RunExt {
+        protected RunExt myRun;
+        protected List<StageNodeExt> wrappedStages;
+
+        public RunLinks get_links() {return myRun.get_links();}
+        public String getId() {return myRun.getId();}
+        public String getName() {return myRun.getName();}
+        public StatusExt getStatus() {return myRun.getStatus();}
+        public long getStartTimeMillis() {return myRun.getStartTimeMillis();}
+        public long getEndTimeMillis() {return myRun.getEndTimeMillis();}
+        public long getDurationMillis() {return myRun.getDurationMillis();}
+        public long getQueueDurationMillis() {return myRun.getQueueDurationMillis();}
+        public long getPauseDurationMillis() {return myRun.getPauseDurationMillis();}
+        public List<StageNodeExt> getStages() {return Collections.unmodifiableList(wrappedStages);}
+
+        protected ChildHidingWrapper(RunExt run) {
+            this.myRun = run;
+            List<StageNodeExt> myWrappedStages = new ArrayList<StageNodeExt>();
+            if (wrappedStages == null) {
+                for(StageNodeExt stage : run.getStages()) {
+                    myWrappedStages.add(stage.myWrapper());
+                }
+                this.wrappedStages = myWrappedStages;
+            } else {
+                wrappedStages = null;
+            }
+        }
+    }
+
+    public static RunExt create(WorkflowRun run) {
+        FlowExecution execution = run.getExecution();
+
+        // Use cache if eligible
+        boolean isNotRunning = FlowNodeUtil.isNotPartOfRunningBuild(execution);
+        if (isNotRunning) {
+            RunExt myRun = FlowNodeUtil.getCachedRun(execution);
+            if (myRun != null) {
+                return myRun;
+            }
+        }
+        // Compute the entire flow
+        RunExt myRun = createOld(run);
+        if (isNotRunning) {
+            FlowNodeUtil.cacheRun(execution, myRun);
+        }
+        return myRun;
+    }
+
+    public static RunExt createOld(WorkflowRun run) {
+        FlowExecution execution = run.getExecution();
+
+        final RunExt runExt = new RunExt();
+        runExt.set_links(new RunLinks());
+        runExt.get_links().initSelf(RunAPI.getDescribeUrl(run));
+
+        runExt.setId(run.getId());
+        runExt.setName(run.getDisplayName());
+        runExt.initStatus(run);
+        runExt.setStartTimeMillis(run.getStartTimeInMillis());
+        runExt.setStages(new ArrayList<StageNodeExt>());
+
+        if (execution != null) {
+            if (ChangeSetExt.hasChanges(run)) {
+                runExt.get_links().setChangesets(Link.newLink(RunAPI.getChangeSetsUrl(run)));
+            }
+            if (isPendingInput(run)) {
+                runExt.get_links().setPendingInputActions(Link.newLink(RunAPI.getPendingInputActionsUrl(run)));
+                runExt.get_links().setNextPendingInputAction(Link.newLink(RunAPI.getNextPendingInputActionUrl(run)));
+            }
+            List<Run<WorkflowJob, WorkflowRun>.Artifact> artifacts = run.getArtifactsUpTo(MAX_ARTIFACTS_COUNT);
+            if (artifacts != null && !artifacts.isEmpty()) {
+                runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
+            }
+            FlowGraphWalker walker = new FlowGraphWalker(execution);
+            List<FlowNode> sortedNodes = FlowNodeUtil.getIdSortedExecutionNodeList(execution); // Hold a ref to prevent GC until we're done analyzing
             for (FlowNode node : walker) {
                 long nodeTime = TimingAction.getStartTime(node);
 
@@ -222,6 +345,7 @@ public class RunExt {
 
                 if (StageNodeExt.isStageNode(node)) {
                     StageNodeExt stage = StageNodeExt.create(node);
+                    stage.addStageFlowNodes(node);
                     runExt.addStage(stage);
                     runExt.setPauseDurationMillis(runExt.getPauseDurationMillis() + stage.getPauseDurationMillis());
                 }
@@ -250,6 +374,7 @@ public class RunExt {
             }
 
             runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
+            sortedNodes = null;
         }
 
         return runExt;
