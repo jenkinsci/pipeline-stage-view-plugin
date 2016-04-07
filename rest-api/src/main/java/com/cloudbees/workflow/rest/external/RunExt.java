@@ -23,6 +23,7 @@
  */
 package com.cloudbees.workflow.rest.external;
 
+import com.cloudbees.workflow.flownode.FlowAnalyzer;
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.endpoints.RunAPI;
 import com.cloudbees.workflow.rest.hal.Link;
@@ -307,6 +308,11 @@ public class RunExt {
         return myRun;
     }
 
+    public static RunExt createNew(WorkflowRun run) {
+        RunExt myRun = FlowAnalyzer.analyzeRunToExt(run, true, 100);
+        return myRun;
+    }
+
     public static RunExt createOld(WorkflowRun run) {
         FlowExecution execution = run.getExecution();
 
@@ -375,7 +381,6 @@ public class RunExt {
 
             runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
         }
-
         return runExt;
     }
 

@@ -24,6 +24,7 @@
  */
 package com.cloudbees.workflow.flownode;
 
+import com.cloudbees.workflow.rest.external.CacheStatsExt;
 import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
@@ -73,6 +74,49 @@ public class FlowNodeUtil {
     private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
     private FlowNodeUtil() {
+    }
+
+    // Used to return information about caches used for FlowNodeUtil
+    public static class CacheResultsExt {
+        protected CacheStatsExt executionCacheStats;
+        protected CacheStatsExt runDataCacheStats;
+        protected CacheStatsExt execNodeNameCacheStats;
+
+        public CacheStatsExt getExecutionCacheStats() {
+            return executionCacheStats;
+        }
+
+        public void setExecutionCacheStats(CacheStatsExt executionCacheStats) {
+            this.executionCacheStats = executionCacheStats;
+        }
+
+        public CacheStatsExt getRunDataCacheStats() {
+            return runDataCacheStats;
+        }
+
+        public void setRunDataCacheStats(CacheStatsExt runDataCacheStats) {
+            this.runDataCacheStats = runDataCacheStats;
+        }
+
+        public CacheStatsExt getExecNodeNameCacheStats() {
+            return execNodeNameCacheStats;
+        }
+
+        public void setExecNodeNameCacheStats(CacheStatsExt execNodeNameCacheStats) {
+            this.execNodeNameCacheStats = execNodeNameCacheStats;
+        }
+
+        public CacheResultsExt(Cache runDataCache, Cache executionCache, Cache execNodeNameCache) {
+            this.setRunDataCacheStats(new CacheStatsExt(runDataCache));
+            this.setExecutionCacheStats(new CacheStatsExt(executionCache));
+            this.setExecNodeNameCacheStats(new CacheStatsExt(execNodeNameCache));
+        }
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="URF_UNREAD_FIELD")  // Findbugs being silly
+    public static CacheResultsExt getCacheResults() {
+        CacheResultsExt output = new CacheResultsExt(runData, executionCache, execNodeNameCache);
+        return output;
     }
 
     @CheckForNull
@@ -320,7 +364,7 @@ public class FlowNodeUtil {
         return null;
     }
 
-    // Pulled out because it is likely to get re-implemented
+    // Convenience method, supposed to make things faster by binary search and it does not
     private static int findStageStartNodeIndex(List<FlowNode> allNodesSorted, FlowNode stageStartNode) {
         return  allNodesSorted.indexOf(stageStartNode);
     }

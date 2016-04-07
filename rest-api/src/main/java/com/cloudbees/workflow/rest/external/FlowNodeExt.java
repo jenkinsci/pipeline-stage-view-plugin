@@ -39,8 +39,6 @@ import org.kohsuke.stapler.Stapler;
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class FlowNodeExt {
-
-
     private FlowNodeLinks _links;
     private String id;
     private String name;
