@@ -26,7 +26,6 @@ package com.cloudbees.workflow.rest.endpoints;
 import com.cloudbees.workflow.Util;
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.BuildArtifactExt;
-import com.cloudbees.workflow.rest.external.CacheStatsExt;
 import com.cloudbees.workflow.rest.external.ChangeSetExt;
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
@@ -84,7 +83,7 @@ public class JobAndRunAPITest {
         assertDescribeEndpointOkay(job, webClient);
         assertArtifactsEndpointOkay(job, webClient);
         assertChangesetsEndpointOkay(job, webClient);
-        assertCacheUrlsWork(job, webClient);
+//        assertCacheUrlsWork(job, webClient);
 
 
         // Run another build and then test resultset narrowing using the 'since' query parameter

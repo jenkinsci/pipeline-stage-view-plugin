@@ -364,7 +364,7 @@ public class FlowNodeUtil {
         return null;
     }
 
-    // Convenience method, supposed to make things faster by binary search and it does not
+    // Pulled out because it is likely to get re-implemented
     private static int findStageStartNodeIndex(List<FlowNode> allNodesSorted, FlowNode stageStartNode) {
         return  allNodesSorted.indexOf(stageStartNode);
     }
