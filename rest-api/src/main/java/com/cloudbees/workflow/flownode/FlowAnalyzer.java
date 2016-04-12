@@ -38,7 +38,7 @@ import java.util.ListIterator;
 public class FlowAnalyzer  {
 
     // queue of nodes to visit, outperforms a stack in general use
-    protected ArrayDeque<FlowNode> q = new ArrayDeque<>();
+    protected ArrayDeque<FlowNode> q = new ArrayDeque<FlowNode>();
 
     // Maps nodes to their stage *and* tracks visiting of nodes
     protected IdentityHashMap<FlowNode,FlowSegment> visited = new IdentityHashMap<FlowNode,FlowSegment>();

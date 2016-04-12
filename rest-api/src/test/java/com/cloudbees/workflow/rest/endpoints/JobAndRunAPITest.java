@@ -23,6 +23,8 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
+import com.cloudbees.workflow.Util;
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.BuildArtifactExt;
 import com.cloudbees.workflow.rest.external.ChangeSetExt;
 import com.cloudbees.workflow.rest.external.JobExt;
@@ -99,7 +101,7 @@ public class JobAndRunAPITest {
         Assert.assertNotEquals(0, utilCache.getExecNodeNameCacheStats().getCacheEntryCount());
 
         // Try cache invalidation, verify caches cleared
-        int val = Util.postToJenkins(jenkinsRule.getInstance(),job.getUrl()+"wfapi/invalidateAllCaches/");
+        int val = Util.postToJenkins(jenkinsRule.getInstance(), job.getUrl() + "wfapi/invalidateAllCaches/");
         Assert.assertEquals(200, val);
 
         cacheResponse = webClient.goTo(job.getUrl()+"/wfapi/cacheStats/").getWebResponse().getContentAsString();

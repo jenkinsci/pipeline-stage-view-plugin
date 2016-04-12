@@ -87,10 +87,4 @@ public class JobAPI extends AbstractWorkflowJobActionHandler {
     public FlowNodeUtil.CacheResultsExt getCacheStats() {
         return FlowNodeUtil.getCacheResults();
     }
-
-    @RequirePOST
-    @Restricted(DoNotUse.class)  // Web method
-    public void doInvalidateAllCaches() {
-        FlowNodeUtil.invalidateAllCaches();
-    }
 }
