@@ -338,8 +338,8 @@ public class RunExt {
             if (artifacts != null && !artifacts.isEmpty()) {
                 runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
             }
-
             FlowGraphWalker walker = new FlowGraphWalker(execution);
+            List<FlowNode> sortedNodes = FlowNodeUtil.getIdSortedExecutionNodeList(execution); // Hold a ref to prevent GC until we're done analyzing
             for (FlowNode node : walker) {
                 long nodeTime = TimingAction.getStartTime(node);
 
@@ -380,6 +380,7 @@ public class RunExt {
             }
 
             runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
+            sortedNodes = null;
         }
         return runExt;
     }

@@ -24,7 +24,6 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.Util;
-import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import hudson.model.queue.QueueTaskFuture;
@@ -45,7 +44,6 @@ public class UndefinedWorkflowTest {
 
     @Test
     public void test_success_flow() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
         // Purposely not setting a workflow definition on the job

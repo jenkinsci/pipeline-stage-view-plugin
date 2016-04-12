@@ -24,7 +24,6 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.Util;
-import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.PendingInputActionsExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
@@ -56,7 +55,6 @@ public class InputStepTest {
 
     @Test
     public void test_basic() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
         job.setDefinition(new CpsFlowDefinition("" +
@@ -112,7 +110,6 @@ public class InputStepTest {
 
     @Test
     public void test_with_params() throws Exception {
-        FlowNodeUtil.invalidateAllCaches();
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Job-With-Inputs");
 
         InputStream sampleFlowRes = getClass().getResourceAsStream("sample-flow.groovy");
