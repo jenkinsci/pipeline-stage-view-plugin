@@ -27,4 +27,5 @@ var jqProxy = require('../jQuery');
 exports.render = function (message, onElement) {
     var $ = jqProxy.getJQuery();
     $('div#side-panel').remove();
+    $('div#main-panel').addClass("fullscreen");
 }
