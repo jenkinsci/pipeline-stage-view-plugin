@@ -85,6 +85,13 @@ public class BuildArtifactExt {
 
         inputActionExt.setId(artifact.getTreeNodeId());
         inputActionExt.setName(artifact.getDisplayPath());
+
+        // DisplayPath does some custom processing to handle collisions, but isn't set if we have more than
+        // Run.LIST_CUTOFF artifacts - since we're just using this for display, relativePath is good enough
+        String nameCandidate = artifact.getDisplayPath();
+        inputActionExt.setName(
+                (nameCandidate != null) ? nameCandidate : artifact.relativePath
+        );
         inputActionExt.setPath(artifact.getHref());
         inputActionExt.setUrl(RunAPI.getArtifactUrl(run, artifact));
         inputActionExt.setSize(artifact.getFileSize());

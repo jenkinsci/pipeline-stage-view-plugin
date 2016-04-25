@@ -23,9 +23,9 @@
  */
 
 var KB = 1024;
-var MB = KB * 1000;
-var GB = MB * 1000;
-var TB = GB * 1000;
+var MB = KB * 1024;
+var GB = MB * 1024;
+var TB = GB * 1024;
 
 var sec = 1000;
 var min = sec * 60;
