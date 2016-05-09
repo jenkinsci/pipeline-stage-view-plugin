@@ -167,10 +167,8 @@ public class FlowNodeExt {
         setId(node.getId());
         setName(node.getDisplayName());
         setExecNode(execNodeName);
-        if (Stapler.getCurrentRequest() != null) {
-            set_links(new FlowNodeLinks());
-            get_links().initSelf(Describe.getUrl(node));
-        }
+        set_links(new FlowNodeLinks());
+        get_links().initSelf(Describe.getUrl(node));
         setStatus(status);
         if (status != StatusExt.NOT_EXECUTED) {
             setError(ErrorExt.create(error));
