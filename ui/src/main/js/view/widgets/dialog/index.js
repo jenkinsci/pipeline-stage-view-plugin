@@ -59,13 +59,8 @@ exports.show = function(title, body, options) {
     bodyEl.append(body);
 
     options.modal = true;
-    // Undefined for the onElement makes it in the window center
-    // WE NEED an onElement, but right now this fails
-    if (options.onElement) {
-        var popover = popoverWidget.newPopover(title, dialog, options.onElement, options);
-    } else {
-        var popover = popoverWidget.newPopover(title, dialog, undefined, options);
-    } 
+    // Undefined for the onElement makes it in the window center, otherwise it needs it for positioning
+    var popover = popoverWidget.newPopover(title, dialog, options.onElement, options);
 
     popover.show();
     if (options.onshow) {

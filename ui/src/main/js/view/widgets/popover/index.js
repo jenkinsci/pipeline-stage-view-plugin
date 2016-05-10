@@ -318,7 +318,7 @@ Popover.prototype.applyPlacement = function() {
             'top': onElementOffset.top,
             'left': onElementOffset.left + thisPopover.onElement.width() + 5
         });
-    } else if (placement === 'over-element') {  // centered on element and just above
+    } else if (placement === 'centered-above-element') {  // centered in window element and just above
         var winWidth = $(theWindow).width();
         var popoverWidth = thisPopover.popover.width();
 
@@ -329,7 +329,7 @@ Popover.prototype.applyPlacement = function() {
             'top': topPlacement,
             'left': leftPlacement
         });
-    } else if (placement === 'left') {
+    }  else if (placement === 'left') {
         var onElementOffset = thisPopover.onElement.offset();
         thisPopover.popover.css({
             'top': onElementOffset.top,
@@ -353,6 +353,16 @@ Popover.prototype.applyPlacement = function() {
         // try not have the top of the dialog further down from the
         // top thn 1/4 the window height.
         topPlacement = Math.min(topPlacement, (winWidth / 4));
+
+        thisPopover.popover.css({
+            'top': topPlacement,
+            'left': leftPlacement
+        });
+    } else if (placement === 'window-visible-top') { // Centered at top of visible window
+        var winWidth = $(theWindow).width();
+        var popoverWidth = thisPopover.popover.width();
+        var leftPlacement = ((winWidth - popoverWidth) / 2);
+        var topPlacement = window.scrollY + 20;
 
         thisPopover.popover.css({
             'top': topPlacement,
