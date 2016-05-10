@@ -17,9 +17,9 @@ describe("util/formatters-spec", function () {
         expect(formatters.memory(1)).toBe('1B');
         expect(formatters.memory(999)).toBe('999B');
         expect(formatters.memory(1999)).toBe('1.95KB');
-        expect(formatters.memory(1999999)).toBe('1.95MB');
-        expect(formatters.memory(1999999999)).toBe('1.95GB');
-        expect(formatters.memory(1999999999999)).toBe('1.95TB');
+        expect(formatters.memory(1999999)).toBe('1.91MB');
+        expect(formatters.memory(1999999999)).toBe('1.86GB');
+        expect(formatters.memory(1999999999999)).toBe('1.82TB');
     });
 
     it("- test_time_default", function () {
