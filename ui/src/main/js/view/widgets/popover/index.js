@@ -318,7 +318,7 @@ Popover.prototype.applyPlacement = function() {
             'top': onElementOffset.top,
             'left': onElementOffset.left + thisPopover.onElement.width() + 5
         });
-    }  else if (placement === 'left') {
+    } else if (placement === 'left') {
         var onElementOffset = thisPopover.onElement.offset();
         thisPopover.popover.css({
             'top': onElementOffset.top,
