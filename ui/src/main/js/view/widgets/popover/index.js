@@ -347,6 +347,20 @@ Popover.prototype.applyPlacement = function() {
             'top': topPlacement,
             'left': leftPlacement
         });
+    } else if (placement === 'window-visible-top') { // Centered at top of visible window
+        var winWidth = $(theWindow).width();
+        var popoverWidth = thisPopover.popover.width();
+        var leftPlacement = ((winWidth - popoverWidth) / 2);
+
+        var topPlacement = 20;  // For tests, which don't have a window
+        if (typeof window !== 'undefined') {
+            topPlacement = window.scrollY + 20;
+        }
+
+        thisPopover.popover.css({
+            'top': topPlacement,
+            'left': leftPlacement
+        });
     } else {
         // default is top
         var onElementOffset = thisPopover.onElement.offset();
