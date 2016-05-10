@@ -351,7 +351,11 @@ Popover.prototype.applyPlacement = function() {
         var winWidth = $(theWindow).width();
         var popoverWidth = thisPopover.popover.width();
         var leftPlacement = ((winWidth - popoverWidth) / 2);
-        var topPlacement = window.scrollY + 20;
+
+        var topPlacement = 20;  // For tests, which don't have a window
+        if (typeof window !== 'undefined') {
+            topPlacement = window.scrollY + 20;
+        }
 
         thisPopover.popover.css({
             'top': topPlacement,
