@@ -318,6 +318,17 @@ Popover.prototype.applyPlacement = function() {
             'top': onElementOffset.top,
             'left': onElementOffset.left + thisPopover.onElement.width() + 5
         });
+    } else if (placement === 'over-element') {  // centered on element and just above
+        var winWidth = $(theWindow).width();
+        var popoverWidth = thisPopover.popover.width();
+
+        var leftPlacement = ((winWidth - popoverWidth) / 2);
+        var topPlacement = thisPopover.onElement.offset().top - 50;
+
+        thisPopover.popover.css({
+            'top': topPlacement,
+            'left': leftPlacement
+        });
     } else if (placement === 'left') {
         var onElementOffset = thisPopover.onElement.offset();
         thisPopover.popover.css({

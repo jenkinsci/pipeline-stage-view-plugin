@@ -44,7 +44,7 @@ exports.render = function (stageDescription, onElement) {
     onElement.on(clickNSEvent, function() {
         dialog.show('Stage Logs (' + stageDescription.name + ')', stageLogsDom, {
             classes: 'cbwf-stage-logs-dialog',
-            placement: 'right',
+            placement: 'over-element',
             'onElement': onElement,
             width: dialogWidth,
             height: dialogHeight,
