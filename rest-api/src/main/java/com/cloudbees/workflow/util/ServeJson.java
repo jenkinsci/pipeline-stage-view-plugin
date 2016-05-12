@@ -26,9 +26,13 @@ public @interface ServeJson {
         @Override
         public Object invoke(StaplerRequest request, StaplerResponse response, Object instance, Object[] arguments)
                 throws IllegalAccessException, InvocationTargetException {
-            Object o = target.invoke(request, response, instance, arguments);
-
-            return new JsonResponse(JSONReadWrite.jsonMapper,o);
+            try {
+                Object o = target.invoke(request, response, instance, arguments);
+                return new JsonResponse(JSONReadWrite.jsonMapper,o);
+            } catch (Exception e) {
+                // TODO: Can be removed and ServletException added to throws declarations from 1.651+
+                throw new RuntimeException("Unexpected exception while serving JSON", e);
+            }
         }
     }
 }
