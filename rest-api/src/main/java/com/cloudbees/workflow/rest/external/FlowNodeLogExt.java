@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class FlowNodeLogExt {
 
-    private static long MAX_RETURN_CHARS = 10 * 1024;
+    private static long MAX_RETURN_CHARS = Integer.getInteger(FlowNodeLogExt.class.getName()+".maxReturnChars", 10 * 1024);
 
     private static final Logger LOGGER = Logger.getLogger(FlowNodeLogExt.class.getName());
 
