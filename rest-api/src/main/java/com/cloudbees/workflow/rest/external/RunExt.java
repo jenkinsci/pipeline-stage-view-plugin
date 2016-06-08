@@ -49,7 +49,7 @@ import java.util.List;
  */
 public class RunExt {
 
-    private static final int MAX_ARTIFACTS_COUNT = 100;
+    private static int MAX_ARTIFACTS_COUNT = Integer.getInteger(RunExt.class.getName()+".maxArtifactsCount", 100);
 
     private RunLinks _links;
     private String id;

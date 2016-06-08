@@ -43,7 +43,7 @@ public class StageNodeExt extends FlowNodeExt {
     private List<AtomFlowNodeExt> stageFlowNodes;
 
     // Limit the size of child nodes returned
-    static final int MAX_CHILD_NODES = 100;
+    static final int MAX_CHILD_NODES = Integer.getInteger(StageNodeExt.class.getName()+".maxChildNodes", 100);
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public List<AtomFlowNodeExt> getStageFlowNodes() {
