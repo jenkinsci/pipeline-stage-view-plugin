@@ -45,8 +45,13 @@ public class ChangeSetExt {
     private List<Commit> commits;
     private String consoleUrl; // Not a rest endpoint so not including in _links
 
-    /** False by default, workaround for JENKINS-35484 where user lookup breaks things */
-    private static boolean AVOID_RESOLVING_COMMIT_AUTHORS = Boolean.getBoolean(ChangeSetExt.class.getName()+".avoidResolvingCommitAuthors");
+
+    /** Allows user to disable Jenkins user lookup for commit authors
+     * By setting System Property com.cloudbees.workflow.rest.external.ChangeSetExt.avoidResolvingCommitAuthors to 'true'
+     * This is a workaround for JENKINS-35484 where user lookup encounters issues */
+    public static boolean isResolvingCommitAuthors() {
+        return !Boolean.getBoolean(ChangeSetExt.class.getName()+".avoidResolvingCommitAuthors");
+    }
 
     public String getKind() {
         return kind;
@@ -176,7 +181,7 @@ public class ChangeSetExt {
             commit.setCommitId(entry.getCommitId());
             commit.setCommitUrl(repoUrl);
             commit.setMessage(entry.getMsg());
-            commit.setAuthorJenkinsId((AVOID_RESOLVING_COMMIT_AUTHORS) ? "Unidentified" : entry.getAuthor().getFullName());
+            commit.setAuthorJenkinsId(isResolvingCommitAuthors() ? entry.getAuthor().getFullName() : "Unidentified");
             commit.setTimestamp(entry.getTimestamp());
 
             if (commit.getTimestamp() > -1) {
