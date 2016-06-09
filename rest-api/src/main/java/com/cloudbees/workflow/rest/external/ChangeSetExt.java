@@ -45,6 +45,9 @@ public class ChangeSetExt {
     private List<Commit> commits;
     private String consoleUrl; // Not a rest endpoint so not including in _links
 
+    /** False by default, workaround for JENKINS-35484 where user lookup breaks things */
+    private static boolean AVOID_RESOLVING_COMMIT_AUTHORS = Boolean.getBoolean(ChangeSetExt.class.getName()+".avoidResolvingCommitAuthors");
+
     public String getKind() {
         return kind;
     }
@@ -173,7 +176,7 @@ public class ChangeSetExt {
             commit.setCommitId(entry.getCommitId());
             commit.setCommitUrl(repoUrl);
             commit.setMessage(entry.getMsg());
-            commit.setAuthorJenkinsId(entry.getAuthor().getFullName());
+            commit.setAuthorJenkinsId((AVOID_RESOLVING_COMMIT_AUTHORS) ? "Unidentified" : entry.getAuthor().getFullName());
             commit.setTimestamp(entry.getTimestamp());
 
             if (commit.getTimestamp() > -1) {
