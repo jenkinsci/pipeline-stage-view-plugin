@@ -30,6 +30,7 @@ import org.jenkinsci.plugins.workflow.actions.StageAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.kohsuke.stapler.Stapler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,9 @@ import java.util.List;
 public class StageNodeExt extends FlowNodeExt {
 
     private List<AtomFlowNodeExt> stageFlowNodes;
+
+    // Limit the size of child nodes returned
+    static final int MAX_CHILD_NODES = Integer.getInteger(StageNodeExt.class.getName()+".maxChildNodes", 100);
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public List<AtomFlowNodeExt> getStageFlowNodes() {
@@ -70,6 +74,35 @@ public class StageNodeExt extends FlowNodeExt {
         return stageNodeExt;
     }
 
+    /** Hides child nodes, so we store a complete image but only return the minimal amount of data */
+
+    protected static class ChildHidingWrapper extends StageNodeExt {
+        protected StageNodeExt myNode;
+
+        public FlowNodeLinks get_links() {return myNode.get_links();}
+        public String getId() {return myNode.getId();}
+        public String getName() {return myNode.getName();}
+        public String getExecNode() {return myNode.getExecNode();}
+        public StatusExt getStatus() {return myNode.getStatus();}
+        public ErrorExt getError() {return myNode.getError();}
+        public long getStartTimeMillis() {return myNode.getStartTimeMillis();}
+        public long getDurationMillis() {return myNode.getDurationMillis();}
+        public long getPauseDurationMillis() {return myNode.getPauseDurationMillis();}
+
+        @Override
+        public List<AtomFlowNodeExt> getStageFlowNodes() {
+            return null;
+        }
+
+        protected ChildHidingWrapper(StageNodeExt stage) {
+            this.myNode = stage;
+        }
+    }
+
+    public StageNodeExt myWrapper() {
+        return new ChildHidingWrapper(this);
+    }
+
     public void addStageFlowNodes(FlowNode node) {
         List<FlowNode> stageFlowNodes = FlowNodeUtil.getStageNodes(node);
         addStageAtomNodeData(stageFlowNodes);
@@ -90,16 +123,24 @@ public class StageNodeExt extends FlowNodeExt {
     }
 
     private void addStageAtomNodeData(List<FlowNode> atomFlowNodes) {
-        this.setStageFlowNodes(new ArrayList<AtomFlowNodeExt>());
+        List<AtomFlowNodeExt> newNodes = new ArrayList<AtomFlowNodeExt>();
+
         for (FlowNode stageNode : atomFlowNodes) {
             if (stageNode instanceof AtomNode) {
-                AtomFlowNodeExt atomFlowNodeExt = AtomFlowNodeExt.create(stageNode);
-                this.getStageFlowNodes().add(atomFlowNodeExt);
-                if (atomFlowNodeExt.getStatus() == StatusExt.FAILED) {
+                // We're capping the number of nodes to prevent major performance issues
+                if (newNodes.size() <= MAX_CHILD_NODES) {
+                    AtomFlowNodeExt atomFlowNodeExt = AtomFlowNodeExt.create(stageNode);
+                    if (atomFlowNodeExt.getStatus() == StatusExt.FAILED) {
+                        this.setStatus(StatusExt.FAILED);
+                    }
+                    newNodes.add(atomFlowNodeExt);
+                } // Just scan for status code
+                if (FlowNodeUtil.getStatus(stageNode) == StatusExt.FAILED) {
                     this.setStatus(StatusExt.FAILED);
                 }
             }
         }
+        this.setStageFlowNodes(newNodes);
     }
 
 }

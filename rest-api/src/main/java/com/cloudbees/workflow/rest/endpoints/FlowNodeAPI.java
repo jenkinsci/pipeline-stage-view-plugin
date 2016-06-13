@@ -31,9 +31,6 @@ import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * API Action handler to return {@link FlowNode} information.
  * <p>

@@ -25,7 +25,9 @@ package com.cloudbees.workflow.rest.external;
 
 import com.cloudbees.workflow.rest.endpoints.flownode.Log;
 import com.cloudbees.workflow.rest.hal.Link;
+import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.kohsuke.stapler.Stapler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +56,19 @@ public class AtomFlowNodeExt extends FlowNodeExt {
         }
         flowNodeExt.addParentNodeRefs(node);
         return flowNodeExt;
+    }
+
+    /** Create an AtomFlowNode from this one */
+    public static AtomFlowNodeExt create(FlowNode node, String execNodeName, ExecDuration duration, long startTimeMillis,
+                                         StatusExt status, ErrorAction error) {
+        AtomFlowNodeExt basic = new AtomFlowNodeExt();
+        // It would be super awesome if we didn't need to make a throwaway object
+        basic.addBasicNodeData(node, execNodeName, duration, startTimeMillis, status, node.getError());
+        if (basic.getStatus() != StatusExt.NOT_EXECUTED && Stapler.getCurrentRequest() != null) {
+            basic.get_links().setLog(Link.newLink(Log.getUrl(node)));
+        }
+        basic.addParentNodeRefs(node);
+        return basic;
     }
 
     private void addParentNodeRefs(FlowNode node) {

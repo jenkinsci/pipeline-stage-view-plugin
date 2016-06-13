@@ -62,8 +62,8 @@ public class JobAndRunAPITest {
                 "   stage ('Test'); " +
                 "   echo ('Testing'); " +
                 "   stage ('Deploy'); " +
-                ( hudson.Functions.isWindows() ? "   bat ('rmdir /s/q targs || echo no such dir\\n mkdir targs && echo hello> targs\\\\hello.txt'); "
-                                               : "   sh ('rm -rf targs && mkdir targs && echo hello > targs/hello.txt'); "
+                (hudson.Functions.isWindows() ? "   bat ('rmdir /s/q targs || echo no such dir\\n mkdir targs && echo hello> targs\\\\hello.txt'); "
+                        : "   sh ('rm -rf targs && mkdir targs && echo hello > targs/hello.txt'); "
 
                 ) +
                 "   archive(includes: 'targs/hello.txt'); " +

@@ -42,7 +42,7 @@ public class JobExt {
     /**
      * Max number of runs per page. Pagination not yet supported.
      */
-    public static final int RUN_PAGE_SIZE = 20;
+    public static final int MAX_RUNS_PER_JOB = Integer.getInteger(JobExt.class.getName()+".maxRunsPerJob", 10);
 
     private JobLinks _links;
     private String name;
@@ -121,11 +121,13 @@ public class JobExt {
 
         List<RunExt> runsExt = new ArrayList<RunExt>();
         for (WorkflowRun run : runs) {
-            RunExt runExt = RunExt.create(run);
+
+            // TODO Optimize this if UI supports it: avoid returning a run if no change
+            RunExt runExt = RunExt.create(run).createWrapper();
             runsExt.add(runExt);
             if (since != null && runExt.getName().equals(since)) {
                 break;
-            } else if (runsExt.size() > RUN_PAGE_SIZE) {
+            } else if (runsExt.size() > MAX_RUNS_PER_JOB) {
                 // We don't yet support pagination, so no point
                 // returning a huge list of runs.
                 break;

@@ -257,15 +257,10 @@ function addCompletionEstimates(timedObject, avgDurationMillis, averagedOver) {
 }
 
 function RunGroupGenerator(maxRuns) {
-    this.maxRuns = 10; // Default max of 5 runs per group... arbitrary :)
     this.stageData = [];
     this.runs = [];
 }
 RunGroupGenerator.prototype.addRun = function(run) {
-    if (this.runs.length >= this.maxRuns) {
-        return false;
-    }
-
     // Make sure the stage name ordering matches
     for (var i = 0; i < run.stages.length; i++) {
         var stage = run.stages[i];
