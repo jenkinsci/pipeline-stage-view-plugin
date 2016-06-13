@@ -89,20 +89,14 @@
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-scm-step</artifactId>
+            <version>2.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
             <version>2.0</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                    <artifactId>workflow-step-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency> <!-- TODO for workflow-scm-step, to override bundled; remove when on core 2.x -->
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>subversion</artifactId>
-            <version>2.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -66,12 +66,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>pipeline-input-step</artifactId>
-            <version>2.0</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
             <version>2.0</version>
@@ -134,25 +128,6 @@
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>display-info</id>
-                        <configuration>
-                            <rules>
-                                <enforceBytecodeVersion>
-                                    <excludes combine.children="append">
-                                        <exclude>org.jenkins-ci.plugins:pipeline-input-step</exclude> <!-- if you are running it, this is Java 7 -->
-                                        <exclude>org.jenkins-ci.plugins.workflow:workflow-step-api</exclude> <!-- seems to be pulled in from the above -->
-                                        <exclude>org.jenkins-ci.plugins.workflow:workflow-support</exclude> <!-- ditto -->
-                                    </excludes>
-                                </enforceBytecodeVersion>
-                            </rules>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
