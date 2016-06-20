@@ -27,6 +27,7 @@ import com.cloudbees.workflow.util.ModelUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.RepositoryBrowser;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
 import java.io.IOException;
@@ -51,8 +52,7 @@ public class ChangeSetExt {
      * This is a workaround for JENKINS-35484 where user lookup encounters issues */
     private static boolean resolveCommitAuthors() {
         String prop = System.getProperty(ChangeSetExt.class.getName()+".resolveCommitAuthors");
-        // Anything but something *explicitly* matching "false" (case insensitive) needs to return true
-        return (prop == null || prop.isEmpty() || !"false".equalsIgnoreCase(prop));
+        return (StringUtils.isEmpty(prop)|| Boolean.parseBoolean(prop));
     }
 
     public String getKind() {
@@ -183,7 +183,7 @@ public class ChangeSetExt {
             commit.setCommitId(entry.getCommitId());
             commit.setCommitUrl(repoUrl);
             commit.setMessage(entry.getMsg());
-            commit.setAuthorJenkinsId(resolveCommitAuthors() ? entry.getAuthor().getFullName() : "Unidentified");
+            commit.setAuthorJenkinsId(resolveCommitAuthors() ? entry.getAuthor().getFullName() : "");
             commit.setTimestamp(entry.getTimestamp());
 
             if (commit.getTimestamp() > -1) {
