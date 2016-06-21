@@ -23,6 +23,7 @@
  */
 package com.cloudbees.workflow.rest.endpoints;
 
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.AbstractWorkflowJobActionHandler;
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
@@ -30,7 +31,10 @@ import com.cloudbees.workflow.util.ModelUtil;
 import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.DoNotUse;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.util.List;
 
@@ -76,5 +80,11 @@ public class JobAPI extends AbstractWorkflowJobActionHandler {
     @ServeJson
     public JobExt doDescribe() {
         return JobExt.create(getJob());
+    }
+
+    @ServeJson
+    @Restricted(DoNotUse.class)  // Web method, publishes to $jobUrl/wfapi/cacheStats/
+    public FlowNodeUtil.CacheResultsExt getCacheStats() {
+        return FlowNodeUtil.getCacheResults();
     }
 }

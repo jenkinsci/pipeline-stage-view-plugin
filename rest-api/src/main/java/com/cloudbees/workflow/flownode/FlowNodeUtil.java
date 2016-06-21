@@ -24,16 +24,14 @@
  */
 package com.cloudbees.workflow.flownode;
 
+import com.cloudbees.workflow.rest.external.CacheStatsExt;
 import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
 import hudson.Extension;
-import hudson.ExtensionList;
-import hudson.ExtensionPoint;
 import hudson.model.Item;
 import hudson.model.listeners.ItemListener;
 import jenkins.model.Jenkins;
@@ -50,15 +48,16 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -66,22 +65,18 @@ import java.util.logging.Logger;
  */
 public class FlowNodeUtil {
 
+
     private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
     private FlowNodeUtil() {
     }
 
-    public abstract static class CacheExtensionPoint implements ExtensionPoint {
-        public abstract Cache<String,List<FlowNode>> getExecutionCache();
-        public abstract Cache<String, RunExt> getRunCache();
-        public abstract Cache<FlowNode,String> getExecNodeNameCache();
-    }
-
-    // Used in testing where Jenkins is not running yet
-    private static final List<CacheExtension> FALLBACK_CACHES = Arrays.asList(new CacheExtension());
+    // Used in unit testing where Jenkins is not running yet
+    private static final CacheExtension FALLBACK_CACHES = new CacheExtension();
 
     @Extension
-    public static class CacheExtension extends CacheExtensionPoint {
+    @Restricted(NoExternalUse.class)
+    public static final class CacheExtension {
 
         protected final Cache<String,List<FlowNode>> executionCache = CacheBuilder.newBuilder().weakValues().maximumSize(100).build();
 
@@ -103,40 +98,108 @@ public class FlowNodeUtil {
             return  this.execNodeNameCache;
         }
 
-        public static List<CacheExtension> all() {
+        public static CacheExtension get() {
             Jenkins myJenkins = Jenkins.getInstance();
             if ( myJenkins == null) {
                 return FALLBACK_CACHES;
             } else {
-                return myJenkins.getExtensionList(CacheExtension.class);
+                return myJenkins.getExtensionList(CacheExtension.class).get(0);
             }
         }
-    }
 
-    @CheckForNull
-    public static RunExt getCachedRun(FlowExecution ex) {
-        try {
-            if (ex != null) {
-                RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(ex.getUrl());
-                if (cachedRun != null) {
-                    return cachedRun;
+        /**
+         * Get a cached run if present, return null if not
+         * @param ex FlowExecution, null in
+         * @return RunExt if present in cache, otherwise null if absent or a null execution given
+         */
+        @CheckForNull
+        public RunExt getCachedRun(@CheckForNull FlowExecution ex) {
+            try {
+                if (ex != null) {
+                    RunExt cachedRun = getRunCache().getIfPresent(ex.getUrl());
+                    if (cachedRun != null) {
+                        return cachedRun;
+                    }
+                }
+                return null;
+            } catch (IOException ioe) {
+                LOGGER.log(Level.SEVERE, null, ioe);
+                return null;
+            }
+        }
+
+        /**
+         * Cache a processed pipeline run
+         * @param exec Execution for that run
+         * @param run Run that was processed
+         */
+        public void cacheRun(@Nonnull FlowExecution exec, @Nonnull RunExt run) {
+            if (exec != null && exec.isComplete()) {
+                try {
+                    getRunCache().put(exec.getUrl(), run);
+                } catch (IOException ioe) {
+                    LOGGER.log(Level.SEVERE, null, ioe);
                 }
             }
-            return null;
-        } catch (IOException ioe) {
-            LOGGER.severe("Can't get execution url for execution, IOException!");
-            throw new IllegalStateException(ioe);
         }
     }
 
-    public static void cacheRun(FlowExecution exec, RunExt run) {
-        if (exec != null && exec.isComplete()) {
-            try {
-                CacheExtension.all().get(0).getRunCache().put(exec.getUrl(), run);
-            } catch (IOException ioe) {
-                LOGGER.severe("Can't get execution url for execution, IOException!");
-            }
+    // Used to return information about caches used for FlowNodeUtil
+    public static class CacheResultsExt {
+        protected CacheStatsExt executionCacheStats;
+        protected CacheStatsExt runDataCacheStats;
+        protected CacheStatsExt execNodeNameCacheStats;
+
+        public CacheStatsExt getExecutionCacheStats() {
+            return executionCacheStats;
         }
+
+        public void setExecutionCacheStats(CacheStatsExt executionCacheStats) {
+            this.executionCacheStats = executionCacheStats;
+        }
+
+        public CacheStatsExt getRunDataCacheStats() {
+            return runDataCacheStats;
+        }
+
+        public void setRunDataCacheStats(CacheStatsExt runDataCacheStats) {
+            this.runDataCacheStats = runDataCacheStats;
+        }
+
+        public CacheStatsExt getExecNodeNameCacheStats() {
+            return execNodeNameCacheStats;
+        }
+
+        public void setExecNodeNameCacheStats(CacheStatsExt execNodeNameCacheStats) {
+            this.execNodeNameCacheStats = execNodeNameCacheStats;
+        }
+
+        public CacheResultsExt(Cache runDataCache, Cache executionCache, Cache execNodeNameCache) {
+            this.setRunDataCacheStats(new CacheStatsExt(runDataCache));
+            this.setExecutionCacheStats(new CacheStatsExt(executionCache));
+            this.setExecNodeNameCacheStats(new CacheStatsExt(execNodeNameCache));
+        }
+    }
+
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="URF_UNREAD_FIELD")  // Findbugs being silly
+    public static CacheResultsExt getCacheResults() {
+        CacheExtension caches = CacheExtension.get();
+        CacheResultsExt output = new CacheResultsExt(caches.getRunCache(), caches.getExecutionCache(), caches.getExecNodeNameCache());
+        return output;
+    }
+
+    /**
+     * Get a cached run if present, return null if not
+     * @param ex FlowExecution, null in
+     * @return RunExt if present in cache, otherwise null if absent or a null execution given
+     */
+    @CheckForNull
+    public static RunExt getCachedRun(@CheckForNull FlowExecution ex) {
+        return CacheExtension.get().getCachedRun(ex);
+    }
+
+    public static void cacheRun(@Nonnull FlowExecution exec, @Nonnull RunExt run) {
+        CacheExtension.get().cacheRun(exec, run);
     }
 
     public static boolean isNotPartOfRunningBuild(FlowExecution execution) {
@@ -283,12 +346,9 @@ public class FlowNodeUtil {
      * @param flowNode The node.
      * @return The name of the node on which the supplied FlowNode executed.
      */
-    public static String getExecNodeName(FlowNode flowNode) {
-        if (flowNode == null) {
-            return "master";
-        }
+    public static String getExecNodeName(@Nonnull FlowNode flowNode) {
 
-        Cache<FlowNode, String> execNodeNameCache = CacheExtension.all().get(0).getExecNodeNameCache();
+        Cache<FlowNode, String> execNodeNameCache = CacheExtension.get().getExecNodeNameCache();
         String execNodeName = execNodeNameCache.getIfPresent(flowNode);
         if (execNodeName != null) {
             return execNodeName;
@@ -368,6 +428,7 @@ public class FlowNodeUtil {
      * @param stageStartNode The stage start node.
      * @return The last stage executed in the stage.
      */
+    @CheckForNull
     public static FlowNode getStageEndNode(FlowNode stageStartNode) {
         FlowExecution execution = stageStartNode.getExecution();
         List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
@@ -384,13 +445,14 @@ public class FlowNodeUtil {
         return allNodesSorted.get(allNodesSorted.size() - 1);
     }
 
-    @CheckForNull
+
     /**
      * Get the last node to start in a flow.
      * @param execution The flow execution.
      * @return The last node to start in the flow.
      */
-    public static FlowNode getFlowEndNode(FlowExecution execution) {
+    @CheckForNull
+    public static FlowNode getFlowEndNode(@CheckForNull  FlowExecution execution) {
         if (execution == null) {
             return null;
         }
@@ -402,7 +464,7 @@ public class FlowNodeUtil {
         return endNodes.get(endNodes.size() - 1);
     }
 
-    public static List<FlowNode> getStageNodes(FlowExecution execution) {
+    public static List<FlowNode> getStageNodes(@CheckForNull FlowExecution execution) {
 
         if (execution == null) {
             return Collections.EMPTY_LIST;
@@ -466,9 +528,9 @@ public class FlowNodeUtil {
         try {
             executionUrl = execution.getUrl();
         } catch (IOException ioe) {
-            LOGGER.severe("Can't get execution url for execution, IOException!");
+            LOGGER.log(Level.SEVERE, null, ioe);
         }
-        Cache<String,List<FlowNode>> cache = CacheExtension.all().get(0).getExecutionCache();
+        Cache<String,List<FlowNode>> cache = CacheExtension.get().getExecutionCache();
         if (executionUrl != null) {
             List<FlowNode> sortedList = cache.getIfPresent(executionUrl);
             if (sortedList != null) {
@@ -505,7 +567,7 @@ public class FlowNodeUtil {
         public void onLocationChanged(Item item, String oldFullName, String newFullName) {
             if (item instanceof WorkflowJob) {
                 // It's a cache, we can rebuild it... we have the technology.
-                CacheExtension ext = CacheExtension.all().get(0);
+                CacheExtension ext = CacheExtension.get();
                 ext.getExecutionCache().invalidateAll();
                 ext.getRunCache().invalidateAll();
             }

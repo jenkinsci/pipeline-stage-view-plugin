@@ -43,7 +43,7 @@ import org.jenkinsci.plugins.workflow.graph.FlowNode;
 public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
 
     public static String getUrl(FlowNode node) {
-        return ModelUtil.getFullItemUrl(node) + FlowNodeAPI.URL_BASE;
+        return  ModelUtil.getFullItemUrl(node) + FlowNodeAPI.URL_BASE;
     }
 
     @ServeJson
