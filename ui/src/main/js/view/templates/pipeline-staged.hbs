@@ -101,9 +101,10 @@
                         <div class="progress-bar progress-bar-striped" style="width: {{this.percentCompleteEstimate}}%"></div>
                     </div>
                 {{/if}}
-                {{#if this.execNode}}
+                {{!-- TODO add back node labels once we have block-aware pipeline graph analysis, per JENKINS-33290 --}}
+                {{!-- #if this.execNode}}
                     <span class="exec-node label label-info" title="executed on '{{this.execNode}}'">{{this.execNode}}</span>
-                {{/if}}
+                {{/if --}}
                 {{#if this.pauseDurationMillis}}
                     <div class="pause-duration">
                         <span title="paused for {{formatTime this.pauseDurationMillis 2}}">(paused for {{formatTime this.pauseDurationMillis 2}})</span>
