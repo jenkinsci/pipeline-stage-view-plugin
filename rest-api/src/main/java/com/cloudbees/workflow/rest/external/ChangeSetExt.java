@@ -27,6 +27,7 @@ import com.cloudbees.workflow.util.ModelUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.RepositoryBrowser;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
 import java.io.IOException;
@@ -44,6 +45,15 @@ public class ChangeSetExt {
     private int commitCount;
     private List<Commit> commits;
     private String consoleUrl; // Not a rest endpoint so not including in _links
+
+
+    /** Allows user to disable Jenkins user lookup for commit authors
+     * By setting System Property com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors to 'false'
+     * This is a workaround for JENKINS-35484 where user lookup encounters issues */
+    private static boolean resolveCommitAuthors() {
+        String prop = System.getProperty(ChangeSetExt.class.getName()+".resolveCommitAuthors");
+        return (StringUtils.isEmpty(prop)|| Boolean.parseBoolean(prop));
+    }
 
     public String getKind() {
         return kind;
@@ -173,7 +183,7 @@ public class ChangeSetExt {
             commit.setCommitId(entry.getCommitId());
             commit.setCommitUrl(repoUrl);
             commit.setMessage(entry.getMsg());
-            commit.setAuthorJenkinsId(entry.getAuthor().getFullName());
+            commit.setAuthorJenkinsId(resolveCommitAuthors() ? entry.getAuthor().getFullName() : "");
             commit.setTimestamp(entry.getTimestamp());
 
             if (commit.getTimestamp() > -1) {

@@ -1,9 +1,13 @@
 <div class="alert alert-info run-changeset-details {{kind}}-repo">
+    {{#if contributors.0.authorJenkinsId}}
     <div class="header">{{commitCount}} commit{{#ifCond commitCount '>' 1}}s{{/ifCond}} by <span class="contributor">{{contributors.0.authorJenkinsId}}</span>{{#ifCond contributorCount '>' 1}} and others{{/ifCond}}</div>
+    {{else}}
+        <div class="header">{{commitCount}} commits</div>
+    {{/if}}
     <div class="body">
         <table>
         {{#each commits}}
-            <tr title="by {{authorJenkinsId}} - {{formatDate timestamp 'short'}}">
+            <tr title="{{#if authorJenkinsId}}by {{authorJenkinsId}} - {{/if}}{{formatDate timestamp 'short'}}">
                 <td class="commitId">
                     <span class="label label-default">
                         {{#if commitUrl}}
