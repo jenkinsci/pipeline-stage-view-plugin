@@ -355,6 +355,14 @@ public class RunExt {
                 runExt.sortStages();
 
                 FlowNodeExt lastStage = runExt.getLastStage();
+
+                // Correct for rare cases with 0 for a FlowEndNode
+                if (lastStage.getPauseDurationMillis() < 0) {
+                    lastStage.setPauseDurationMillis(0);
+                }
+                if (lastStage.getDurationMillis() < 0) {
+                    lastStage.setDurationMillis(runExt.getEndTimeMillis()-lastStage.getStartTimeMillis());
+                }
                 lastStage.setStatus(runExt.getStatus());
             }
 
