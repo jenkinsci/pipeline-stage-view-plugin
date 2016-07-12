@@ -357,6 +357,19 @@ public class RunExt {
 
                 FlowNodeExt lastStage = runExt.getLastStage();
 
+                // Correct for some edge cases due to simplified handling of stages (just looking for executed and presence of error)
+                for (StageNodeExt stageNodeExt : runExt.getStages()) {
+                    // If stage has an error, but run succeeded... error was caught
+                    if (stageNodeExt.getStatus() == StatusExt.FAILED && (runExt.getStatus() != StatusExt.FAILED)) {
+                        stageNodeExt.setStatus(StatusExt.SUCCESS);
+                    }
+
+                    // If run is unstable, one of the stages must have set the status -- no idea which though
+                    if (runExt.getStatus() == StatusExt.UNSTABLE && stageNodeExt.getStatus() != StatusExt.NOT_EXECUTED) {
+                        stageNodeExt.setStatus(StatusExt.UNSTABLE);
+                    }
+                }
+
                 // Correct for rare cases with 0 for a FlowEndNode
                 if (lastStage.getPauseDurationMillis() < 0) {
                     lastStage.setPauseDurationMillis(0);
@@ -379,19 +392,6 @@ public class RunExt {
                 StageNodeExt firstExecutedStage = runExt.getFirstExecutedStage();
                 if (firstExecutedStage != null) {
                     runExt.setQueueDurationMillis(firstExecutedStage.getStartTimeMillis() - runExt.getStartTimeMillis());
-                }
-            }
-
-            // Correct for some edge cases due to simplified handling of stages (just looking for executed and presence of error)
-            for (StageNodeExt stageNodeExt : runExt.getStages()) {
-                // If stage has an error, but run succeeded... error was caught
-                if (stageNodeExt.getStatus() == StatusExt.FAILED && (runExt.getStatus() != StatusExt.FAILED)) {
-                    stageNodeExt.setStatus(StatusExt.SUCCESS);
-                }
-
-                // If run is unstable, one of the stages must have set the status -- no idea which though
-                if (stageNodeExt.getStatus() != StatusExt.NOT_EXECUTED && runExt.getStatus() == StatusExt.UNSTABLE) {
-                    stageNodeExt.setStatus(StatusExt.UNSTABLE);
                 }
             }
 
@@ -433,7 +433,7 @@ public class RunExt {
             } else if (r == Result.SUCCESS) {
                 setStatus(StatusExt.SUCCESS);
             } else {
-                setStatus(StatusExt.CUSTOM);
+                setStatus(StatusExt.FAILED);
             }
         } else if (isPendingInput(run)) {
             setStatus(StatusExt.PAUSED_PENDING_INPUT);
