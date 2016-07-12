@@ -63,7 +63,7 @@ function _render(jobRunsData, onElement, fragCaption) {
         var pipelineStagedDom = templates.apply('pipeline-staged', runGroup);
         addLaneCharts(pipelineStagedDom, runGroup);
         var viewPort = $('div.table-viewPort');
-        if (viewPort) { // First rendering
+        if (viewPort && viewPort.size() > 0) { // First rendering
             var leftScroll = viewPort[0].scrollLeft;
             onElement.empty().append(pipelineStagedDom);
             viewPort = $('div.table-viewPort')[0];
