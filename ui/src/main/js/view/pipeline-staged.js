@@ -54,15 +54,25 @@ function _render(jobRunsData, onElement, fragCaption) {
     // The expected model is that produced by ui/src/main/js/model/runs-stage-grouped.js
 
     if (jobRunsData.runGroups && jobRunsData.runGroups.length > 0) {
+        var $ = jqProxy.getJQuery();
         var runGroup = jobRunsData.runGroups[0];
 
         runGroup.fragCaption = fragCaption;
         runGroup.maxTableEms = runGroup.stageData.length * 10;
 
         var pipelineStagedDom = templates.apply('pipeline-staged', runGroup);
-
         addLaneCharts(pipelineStagedDom, runGroup);
-        onElement.empty().append(pipelineStagedDom);
+        var viewPort = $('div.table-viewPort');
+        if (viewPort) { // First rendering
+            var leftScroll = viewPort[0].scrollLeft;
+            onElement.empty().append(pipelineStagedDom);
+            viewPort = $('div.table-viewPort')[0];
+            if (leftScroll < viewPort.scrollWidth) {
+                viewPort.scrollLeft = leftScroll;
+            }
+        } else {
+            onElement.empty().append(pipelineStagedDom);
+        }
 
         addExtensionPoints(onElement, runGroup);
     }
