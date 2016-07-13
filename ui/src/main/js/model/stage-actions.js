@@ -25,13 +25,18 @@
 exports.getModelData = function (callback) {
     var caption = this.targetEl.attr('caption');
 
+    var alertType = "success";
     if (!caption) {
         caption = "Success";
+    } else {
+        if (caption == 'Unstable Build') {
+            alertType = 'warning';
+        }
     }
 
     var descUrl = this.requiredAttr('descUrl');
     callback({
-	alert:"success",
+	alert: alertType,
 	caption: caption,
 	errors:[],
         options: [
