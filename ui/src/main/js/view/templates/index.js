@@ -63,6 +63,12 @@ function registerHBSHelper(name, helper) {
     handlebars.registerHelper(name, helper);
 }
 
+registerHBSHelper('breaklines', function(text) {
+    text = handlebars.escapeExpression(text);
+    text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
+    return new handlebars.SafeString(text);
+});
+
 registerHBSHelper('dumpObj', function(object) {
     return JSON.stringify(object, undefined, 4);
 });
