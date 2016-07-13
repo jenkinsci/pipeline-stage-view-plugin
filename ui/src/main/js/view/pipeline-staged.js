@@ -63,10 +63,10 @@ function _render(jobRunsData, onElement, fragCaption) {
         var pipelineStagedDom = templates.apply('pipeline-staged', runGroup);
         addLaneCharts(pipelineStagedDom, runGroup);
         var viewPort = $('div.table-viewPort');
-        if (viewPort && viewPort.size() > 0) { // First rendering
-            var leftScroll = viewPort[0].scrollLeft;
-            onElement.empty().append(pipelineStagedDom);
-            viewPort = $('div.table-viewPort')[0];
+        if (viewPort && viewPort.size() > 0) { // First rendering does not have an existing element
+            var leftScroll = viewPort[0].scrollLeft;  // This way we can jump back to the previous scroll position
+            onElement.empty().append(pipelineStagedDom); // With many stages, the DOM change scrolls us back to start if we don't reset scroll.
+            viewPort = $('div.table-viewPort')[0]; // Re-fetched because the DOM has changed in above.
             if (leftScroll < viewPort.scrollWidth) {
                 viewPort.scrollLeft = leftScroll;
             }
