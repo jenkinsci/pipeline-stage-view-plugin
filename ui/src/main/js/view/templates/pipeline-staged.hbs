@@ -88,6 +88,9 @@
                 {{#ifCond this.status '===' 'IN_PROGRESS'}}
                     <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="In Progress" />
                 {{/ifCond}}
+                {{#ifCond this.status '===' 'UNSTABLE'}}
+                    <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Unstable Build" />
+                {{/ifCond}}
                 {{#ifCond this.status '===' 'PAUSED_PENDING_INPUT'}}
                     <div cbwf-controller="run-input-required" objectUrl="{{../../_links.nextPendingInputAction.href}}" />
                     <div class="status">paused</div>

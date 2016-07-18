@@ -33,6 +33,7 @@ import com.cloudbees.workflow.rest.external.StatusExt;
 import com.cloudbees.workflow.util.JSONReadWrite;
 import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.Action;
+import hudson.model.Result;
 import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -42,6 +43,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.xml.sax.SAXException;
 
@@ -163,9 +165,9 @@ public class JobAndRunAPITest {
     }
 
     private void assertStageInfoOkay(StageNodeExt stageNodeExt) {
-        Assert.assertTrue("Stage has duration <0!", stageNodeExt.getDurationMillis() > 0);
-        Assert.assertTrue("Stage has pause duration <0!", stageNodeExt.getPauseDurationMillis() >= 0);
-        Assert.assertTrue("Stage has startTimeMillis <= 0!", stageNodeExt.getStartTimeMillis() > 0);
+        Assert.assertTrue("Stage has duration >0!", stageNodeExt.getDurationMillis() > 0);
+        Assert.assertTrue("Stage has pause duration >= 0!", stageNodeExt.getPauseDurationMillis() >= 0);
+        Assert.assertTrue("Stage has startTimeMillis >= 0!", stageNodeExt.getStartTimeMillis() > 0);
     }
 
     private void assertRunInfoOkay(RunExt runExt) {
@@ -251,5 +253,153 @@ public class JobAndRunAPITest {
 //        System.out.println(jsonResponse);
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         return jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+    }
+
+    @Test
+    @Issue("JENKINS-33700")
+    public void test_unstable_basic_flow() throws Exception {
+        // Succeeds but custom-marked as unstable
+        WorkflowJob passUnstable = jenkinsRule.jenkins.createProject(WorkflowJob.class, "SafelyUnstable");
+        passUnstable.setDefinition(new CpsFlowDefinition("" +
+                "stage 'first'\n" +
+                "echo 'works'\n" +
+                "stage 'second'\n" +
+                "currentBuild.result = 'UNSTABLE'\n" +
+                "echo 'ran things'\n" +
+                "stage 'end'\n" +
+                "echo 'done'"
+        ));
+        QueueTaskFuture<WorkflowRun> build = passUnstable.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.UNSTABLE, build.get());
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+        RunExt[] workflowRuns = getRuns(passUnstable, webClient, "wfapi/runs/");
+
+        // Confirm that in the case of success with overriding, all stages are marked as unstable
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+        Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
+        Assert.assertEquals(3, run.getStages().size());
+        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(1).getStatus());
+        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(2).getStatus());
+    }
+
+    @Test
+    @Issue("JENKINS-33700")
+    public void test_unstable_try_catch_flow() throws Exception {
+        // Error generated, but caught and custom-marked as unstable
+        WorkflowJob failUnstable = jenkinsRule.jenkins.createProject(WorkflowJob.class, "DangerouslyUnstable");
+        failUnstable.setDefinition(new CpsFlowDefinition("" +
+                "stage 'safe'\n" +
+                "echo 'okay'\n" +
+                "stage 'warning'\n" +
+                "try { \n" +
+                "    error('danger will robinson') \n" +
+                "} \n" +
+                "catch (Exception e) {\n" +
+                "    currentBuild.result = 'UNSTABLE'    \n" +
+                "    echo 'eaten error!' \n" +
+                "}"));
+
+        QueueTaskFuture<WorkflowRun> build = failUnstable.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.UNSTABLE, build.get());
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        // Confirms that unstable & status override works with try/catch per JENKINS-34212 as well
+        RunExt[] workflowRuns = getRuns(failUnstable, webClient, "wfapi/runs/");
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+        Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
+        Assert.assertEquals(2, run.getStages().size());
+        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(1).getStatus());
+    }
+
+    @Test
+    @Issue("JENKINS-34212")
+    public void test_basic_try_catch_flow() throws Exception {
+        // Verify that caught errors do not cause a stage to be flagged as erroring, as complex as a the game of thrones
+        WorkflowJob oneStageCatch = jenkinsRule.jenkins.createProject(WorkflowJob.class, "One_Stage_Catch");
+        oneStageCatch.setDefinition(new CpsFlowDefinition("" + // Tyrion in King's Landing
+                "stage 'Game of Thrones'\n" +
+                "try {\n" +
+                "    error('Trusted Grand Maester Pycelle')\n" +
+                "} catch (Exception e) {\n" +
+                "    echo 'It was a trap - Tyriowned!'\n" +
+                "}"
+        ));
+        QueueTaskFuture<WorkflowRun> build = oneStageCatch.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatusSuccess(build);
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        // Single stage should reflect final build state
+        RunExt[] workflowRuns = getRuns(oneStageCatch, webClient, "wfapi/runs");
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStatus());
+        Assert.assertEquals(1, run.getStages().size());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
+    }
+
+    @Test
+    @Issue("JENKINS-34212")
+    public void test_multistage_try_catch_flow() throws Exception {
+        // Multiple stages where first error is caught, there's an ErrorAction on first stage but it can be safely ignored
+        WorkflowJob multiStageCatch = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Multi_Stage_catch");
+        multiStageCatch.setDefinition(new CpsFlowDefinition("" + //The One True King, Stannis
+                "stage 'Battle of the Blackwater'\n" +
+                "try {\n" +
+                "    error('Failed to watch out for Tywin and his army')\n" +
+                "} catch (Exception e) {\n" +
+                "    echo 'Ran away to Dragonstone'\n" +
+                "}\n" +
+                "stage 'Flee to the North'\n" +
+                "echo 'Helped defeat the Wildlings'"
+        ));
+        QueueTaskFuture<WorkflowRun> build = multiStageCatch.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatusSuccess(build);
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        // Confirm that try/catch was handled: all stages should be marked successful
+        RunExt[] workflowRuns = getRuns(multiStageCatch, webClient, "wfapi/runs");
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStatus());
+        Assert.assertEquals(2, run.getStages().size());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(1).getStatus());
+    }
+
+    @Test
+    @Issue("JENKINS-36523")
+    public void test_try_catch_override_to_fail() throws Exception {
+        // One stage where error is caught, but job still fails by explicitly setting status
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "One_Stage_Catch");
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "stage 'Catch and fail'\n" +
+                "try {\n" +
+                "    error('All the things are broken')\n" +
+                "} catch (Exception ex) {\n" +
+                "    echo 'Stage failed'\n" +
+                "    currentBuild.result = 'FAILURE'\n" +
+                "}"
+        ));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
+
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+
+        // Confirm that in the case of success with overriding, all stages are marked as unstable
+        String jsonResponse = webClient.goTo(job.getUrl()+"wfapi/runs/", "application/json")
+                .getWebResponse().getContentAsString();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+        Assert.assertEquals(StatusExt.FAILED, run.getStatus());
+        Assert.assertEquals(1, run.getStages().size());
+        Assert.assertEquals(StatusExt.FAILED, run.getStages().get(0).getStatus());
     }
 }

@@ -48,6 +48,10 @@ describe("view/pipeline-staged-spec", function () {
         testStageViewLayout('07_rest_api_runs_in_progress', done);
     });
 
+    it("- test_render_stages_with_unstable", function (done) {
+            testStageViewLayout('08_rest_api_unstable_run', done);
+    });
+
     function testStageViewLayout(feature, done, devMode) {
         helper.testWithJQuery(controllerHtml, function ($) {
             // Setup mocks

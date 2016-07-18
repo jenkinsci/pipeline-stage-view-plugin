@@ -28,6 +28,7 @@ import com.cloudbees.workflow.rest.endpoints.RunAPI;
 import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import hudson.model.Result;
 import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
@@ -356,6 +357,19 @@ public class RunExt {
 
                 FlowNodeExt lastStage = runExt.getLastStage();
 
+                // Correct for some edge cases due to simplified handling of stages (just looking for executed and presence of error)
+                for (StageNodeExt stageNodeExt : runExt.getStages()) {
+                    // If stage has an error, but run succeeded... error was caught
+                    if (stageNodeExt.getStatus() == StatusExt.FAILED && (runExt.getStatus() != StatusExt.FAILED)) {
+                        stageNodeExt.setStatus(StatusExt.SUCCESS);
+                    }
+
+                    // If run is unstable, one of the stages must have set the status -- no idea which though
+                    if (runExt.getStatus() == StatusExt.UNSTABLE && stageNodeExt.getStatus() != StatusExt.NOT_EXECUTED) {
+                        stageNodeExt.setStatus(StatusExt.UNSTABLE);
+                    }
+                }
+
                 // Correct for rare cases with 0 for a FlowEndNode
                 if (lastStage.getPauseDurationMillis() < 0) {
                     lastStage.setPauseDurationMillis(0);
@@ -407,7 +421,20 @@ public class RunExt {
         } else if (execution.getCauseOfFailure() != null) {
             setStatus(StatusExt.valueOf(execution.getCauseOfFailure()));
         } else if (execution.isComplete()) {
-            setStatus(StatusExt.SUCCESS);
+            Result r = run.getResult();
+            if (r == Result.NOT_BUILT) {
+                setStatus(StatusExt.NOT_EXECUTED);
+            } else if (r == Result.ABORTED) {
+                setStatus(StatusExt.ABORTED);
+            } else if (r == Result.FAILURE ) {
+                setStatus(StatusExt.FAILED);
+            } else if (r == Result.UNSTABLE ) {
+                setStatus(StatusExt.UNSTABLE);
+            } else if (r == Result.SUCCESS) {
+                setStatus(StatusExt.SUCCESS);
+            } else {
+                setStatus(StatusExt.FAILED);
+            }
         } else if (isPendingInput(run)) {
             setStatus(StatusExt.PAUSED_PENDING_INPUT);
         } else {

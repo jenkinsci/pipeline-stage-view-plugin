@@ -1,0 +1,47 @@
+[
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/1/wfapi/describe"
+            },
+            "artifacts": {
+                "href": "/job/cd/1/wfapi/artifacts"
+            }
+        },
+        "id": "2014-10-26_10-10-32",
+        "name": "#1",
+        "status": "UNSTABLE",
+        "startTimeMillis": 1414318232950,
+        "endTimeMillis": 1414318288921,
+        "durationMillis": 55971,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/27/wfapi/describe"
+                    }
+                },
+                "id": "27",
+                "name": "Staging",
+                "status": "UNSTABLE",
+                "startTimeMillis": 1414318278045,
+                "durationMillis": 10247,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/33/wfapi/describe"
+                    }
+                },
+                "id": "33",
+                "name": "Production",
+                "status": "UNSTABLE",
+                "startTimeMillis": 1414318288292,
+                "durationMillis": 629,
+                "pauseDurationMillis": 0
+            }
+        ]
+    }
+]
