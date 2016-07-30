@@ -52,15 +52,15 @@ public class Describe {
 
     public static FlowNodeExt get(FlowNode node) {
         if (StageNodeExt.isStageNode(node)) {
-
-            RunExt cachedRunData = FlowNodeUtil.getCachedRun(node.getExecution());
+            // TODO figure out a way to use the cache when we have the node+FlowExectuon but not its parent run
+            /* RunExt cachedRunData = FlowNodeUtil.getCachedRun(node.getExecution());
             if (cachedRunData != null) {
                 for (StageNodeExt stage : cachedRunData.getStages()) {
                     if (stage.getId().equals(node.getId())) {
                         return stage;
                     }
                 }
-            }
+            }*/
 
             StageNodeExt stageNodeExt = StageNodeExt.create(node);
             stageNodeExt.addStageFlowNodes(node);
