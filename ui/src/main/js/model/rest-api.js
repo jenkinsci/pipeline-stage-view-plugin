@@ -33,7 +33,7 @@ var cache = {};
 function addCacheEntry (key, ob) {
     if (typeof ob === 'object') {
         if (ob.status && (ob.status === 'SUCCESS' || ob.status === 'ABORTED' || ob.status === 'FAILED' || ob.status === 'UNSTABLE')) {
-            cache[key] = object;
+            cache[key] = ob;
         }
     }
 };
@@ -80,10 +80,10 @@ exports.getDescription = function(of, success) {
     if (cacheEntry) {
         success(cacheEntry);
     } else {
-        ajax.execAsyncGET([url], function(object) {
+        ajax.execAsyncGET([url], function(ob) {
             // Cache the details for the object: this can greatly reduce the number of REST calls to the Jenkins backend.
-            addCacheEntry(url, object);
-            success(object);
+            addCacheEntry(url, ob);
+            success(ob);
         });
     }
 }
