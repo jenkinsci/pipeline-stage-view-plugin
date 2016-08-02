@@ -28,21 +28,72 @@ var ajax = require('../util/ajax');
  * Workflow REST API
  */
 
+var cache;
+
+function addCacheEntry (key, ob) {
+    if (!cache) {
+        cache = {};
+    }
+    if (typeof ob === 'object') {
+        if (ob.status && (ob.status === 'SUCCESS' || ob.status === 'ABORTED' || ob.status === 'FAILED' || ob.status === 'UNSTABLE')) {
+            cache[key] = object;
+        }
+    }
+};
+
+// Cache the stage data if it's eligible for caching
+function cacheRunStages(run) {
+    if (run && run.stages) {
+        for (var j=0; j<run.stages.length; j++) {
+            var stage = run.stages[j];
+            try {
+                addCacheEntry(stage._links.self.href, stage);
+            } catch (e) {
+                console.error("Stage with no link to it");
+            }
+        }
+    }
+}
+
 exports.getJobRuns = function(jobUrl, success, params) {
-    ajax.execAsyncGET([jobUrl, 'wfapi', 'runs'], success, params);
+    ajax.execAsyncGET([jobUrl, 'wfapi', 'runs'], function(obj) {
+        // Cache the stages for the run
+        for (var i=0; i < obj.length; i++) {
+            cacheRunStages(obj[i]);
+        }
+        success(obj);
+    }, params);
 }
 
 exports.getDescription = function(of, success) {
+    var url;
     if (typeof of === 'string') {
-        ajax.execAsyncGET([of], success);
+        url = of;
     } else if (typeof of === 'object') {
         if (!of._links) {
-            console.error("Request to get description of object where the object does not have a 'descUrl' property (the REST endpoint url).");
-        } else {
-            ajax.execAsyncGET([of._links.self.href], success);
+            url = of._links.self.href;
         }
     } else {
         console.error("Request to get description using a type other than 'string' or 'object'.");
+        return;
+    }
+
+    // Use existing cache if possible, otherwise make a request
+    var cacheEntry;
+    if(!cache) {
+        cache = {};
+    } else {
+        cacheEntry = cache[url];
+    }
+
+    if (cacheEntry) {
+        success(cacheEntry);
+    } else {
+        ajax.execAsyncGET([url], function(object) {
+            // Cache the details for the object: this can greatly reduce the number of REST calls to the Jenkins backend.
+            addCacheEntry(url, object);
+            success(object);
+        });
     }
 }
 

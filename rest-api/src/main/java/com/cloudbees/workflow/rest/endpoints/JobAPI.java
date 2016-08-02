@@ -29,9 +29,12 @@ import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.util.ModelUtil;
 import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
+import hudson.model.Fingerprint;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.stapler.QueryParameter;
 
+import javax.annotation.CheckForNull;
 import java.util.List;
 
 /**
@@ -61,11 +64,13 @@ public class JobAPI extends AbstractWorkflowJobActionHandler {
      * Get all Workflow Job runs/builds since the specified run/build name.
      * @param since The run/build name at which to stop returning (inclusive),
      *              or null/empty if all runs/builds are to be returned.
+     * @param fullStages Return the stageNodes within each stage
      * @return The runs list.
      */
     @ServeJson
-    public List<RunExt> doRuns(@QueryParameter String since) {
-        return JobExt.create(getJob().getBuilds(), since);
+    public List<RunExt> doRuns(@QueryParameter String since, @QueryParameter String fullStages) {
+        boolean showFullStages = Boolean.parseBoolean(fullStages);
+        return JobExt.create(getJob().getBuilds(), since, showFullStages);
     }
 
     @ServeJson
