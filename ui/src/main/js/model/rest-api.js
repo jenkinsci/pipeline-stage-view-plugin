@@ -28,12 +28,9 @@ var ajax = require('../util/ajax');
  * Workflow REST API
  */
 
-var cache;
+var cache = {};
 
 function addCacheEntry (key, ob) {
-    if (!cache) {
-        cache = {};
-    }
     if (typeof ob === 'object') {
         if (ob.status && (ob.status === 'SUCCESS' || ob.status === 'ABORTED' || ob.status === 'FAILED' || ob.status === 'UNSTABLE')) {
             cache[key] = object;
@@ -79,13 +76,7 @@ exports.getDescription = function(of, success) {
     }
 
     // Use existing cache if possible, otherwise make a request
-    var cacheEntry;
-    if(!cache) {
-        cache = {};
-    } else {
-        cacheEntry = cache[url];
-    }
-
+    var cacheEntry = cache[url];
     if (cacheEntry) {
         success(cacheEntry);
     } else {
