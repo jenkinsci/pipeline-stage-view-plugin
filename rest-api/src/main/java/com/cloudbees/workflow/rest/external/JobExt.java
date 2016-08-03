@@ -27,6 +27,8 @@ import com.cloudbees.workflow.rest.endpoints.JobAPI;
 import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Predicate;
+import hudson.util.Iterators;
 import hudson.util.RunList;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -108,15 +110,15 @@ public class JobExt {
         return count;
     }
 
-    public static List<RunExt> create(List<WorkflowRun> runs) {
+    public static List<RunExt> create(RunList<WorkflowRun> runs) {
         return create(runs, null);
     }
 
-    public static List<RunExt> create(List<WorkflowRun> runs, String since) {
+    public static List<RunExt> create(RunList<WorkflowRun> runs, String since) {
         return create(runs, since, false);
     }
 
-    public static List<RunExt> create(List<WorkflowRun> runs, String since, boolean fullStages) {
+    public static List<RunExt> create(RunList<WorkflowRun> runs, String since, boolean fullStages) {
         if (since != null) {
             since = since.trim();
             if (since.length() == 0) {
@@ -124,18 +126,15 @@ public class JobExt {
             }
         }
 
-        List<RunExt> runsExt = new ArrayList<RunExt>();
-        for (WorkflowRun run : runs) {
-            RunExt runExt = (fullStages) ? RunExt.create(run) : RunExt.create(run).createWrapper();
-            runsExt.add(runExt);
-            if (since != null && runExt.getName().equals(since)) {
-                break;
-            } else if (runsExt.size() > MAX_RUNS_PER_JOB) {
-                // We don't yet support pagination, so no point
-                // returning a huge list of runs.
+        // Limit the output to everything before the run named "since"
+        RunList<WorkflowRun> filtered = runs.limit(MAX_RUNS_PER_JOB);
+        ArrayList<RunExt> output = new ArrayList<RunExt>();
+        for (WorkflowRun r : filtered) {
+            if (since != null && since.equals(r.getDisplayName())) {
                 break;
             }
+            output.add((fullStages) ? RunExt.create(r) : RunExt.create(r).createWrapper());
         }
-        return runsExt;
+        return output;
     }
 }
