@@ -124,7 +124,7 @@ public class FlowNodeUtil {
     }
 
     @Nonnull
-    private static String getRunPath(@Nonnull WorkflowRun run) {
+    static String getRunPath(@Nonnull WorkflowRun run) {
         return run.getParent().getFullName()+"/"+run.getId();
     }
 
@@ -543,8 +543,6 @@ public class FlowNodeUtil {
 
         @Override
         public void onDeleted(Item item) {
-            // TODO test that I still have runs once item is about to get deleted... otherwise we need to run through
-            //  cache entries and look for where the string begins with jobFullName and remove it
             CacheExtension ext = CacheExtension.all().get(0);
             if (item instanceof WorkflowJob) {
                 RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds();
