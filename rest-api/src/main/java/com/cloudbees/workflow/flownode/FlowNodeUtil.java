@@ -514,7 +514,7 @@ public class FlowNodeUtil {
                     ext.getExecutionCache().invalidate(url);
                 }
             } catch (IOException ioe) {
-                LOGGER.log(Level.WARNING, "Can't get execution URL or WorkflowRun!", ioe);
+                LOGGER.log(Level.WARNING, "Can't get execution URL for WorkflowRun!", ioe);
             }
         }
 
