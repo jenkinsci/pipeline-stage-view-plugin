@@ -108,10 +108,12 @@ public class JobExt {
         return count;
     }
 
+    @Deprecated
     public static List<RunExt> create(List<WorkflowRun> runs) {
         return create(runs, null);
     }
 
+    @Deprecated
     public static List<RunExt> create(List<WorkflowRun> runs, String since) {
         return create(runs, since, false);
     }

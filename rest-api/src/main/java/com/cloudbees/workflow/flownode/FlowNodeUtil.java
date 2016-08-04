@@ -116,21 +116,16 @@ public class FlowNodeUtil {
 
     @CheckForNull
     public static RunExt getCachedRun(@Nonnull WorkflowRun run) {
-        RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(getRunPath(run));
+        RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(run.getExternalizableId());
         if (cachedRun != null) {
             return cachedRun;
         }
         return null;
     }
 
-    @Nonnull
-    static String getRunPath(@Nonnull WorkflowRun run) {
-        return run.getParent().getFullName()+"/"+run.getId();
-    }
-
     public static void cacheRun(WorkflowRun run, RunExt runExt) {
         if (!run.isBuilding()) {
-            CacheExtension.all().get(0).getRunCache().put(getRunPath(run), runExt);
+            CacheExtension.all().get(0).getRunCache().put(run.getExternalizableId(), runExt);
         }
     }
 
@@ -489,16 +484,6 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-    protected static String itemFullNameToUrl(String fullName) {
-        StringBuilder output = new StringBuilder();
-        for (String s : fullName.split("/")) {
-            output.append("job/");
-            output.append(s);
-            output.append("/");
-        }
-        return output.toString();
-    }
-
     /** This is used to cover an obscure case where a WorkflowJob is renamed BUT
      *  a previous WorkflowJob existed with cached execution data.
      *  Otherwise the previous job's cached data would be returned.
@@ -529,11 +514,11 @@ public class FlowNodeUtil {
                 RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds().limit(JobExt.MAX_RUNS_PER_JOB+5);  // Add a few to help invalidate just-completed
                 for (WorkflowRun r : runs) {
                     if (!r.isBuilding()) {
-                        String path = oldFullName+"/"+r.getId();
+                        String path = oldFullName+"#"+r.getId();
                         RunExt cachedRun = rc.getIfPresent(path);
                         if (cachedRun != null) {
                             rc.invalidate(path);
-                            rc.put(newFullName+"/"+r.getId(), cachedRun);
+                            rc.put(newFullName+"#"+r.getId(), cachedRun);
                         }
                     }
                     invalidateExecutionCache(r, ext);
@@ -547,7 +532,7 @@ public class FlowNodeUtil {
             if (item instanceof WorkflowJob) {
                 RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds();
                 for (WorkflowRun r : runs) {
-                    ext.getRunCache().invalidate(getRunPath(r));
+                    ext.getRunCache().invalidate(r.getExternalizableId());
                     invalidateExecutionCache(r, ext);
                 }
             }

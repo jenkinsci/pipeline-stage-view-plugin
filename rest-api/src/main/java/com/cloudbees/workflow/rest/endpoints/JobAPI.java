@@ -68,9 +68,8 @@ public class JobAPI extends AbstractWorkflowJobActionHandler {
      * @return The runs list.
      */
     @ServeJson
-    public List<RunExt> doRuns(@QueryParameter String since, @QueryParameter String fullStages) {
-        boolean showFullStages = Boolean.parseBoolean(fullStages);
-        return JobExt.create(getJob().getBuilds(), since, showFullStages);
+    public List<RunExt> doRuns(@QueryParameter String since, @QueryParameter boolean fullStages) {
+        return JobExt.create(getJob().getBuilds(), since, fullStages);
     }
 
     @ServeJson

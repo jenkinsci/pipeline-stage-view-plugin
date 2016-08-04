@@ -25,7 +25,6 @@ package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.google.common.cache.Cache;
-import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -52,10 +51,9 @@ public class CachingTest {
                 "stage 'first' \n" +
                 "echo 'done' "
         ));
-        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
-        jenkinsRule.assertBuildStatusSuccess(build);
-        RunExt r = RunExt.create(build.get());
-        String runKey = FlowNodeUtil.getRunPath(build.get());
+        WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        RunExt r = RunExt.create(build);
+        String runKey = build.getExternalizableId();
         Assert.assertEquals(r, cache.getIfPresent(runKey));
 
         // Control: this one won't be touched
@@ -64,10 +62,9 @@ public class CachingTest {
                 "stage 'second' \n" +
                 "echo 'done' "
         ));
-        QueueTaskFuture<WorkflowRun> build2 = job2.scheduleBuild2(0);
-        jenkinsRule.assertBuildStatusSuccess(build2);
-        RunExt r2 = RunExt.create(build2.get());
-        String runKey2 = FlowNodeUtil.getRunPath(build2.get());
+        WorkflowRun build2 = jenkinsRule.assertBuildStatusSuccess(job2.scheduleBuild2(0));
+        RunExt r2 = RunExt.create(build2);
+        String runKey2 = build2.getExternalizableId();
         Assert.assertEquals(r2, cache.getIfPresent(runKey2));
 
         // Check we still have the jobs cached appropriately
@@ -86,10 +83,10 @@ public class CachingTest {
                 "stage 'first' \n" +
                 "echo 'done'"
         ));
-        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));
         jenkinsRule.assertBuildStatusSuccess(build);
-        RunExt r = RunExt.create(build.get());
-        String runKey = FlowNodeUtil.getRunPath(build.get());
+        RunExt r = RunExt.create(build);
+        String runKey = build.getExternalizableId();
         Assert.assertEquals(r, cache.getIfPresent(runKey));
 
         // Control: this one won't be touched
@@ -98,15 +95,14 @@ public class CachingTest {
                 "stage 'second' \n" +
                 "echo 'done'"
         ));
-        QueueTaskFuture<WorkflowRun> build2 = job2.scheduleBuild2(0);
-        jenkinsRule.assertBuildStatusSuccess(build2);
-        RunExt r2 = RunExt.create(build2.get());
-        String runKey2 = FlowNodeUtil.getRunPath(build2.get());
+        WorkflowRun build2 = jenkinsRule.assertBuildStatusSuccess(job2.scheduleBuild2(0));
+        RunExt r2 = RunExt.create(build2);
+        String runKey2 = build2.getExternalizableId();
         Assert.assertEquals(r2, cache.getIfPresent(runKey2));
 
         // Check we still have the jobs cached appropriately
         job.renameTo("NewName");
-        String newJobKey = FlowNodeUtil.getRunPath(build.get());
+        String newJobKey = build.getExternalizableId();
         Assert.assertNull("Cache should be moved for renamed job", cache.getIfPresent(runKey));
         Assert.assertEquals("Non-renamed jobs should still be cached", r2, cache.getIfPresent(runKey2));
         Assert.assertEquals("Moved cached entry should be present after rename", r, cache.getIfPresent(newJobKey));
