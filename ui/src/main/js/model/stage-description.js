@@ -23,22 +23,10 @@
  */
 
 var restApi = require('./rest-api');
-var cache = {};
 
 exports.getModelData = function (callback) {
     var stageDescribeUrl = this.requiredAttr('descUrl');
-    var cachedDetails = cache[stageDescribeUrl];
-
-    if (cachedDetails) {
-        callback(cachedDetails);
-    } else {
-        restApi.getDescription(stageDescribeUrl, function (stageDetails) {
-            // We can cache the stage details if the stage is in one of the "completed" states. This
-            // can greatly reduce the number of REST calls to the Jenkins backend. See CJP-3295.
-            if (stageDetails.status === 'SUCCESS' || stageDetails.status === 'ABORTED' || stageDetails.status === 'FAILED') {
-                cache[stageDescribeUrl] = stageDetails;
-            }
+    restApi.getDescription(stageDescribeUrl, function (stageDetails) {
             callback(stageDetails);
-        })
-    }
+    });
 }

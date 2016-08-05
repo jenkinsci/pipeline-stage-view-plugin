@@ -28,7 +28,7 @@ exports.listen = function (jobUrl, callback) {
     restApi.getJobRuns(jobUrl, function (jobRunsData) {
         callback(jobRunsData);
         setupJobPoll(jobUrl, callback, jobRunsData)
-    });
+    }, {fullStages: 'true'});
 }
 
 exports.schedulePoll = function (callback) {
@@ -38,7 +38,7 @@ exports.schedulePoll = function (callback) {
 
 function setupJobPoll(jobUrl, callback, jobRunsData) {
     function findSinceRunParam() {
-	// console.log('findSinceRunParam');
+        // console.log('findSinceRunParam');
         // Find the oldest build that has an in progress type status.  If there's non
         // that fit that, use the latest build.
         var i = jobRunsData.length - 1;
@@ -70,7 +70,7 @@ function setupJobPoll(jobUrl, callback, jobRunsData) {
 
     function pollJobRuns () {
         restApi.getJobRuns(jobUrl, function (sinceJobRunsData) {
-		// console.log('job-progress......');
+        // console.log('job-progress......');
             try {
                 var notifyListeners = false;
 
@@ -106,7 +106,7 @@ function setupJobPoll(jobUrl, callback, jobRunsData) {
             } finally {
                 exports.schedulePoll(pollJobRuns);
             }
-        }, {since: findSinceRunParam()});
+        }, {since: findSinceRunParam(), fullStages: 'true'});
     }
 
     // Kick it ...

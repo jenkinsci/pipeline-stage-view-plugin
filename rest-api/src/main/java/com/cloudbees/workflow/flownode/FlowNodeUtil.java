@@ -25,17 +25,17 @@
 package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.ExecDuration;
+import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
 import hudson.Extension;
-import hudson.ExtensionList;
 import hudson.ExtensionPoint;
 import hudson.model.Item;
 import hudson.model.listeners.ItemListener;
+import hudson.util.RunList;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
@@ -45,11 +45,11 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -59,6 +59,7 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -114,28 +115,17 @@ public class FlowNodeUtil {
     }
 
     @CheckForNull
-    public static RunExt getCachedRun(FlowExecution ex) {
-        try {
-            if (ex != null) {
-                RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(ex.getUrl());
-                if (cachedRun != null) {
-                    return cachedRun;
-                }
-            }
-            return null;
-        } catch (IOException ioe) {
-            LOGGER.severe("Can't get execution url for execution, IOException!");
-            throw new IllegalStateException(ioe);
+    public static RunExt getCachedRun(@Nonnull WorkflowRun run) {
+        RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(run.getExternalizableId());
+        if (cachedRun != null) {
+            return cachedRun;
         }
+        return null;
     }
 
-    public static void cacheRun(FlowExecution exec, RunExt run) {
-        if (exec != null && exec.isComplete()) {
-            try {
-                CacheExtension.all().get(0).getRunCache().put(exec.getUrl(), run);
-            } catch (IOException ioe) {
-                LOGGER.severe("Can't get execution url for execution, IOException!");
-            }
+    public static void cacheRun(WorkflowRun run, RunExt runExt) {
+        if (!run.isBuilding()) {
+            CacheExtension.all().get(0).getRunCache().put(run.getExternalizableId(), runExt);
         }
     }
 
@@ -494,20 +484,57 @@ public class FlowNodeUtil {
         return nodes;
     }
 
-
     /** This is used to cover an obscure case where a WorkflowJob is renamed BUT
      *  a previous WorkflowJob existed with cached execution data.
      *  Otherwise the previous job's cached data would be returned.
      **/
     @Extension
     public static class RenameHandler extends ItemListener {
+
+        private void invalidateExecutionCache(WorkflowRun run, CacheExtension ext){
+            try {
+                FlowExecution f = run.getExecution();
+                if (f != null) {
+                    String url = f.getUrl();
+                    ext.getExecutionCache().invalidate(url);
+                }
+            } catch (IOException ioe) {
+                LOGGER.log(Level.WARNING, "Can't get execution URL for WorkflowRun!", ioe);
+            }
+        }
+
         @Override
         public void onLocationChanged(Item item, String oldFullName, String newFullName) {
+            // Better solution: scam through cache, find all instances where oldFullName matches
+            // Replace with newFullName
+            CacheExtension ext = CacheExtension.all().get(0);
+            Cache<String, RunExt> rc = ext.getRunCache();
+
             if (item instanceof WorkflowJob) {
-                // It's a cache, we can rebuild it... we have the technology.
-                CacheExtension ext = CacheExtension.all().get(0);
-                ext.getExecutionCache().invalidateAll();
-                ext.getRunCache().invalidateAll();
+                RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds().limit(JobExt.MAX_RUNS_PER_JOB+5);  // Add a few to help invalidate just-completed
+                for (WorkflowRun r : runs) {
+                    if (!r.isBuilding()) {
+                        String path = oldFullName+"#"+r.getId();
+                        RunExt cachedRun = rc.getIfPresent(path);
+                        if (cachedRun != null) {
+                            rc.invalidate(path);
+                            rc.put(newFullName+"#"+r.getId(), cachedRun);
+                        }
+                    }
+                    invalidateExecutionCache(r, ext);
+                }
+            }
+        }
+
+        @Override
+        public void onDeleted(Item item) {
+            CacheExtension ext = CacheExtension.all().get(0);
+            if (item instanceof WorkflowJob) {
+                RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds();
+                for (WorkflowRun r : runs) {
+                    ext.getRunCache().invalidate(r.getExternalizableId());
+                    invalidateExecutionCache(r, ext);
+                }
             }
         }
     }

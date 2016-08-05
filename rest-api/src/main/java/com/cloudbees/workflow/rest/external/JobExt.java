@@ -108,10 +108,17 @@ public class JobExt {
         return count;
     }
 
+    @Deprecated
     public static List<RunExt> create(List<WorkflowRun> runs) {
         return create(runs, null);
     }
+
+    @Deprecated
     public static List<RunExt> create(List<WorkflowRun> runs, String since) {
+        return create(runs, since, false);
+    }
+
+    public static List<RunExt> create(List<WorkflowRun> runs, String since, boolean fullStages) {
         if (since != null) {
             since = since.trim();
             if (since.length() == 0) {
@@ -121,9 +128,7 @@ public class JobExt {
 
         List<RunExt> runsExt = new ArrayList<RunExt>();
         for (WorkflowRun run : runs) {
-
-            // TODO Optimize this if UI supports it: avoid returning a run if no change
-            RunExt runExt = RunExt.create(run).createWrapper();
+            RunExt runExt = (fullStages) ? RunExt.create(run) : RunExt.create(run).createWrapper();
             runsExt.add(runExt);
             if (since != null && runExt.getName().equals(since)) {
                 break;

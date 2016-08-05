@@ -295,7 +295,7 @@ public class RunExt {
         // Use cache if eligible
         boolean isNotRunning = FlowNodeUtil.isNotPartOfRunningBuild(execution);
         if (isNotRunning) {
-            RunExt myRun = FlowNodeUtil.getCachedRun(execution);
+            RunExt myRun = FlowNodeUtil.getCachedRun(run);
             if (myRun != null) {
                 return myRun;
             }
@@ -303,7 +303,7 @@ public class RunExt {
         // Compute the entire flow
         RunExt myRun = createOld(run);
         if (isNotRunning) {
-            FlowNodeUtil.cacheRun(execution, myRun);
+            FlowNodeUtil.cacheRun(run, myRun);
         }
         return myRun;
     }
