@@ -34,6 +34,8 @@ import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
+import org.jenkinsci.plugins.workflow.graphanalysis.StageChunkFinder;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputAction;
@@ -301,11 +303,22 @@ public class RunExt {
             }
         }
         // Compute the entire flow
-        RunExt myRun = createOld(run);
+        RunExt myRun = createNew(run);
         if (isNotRunning) {
             FlowNodeUtil.cacheRun(run, myRun);
         }
         return myRun;
+    }
+
+    public static RunExt createNew(WorkflowRun run) {
+        final RunExt runExt = createMinimal(run);
+        FlowExecution execution = run.getExecution();
+        if (execution != null) {
+            ChunkVisitor visitor = new ChunkVisitor(run);
+            ForkScanner.visitSimpleChunks(execution.getCurrentHeads(), visitor, new StageChunkFinder());
+            runExt.setStages(new ArrayList<StageNodeExt>(visitor.stages));
+        }
+        return runExt;
     }
 
     public static RunExt createOld(WorkflowRun run) {
