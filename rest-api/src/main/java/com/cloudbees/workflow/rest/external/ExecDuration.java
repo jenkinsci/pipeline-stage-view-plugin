@@ -51,7 +51,7 @@ public class ExecDuration {
     }
 
     public ExecDuration() { }
-    
+
     public ExecDuration(TimingInfo info) {
         this.totalDurationMillis = info.getTotalDurationMillis();
         this.pauseDurationMillis = info.getPauseDurationMillis();
