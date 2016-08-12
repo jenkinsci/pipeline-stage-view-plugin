@@ -87,6 +87,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
 
     /** Called when hitting the end of a block (determined by the chunkEndPredicate) */
     public void chunkEnd(@Nonnull FlowNode endNode, @CheckForNull FlowNode afterBlock, @Nonnull ForkScanner scanner) {
+        super.chunkEnd(endNode, afterBlock, scanner);
         if (!(endNode instanceof BlockEndNode)) { // Normal stage markers that are not AtomNodes
             atomNode(null, endNode, afterBlock, scanner);
         }
