@@ -35,6 +35,8 @@ import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 import org.kohsuke.stapler.Stapler;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
@@ -181,8 +183,7 @@ public class FlowNodeExt {
         }
     }
 
-    protected void addBasicNodeData(FlowNode node) {
-        String execNodeName = FlowNodeUtil.getExecNodeName(node);
+    protected void addBasicNodeData(@Nonnull FlowNode node) {
         boolean isExecuted = NotExecutedNodeAction.isExecuted(node);
         StatusExt status = null;
         ErrorAction errorAction = null;
@@ -194,7 +195,7 @@ public class FlowNodeExt {
         }
 
         // Placeholders are used for timing data until calculated explicitly
-        addBasicNodeData(node, execNodeName, null, 0L, status, errorAction);
+        addBasicNodeData(node, "", null, 0L, status, errorAction);
         calculateTimings(node);
     }
 

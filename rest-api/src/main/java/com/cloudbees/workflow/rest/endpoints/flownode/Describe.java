@@ -30,14 +30,11 @@ import com.cloudbees.workflow.rest.endpoints.FlowNodeAPI;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 
-import java.util.logging.Logger;
-
 /**
  * {@link FlowNode} "describe" endpoint.
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class Describe {
-    private static final Logger LOGGER = Logger.getLogger(Describe.class.getName());
 
     public static String getUrl(FlowNode node) {
         return FlowNodeAPI.getUrl(node) + "/describe";

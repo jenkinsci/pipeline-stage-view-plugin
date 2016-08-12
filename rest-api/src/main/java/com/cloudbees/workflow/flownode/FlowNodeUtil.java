@@ -75,7 +75,6 @@ public class FlowNodeUtil {
     public abstract static class CacheExtensionPoint implements ExtensionPoint {
         public abstract Cache<String,List<FlowNode>> getExecutionCache();
         public abstract Cache<String, RunExt> getRunCache();
-        public abstract Cache<FlowNode,String> getExecNodeNameCache();
     }
 
     // Used in testing where Jenkins is not running yet
@@ -91,17 +90,11 @@ public class FlowNodeUtil {
         // Because the RunExt caps the total elements returned, and this is fully realized, this is the fastest way
         protected final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-        protected final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(1, TimeUnit.HOURS).build();
-
         public Cache<String,List<FlowNode>> getExecutionCache() {
             return this.executionCache;
         }
         public Cache<String, RunExt> getRunCache() {
             return this.runData;
-        }
-
-        public Cache<FlowNode,String> getExecNodeNameCache() {
-            return  this.execNodeNameCache;
         }
 
         public static List<CacheExtension> all() {
@@ -265,62 +258,6 @@ public class FlowNodeUtil {
             }
         }
         return null;
-    }
-
-    /**
-     * Get the name of the node on which the supplied FlowNode executed.
-     *
-     * @param flowNode The node.
-     * @return The name of the node on which the supplied FlowNode executed.
-     */
-    public static String getExecNodeName(FlowNode flowNode) {
-        if (flowNode == null) {
-            return "master";
-        }
-
-        Cache<FlowNode, String> execNodeNameCache = CacheExtension.all().get(0).getExecNodeNameCache();
-        String execNodeName = execNodeNameCache.getIfPresent(flowNode);
-        if (execNodeName != null) {
-            return execNodeName;
-        }
-
-        // It is sufficient to walk through just the ancestry
-        ArrayDeque<FlowNode> ancestry = new ArrayDeque<FlowNode>(); // For these nodes, add cache entries
-
-        while (flowNode != null) {
-            // Always hit the cache first
-            execNodeName = execNodeNameCache.getIfPresent(flowNode);
-            if (execNodeName != null) {
-                break;
-            }
-
-            // Then we check for the node itself
-            WorkspaceAction executorAction = flowNode.getAction(WorkspaceAction.class);
-            if (executorAction != null) {
-                String node = executorAction.getNode();
-                if (node.length() > 0) {
-                    execNodeName = node;
-                }
-                break;
-            }
-
-            // Next look at ancestors
-            ancestry.push(flowNode);
-            List<FlowNode> parents = flowNode.getParents();
-            if (parents != null && !parents.isEmpty()) {
-                flowNode = parents.get(0);
-            } else {
-                break;
-            }
-        }
-        // Ran on master if no executor workspace
-        if (execNodeName == null) {
-            execNodeName = "master";
-        }
-        for (FlowNode f : ancestry) {
-            execNodeNameCache.put(f, execNodeName);
-        }
-        return execNodeName;
     }
 
     /**
