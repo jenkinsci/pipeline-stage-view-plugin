@@ -1,14 +1,12 @@
 package com.cloudbees.workflow.rest.external;
 
 import com.google.common.collect.Iterables;
-import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.BlockEndNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
 import org.jenkinsci.plugins.workflow.graphanalysis.MemoryFlowChunk;
-import org.jenkinsci.plugins.workflow.graphanalysis.SimpleChunkVisitor;
 import org.jenkinsci.plugins.workflow.graphanalysis.StandardChunkVisitor;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.GenericStatus;
@@ -20,8 +18,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Couples to the new analysis APIs to collect stages for processing
@@ -29,20 +26,30 @@ import java.util.List;
  */
 public class ChunkVisitor extends StandardChunkVisitor {
     ArrayDeque<StageNodeExt> stages = new ArrayDeque<StageNodeExt>();
-    FlowNode firstExecuted = null;
+//    FlowNode firstExecuted = null;
     ArrayDeque<AtomFlowNodeExt> stageContents = new ArrayDeque<AtomFlowNodeExt>();
     WorkflowRun run;
 
-    public ChunkVisitor(WorkflowRun run) {
+    public ChunkVisitor(@Nonnull WorkflowRun run) {
         this.run = run;
+    }
+
+    public Collection<StageNodeExt> getStages() {
+        return stages;
     }
 
     protected AtomFlowNodeExt makeAtomNode(@Nonnull WorkflowRun run, @CheckForNull FlowNode beforeNode, @Nonnull FlowNode node, @CheckForNull FlowNode next) {
         long pause = PauseAction.getPauseDuration(node);
-        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, node, node, next);
-        GenericStatus status = StatusAndTiming.computeChunkStatus(run, beforeNode, node, node, next);
+        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, node, node, next); // TODO pipeline graph analysis adds this to TimingInfo
+        ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
-        AtomFlowNodeExt output = AtomFlowNodeExt.create(node, "", new ExecDuration(times), TimingAction.getStartTime(node), StatusExt.fromGenericStatus(status), node.getError());
+        GenericStatus status = StatusAndTiming.computeChunkStatus(run, beforeNode, node, node, next);
+        if (status == null) {
+            status = GenericStatus.NOT_EXECUTED;
+        }
+
+        // TODO pipeline graph analysis gets most of the metadata for the chunk in 1 pass
+        AtomFlowNodeExt output = AtomFlowNodeExt.create(node, "", dur, TimingAction.getStartTime(node), StatusExt.fromGenericStatus(status), node.getError());
         return output;
     }
 
@@ -50,11 +57,18 @@ public class ChunkVisitor extends StandardChunkVisitor {
     /** Do the final computations to materialize the stage */
     protected void handleChunkDone(@Nonnull MemoryFlowChunk chunk) {
         StageNodeExt stageExt = new StageNodeExt();
-        TimingInfo info = StatusAndTiming.computeChunkTiming(run, chunk.getPauseTimeMillis(), chunk);
-        GenericStatus status = StatusAndTiming.computeChunkStatus(run, chunk);
+        TimingInfo times = StatusAndTiming.computeChunkTiming(run, chunk.getPauseTimeMillis(), chunk);
+        ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
-        stageExt.addBasicNodeData(chunk.getFirstNode(), "", new ExecDuration(info), TimingAction.getStartTime(chunk.getFirstNode()), StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
-        stageExt.setStartTimeMillis(TimingAction.getStartTime(chunk.getFirstNode()));
+        GenericStatus status = StatusAndTiming.computeChunkStatus(run, chunk);
+        if (status == null) {
+            status = GenericStatus.NOT_EXECUTED;
+        }
+
+        // TODO pipeline graph analysis gets most of the metadata for the chunk in 1 pass
+
+        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, TimingAction.getStartTime(chunk.getFirstNode()), StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
+        stageExt.setStartTimeMillis(TimingAction.getStartTime(chunk.getFirstNode()));  // TODO pipeline graph analysis adds this to TimingInfo
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
         ArrayList<AtomFlowNodeExt> internals = new ArrayList<AtomFlowNodeExt>(childNodeLength);
@@ -65,9 +79,9 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     @Override
-    protected void resetChunk(MemoryFlowChunk chunk) {
+    protected void resetChunk(@Nonnull MemoryFlowChunk chunk) {
         super.resetChunk(chunk);
-        firstExecuted = null;
+//        firstExecuted = null;
     }
 
 
@@ -79,9 +93,9 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     public void atomNode(@CheckForNull FlowNode before, @Nonnull FlowNode atomNode, @CheckForNull FlowNode after, @Nonnull ForkScanner scan) {
-        if (!NotExecutedNodeAction.isExecuted(atomNode)) {
-            firstExecuted = atomNode;
-        }
+        /*if (!NotExecutedNodeAction.isExecuted(atomNode)) {
+            firstExecuted = atomNode;  // See if we need this
+        }*/
         long pause = PauseAction.getPauseDuration(atomNode);
         chunk.setPauseTimeMillis(chunk.getPauseTimeMillis()+pause);
 
