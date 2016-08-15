@@ -76,6 +76,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Trying this for block-scoped stage support -->
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-cps</artifactId>
+            <version>2.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
             <version>2.0</version>
@@ -90,9 +97,14 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
-            <version>2.0</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
+            <version>2.1</version>
+            <!-- If you don't force v 2.1 then you get conflicts with block-scoped stage -->
+        </dependency>
+        <dependency>
+            <!-- For block-scoped stage support -->
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>2.1</version>
         </dependency>
 
         <!-- May be able to remove these due to core -->
