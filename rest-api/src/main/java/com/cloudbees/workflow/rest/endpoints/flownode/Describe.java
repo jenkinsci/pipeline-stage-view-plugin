@@ -25,10 +25,15 @@ package com.cloudbees.workflow.rest.endpoints.flownode;
 
 import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
 import com.cloudbees.workflow.rest.external.FlowNodeExt;
+import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.endpoints.FlowNodeAPI;
+import hudson.model.Queue;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+
+import java.io.IOException;
 
 /**
  * {@link FlowNode} "describe" endpoint.
@@ -42,19 +47,25 @@ public class Describe {
 
     public static FlowNodeExt get(FlowNode node) {
         if (StageNodeExt.isStageNode(node)) {
-            // TODO figure out a way to use the cache when we have the node+FlowExecution but not its parent run
-            /* RunExt cachedRunData = FlowNodeUtil.getCachedRun(node.getExecution());
-            if (cachedRunData != null) {
-                for (StageNodeExt stage : cachedRunData.getStages()) {
-                    if (stage.getId().equals(node.getId())) {
-                        return stage;
+            try {
+                // Digest the WorkflowRun to get the stages, using cache if possible.
+                // Future optimization for big runs: use the blackLists in the ForkScanner only digest until the
+                // Node before the stage
+                Queue.Executable exec = node.getExecution().getOwner().getExecutable();
+                if (exec instanceof WorkflowRun) {
+                    WorkflowRun run = (WorkflowRun)exec;
+                    RunExt runExt = RunExt.create(run);
+                    for (StageNodeExt st : runExt.getStages()) {
+                        if (st.getId().equals(node.getId())) {
+                            return st;
+                        }
                     }
                 }
-            }*/
-
-            StageNodeExt stageNodeExt = StageNodeExt.create(node);
-            stageNodeExt.addStageFlowNodes(node);
-            return stageNodeExt;
+            } catch (IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+            // This would mean that the node is a stage node but not in its own run...
+            return null;
         } else if (node instanceof AtomNode) {
             return AtomFlowNodeExt.create(node);
         } else {
