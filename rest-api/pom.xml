@@ -52,7 +52,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>pipeline-graph-analysis</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.1-bss-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -101,7 +101,7 @@
             <!-- If you don't force v 2.1 then you get conflicts with block-scoped stage -->
         </dependency>
         <dependency>
-            <!-- For block-scoped stage support -->
+            <!-- For block-scoped stage support, and some version needed for StatusExt -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
             <version>2.1</version>

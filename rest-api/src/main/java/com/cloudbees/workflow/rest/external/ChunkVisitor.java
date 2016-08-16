@@ -38,9 +38,9 @@ public class ChunkVisitor extends StandardChunkVisitor {
         return stages;
     }
 
-    protected AtomFlowNodeExt makeAtomNode(@Nonnull WorkflowRun run, @CheckForNull FlowNode beforeNode, @Nonnull FlowNode node, @CheckForNull FlowNode next) {
+    public static AtomFlowNodeExt makeAtomNode(@Nonnull WorkflowRun run, @CheckForNull FlowNode beforeNode, @Nonnull FlowNode node, @CheckForNull FlowNode next) {
         long pause = PauseAction.getPauseDuration(node);
-        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, node, node, next); // TODO pipeline graph analysis adds this to TimingInfo
+        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, beforeNode, node, node, next); // TODO pipeline graph analysis adds this to TimingInfo
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
         GenericStatus status = StatusAndTiming.computeChunkStatus(run, beforeNode, node, node, next);
@@ -88,7 +88,13 @@ public class ChunkVisitor extends StandardChunkVisitor {
     /** Called when hitting the end of a block (determined by the chunkEndPredicate) */
     public void chunkEnd(@Nonnull FlowNode endNode, @CheckForNull FlowNode afterBlock, @Nonnull ForkScanner scanner) {
         super.chunkEnd(endNode, afterBlock, scanner);
-        if (!(endNode instanceof BlockEndNode)) { // Normal stage markers that are not AtomNodes
+
+        // Reset the stage internal state to start here
+        stageContents.clear();
+        chunk.setPauseTimeMillis(0);
+
+        // if we're using marker-based (and not block-scoped) stages, add the last node as part of its contents
+        if (!(endNode instanceof BlockEndNode)) {
             atomNode(null, endNode, afterBlock, scanner);
         }
     }
