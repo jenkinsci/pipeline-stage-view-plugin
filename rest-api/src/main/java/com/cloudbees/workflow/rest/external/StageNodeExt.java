@@ -25,8 +25,10 @@ package com.cloudbees.workflow.rest.external;
 
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.StageAction;
+import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -55,23 +57,7 @@ public class StageNodeExt extends FlowNodeExt {
     }
 
     public static boolean isStageNode(FlowNode node) {
-        return (node.getAction(StageAction.class) != null);
-    }
-
-    public static StageNodeExt create(FlowNode node) {
-        StageNodeExt stageNodeExt = new StageNodeExt();
-
-        stageNodeExt.addBasicNodeData(node);
-
-        // Use the last node in the stage to configure the stage status.
-        FlowNode stageEndNode = FlowNodeUtil.getStageEndNode(node);
-        if (NotExecutedNodeAction.isExecuted(stageEndNode)) {
-            stageNodeExt.setStatus(StatusExt.valueOf(stageEndNode.getError()));
-        } else {
-            stageNodeExt.setStatus(StatusExt.NOT_EXECUTED);
-        }
-
-        return stageNodeExt;
+        return (node.getAction(LabelAction.class) != null && node.getAction(ThreadNameAction.class) == null);
     }
 
     /** Hides child nodes, so we store a complete image but only return the minimal amount of data */
@@ -103,23 +89,9 @@ public class StageNodeExt extends FlowNodeExt {
         return new ChildHidingWrapper(this);
     }
 
-    public void addStageFlowNodes(FlowNode node) {
-        List<FlowNode> stageFlowNodes = FlowNodeUtil.getStageNodes(node);
-        addStageAtomNodeData(stageFlowNodes);
-    }
-
     @Override
     protected void calculateTimings(FlowNode node) {
-        // Set the stage start time to be the start time of the first executed
-        // node on the stage.
-        FlowNode stageExecStartNode = FlowNodeUtil.getStageExecStartNode(node);
-        if (stageExecStartNode != null) {
-            setStartTimeMillis(TimingAction.getStartTime(stageExecStartNode));
-        }
-        ExecDuration execDuration = FlowNodeUtil.getStageExecDuration(node);
-        setDurationMillis(execDuration.getTotalDurationMillis());
-        setPauseDurationMillis(execDuration.getPauseDurationMillis());
-        setPauseDurationMillis(Math.min(getPauseDurationMillis(), getDurationMillis()));
+        // StageNodeExt objects must have timing passed in
     }
 
     private void addStageAtomNodeData(List<FlowNode> atomFlowNodes) {

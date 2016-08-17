@@ -21,8 +21,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Couples to the new analysis APIs to collect stages for processing
- * Created by @author <samvanoort@gmail.com>Sam Van Oort</samvanoort@gmail.com>
+ * Couples to the new analysis APIs to collect stages for processing.
+ * This is where all the interesting parts happen.
+ * @author Sam Van Oort
  */
 public class ChunkVisitor extends StandardChunkVisitor {
     ArrayDeque<StageNodeExt> stages = new ArrayDeque<StageNodeExt>();
@@ -40,7 +41,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
 
     public static AtomFlowNodeExt makeAtomNode(@Nonnull WorkflowRun run, @CheckForNull FlowNode beforeNode, @Nonnull FlowNode node, @CheckForNull FlowNode next) {
         long pause = PauseAction.getPauseDuration(node);
-        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, beforeNode, node, node, next); // TODO pipeline graph analysis adds this to TimingInfo
+        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, node, node, next); // TODO pipeline graph analysis adds this to TimingInfo
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
         GenericStatus status = StatusAndTiming.computeChunkStatus(run, beforeNode, node, node, next);
@@ -48,7 +49,6 @@ public class ChunkVisitor extends StandardChunkVisitor {
             status = GenericStatus.NOT_EXECUTED;
         }
 
-        // TODO pipeline graph analysis gets most of the metadata for the chunk in 1 pass
         AtomFlowNodeExt output = AtomFlowNodeExt.create(node, "", dur, TimingAction.getStartTime(node), StatusExt.fromGenericStatus(status), node.getError());
         return output;
     }

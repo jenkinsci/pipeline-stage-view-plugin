@@ -318,99 +318,27 @@ public class RunExt {
             ForkScanner.visitSimpleChunks(execution.getCurrentHeads(), visitor, new StageChunkFinder());
             runExt.setStages(new ArrayList<StageNodeExt>(visitor.stages));
         }
-        return runExt;
-    }
 
-    public static RunExt createOld(WorkflowRun run) {
-        FlowExecution execution = run.getExecution();
+        long currentTimeMillis = System.currentTimeMillis();
+        if (runExt.getStatus() == StatusExt.IN_PROGRESS || runExt.getStatus() == StatusExt.PAUSED_PENDING_INPUT) {
+            runExt.setEndTimeMillis(currentTimeMillis);
+        }
 
-        final RunExt runExt = new RunExt();
-        runExt.set_links(new RunLinks());
-        runExt.get_links().initSelf(RunAPI.getDescribeUrl(run));
-
-        runExt.setId(run.getId());
-        runExt.setName(run.getDisplayName());
-        runExt.initStatus(run);
-        runExt.setStartTimeMillis(run.getStartTimeInMillis());
-        runExt.setStages(new ArrayList<StageNodeExt>());
-
-        if (execution != null) {
-            if (ChangeSetExt.hasChanges(run)) {
-                runExt.get_links().setChangesets(Link.newLink(RunAPI.getChangeSetsUrl(run)));
-            }
-            if (isPendingInput(run)) {
-                runExt.get_links().setPendingInputActions(Link.newLink(RunAPI.getPendingInputActionsUrl(run)));
-                runExt.get_links().setNextPendingInputAction(Link.newLink(RunAPI.getNextPendingInputActionUrl(run)));
-            }
-            List<Run<WorkflowJob, WorkflowRun>.Artifact> artifacts = run.getArtifactsUpTo(MAX_ARTIFACTS_COUNT);
-            if (artifacts != null && !artifacts.isEmpty()) {
-                runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
-            }
-            FlowGraphWalker walker = new FlowGraphWalker(execution);
-            List<FlowNode> sortedNodes = FlowNodeUtil.getIdSortedExecutionNodeList(execution); // Hold a ref to prevent GC until we're done analyzing
-            for (FlowNode node : walker) {
-                long nodeTime = TimingAction.getStartTime(node);
-
-                if (nodeTime > runExt.getEndTimeMillis()) {
-                    // Use the most resent FlowNode timestamp as being
-                    // the end time for the run.
-                    runExt.setEndTimeMillis(nodeTime);
-                }
-
-                if (StageNodeExt.isStageNode(node)) {
-                    StageNodeExt stage = StageNodeExt.create(node);
-                    stage.addStageFlowNodes(node);
-                    runExt.addStage(stage);
-                    runExt.setPauseDurationMillis(runExt.getPauseDurationMillis() + stage.getPauseDurationMillis());
-                }
-            }
-
-            if (!runExt.getStages().isEmpty()) {
-                runExt.sortStages();
-
-                FlowNodeExt lastStage = runExt.getLastStage();
-
-                // Correct for some edge cases due to simplified handling of stages (just looking for executed and presence of error)
-                for (StageNodeExt stageNodeExt : runExt.getStages()) {
-                    // If stage has an error, but run succeeded... error was caught
-                    if (stageNodeExt.getStatus() == StatusExt.FAILED && (runExt.getStatus() != StatusExt.FAILED)) {
-                        stageNodeExt.setStatus(StatusExt.SUCCESS);
-                    }
-
-                    // If run is unstable, one of the stages must have set the status -- no idea which though
-                    if (runExt.getStatus() == StatusExt.UNSTABLE && stageNodeExt.getStatus() != StatusExt.NOT_EXECUTED) {
-                        stageNodeExt.setStatus(StatusExt.UNSTABLE);
-                    }
-                }
-
-                // Correct for rare cases with 0 for a FlowEndNode
-                if (lastStage.getPauseDurationMillis() < 0) {
-                    lastStage.setPauseDurationMillis(0);
-                }
-                if (lastStage.getDurationMillis() < 0) {
-                    lastStage.setDurationMillis(runExt.getEndTimeMillis()-lastStage.getStartTimeMillis());
-                }
-                lastStage.setStatus(runExt.getStatus());
-            }
-
-            long currentTimeMillis = System.currentTimeMillis();
-
-            if (runExt.getStatus() == StatusExt.IN_PROGRESS || runExt.getStatus() == StatusExt.PAUSED_PENDING_INPUT) {
-                runExt.setEndTimeMillis(currentTimeMillis);
-            }
-
-            if (runExt.getStages().isEmpty()) {
+        if (runExt.getStages().isEmpty()) {
+            if (run.isBuilding()) { // In-progress == in queue
                 runExt.setQueueDurationMillis(currentTimeMillis - runExt.getStartTimeMillis());
             } else {
-                StageNodeExt firstExecutedStage = runExt.getFirstExecutedStage();
-                if (firstExecutedStage != null) {
-                    runExt.setQueueDurationMillis(firstExecutedStage.getStartTimeMillis() - runExt.getStartTimeMillis());
-                }
+                runExt.setQueueDurationMillis(0L);
             }
 
-            runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
-            sortedNodes = null;
+        } else {
+            StageNodeExt firstExecutedStage = runExt.getFirstExecutedStage();
+            if (firstExecutedStage != null) {
+                runExt.setQueueDurationMillis(firstExecutedStage.getStartTimeMillis() - runExt.getStartTimeMillis());
+            }
         }
+
+        runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
 
         return runExt;
     }
@@ -453,41 +381,6 @@ public class RunExt {
         } else {
             setStatus(StatusExt.IN_PROGRESS);
         }
-    }
-
-    private void addStage(StageNodeExt stageToAdd) {
-        // Iterate the current list of stages and see if we already have a stage with
-        // the same id.
-        for (int i = 0; i < getStages().size(); i++) {
-            FlowNodeExt stage = getStages().get(i);
-            if (stage.getId().equals(stageToAdd.getId())) {
-                // Same stage... don't add again.
-                return;
-            }
-        }
-
-        // Insert at the head, but we'll be sorting them (by time) later.
-        getStages().add(0, stageToAdd);
-    }
-
-    private void sortStages() {
-        // TF: Sorting in case they're somehow out of order (depending on how the FloWGraph works
-        // wrt forks and joins etc).  My understanding is that forks and joins only make sense
-        // within a given stage (and so a stage node should only ever be traversed once),
-        // but I may be wrong so just in case :) ...
-        Comparator<FlowNodeExt> sortComparator = new Comparator<FlowNodeExt>() {
-            @Override
-            public int compare(FlowNodeExt stage1, FlowNodeExt stage2) {
-                if (stage1.getStartTimeMillis() < stage2.getStartTimeMillis()) {
-                    return -1;
-                } else if (stage1.getStartTimeMillis() > stage2.getStartTimeMillis()) {
-                    return 1;
-                }
-                return 0;
-            }
-        };
-
-        Collections.sort(getStages(), sortComparator);
     }
 
     private StageNodeExt getFirstExecutedStage() {

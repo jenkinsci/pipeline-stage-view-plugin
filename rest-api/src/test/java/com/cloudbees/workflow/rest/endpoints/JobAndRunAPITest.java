@@ -158,7 +158,6 @@ public class JobAndRunAPITest {
         // Remove timing info from last node (root cause of one set of bugs) and flush the cache
         actions.remove(timing);
         FlowNodeUtil.CacheExtension ext = FlowNodeUtil.CacheExtension.all().get(0);
-        ext.getExecutionCache().invalidateAll();
         ext.getRunCache().invalidateAll();
 
         Page runsPage = webClient.goTo(run.getUrl() + "/wfapi/describe", "application/json");
