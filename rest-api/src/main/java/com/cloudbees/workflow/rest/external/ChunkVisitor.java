@@ -1,7 +1,6 @@
 package com.cloudbees.workflow.rest.external;
 
 import com.google.common.collect.Iterables;
-import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.BlockEndNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
