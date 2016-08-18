@@ -1,6 +1,7 @@
 package com.cloudbees.workflow.rest.external;
 
 import com.google.common.collect.Iterables;
+import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.BlockEndNode;
@@ -61,14 +62,16 @@ public class ChunkVisitor extends StandardChunkVisitor {
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
         GenericStatus status;
+        long startTime = 0;
         if (firstExecuted == null) {
             status = GenericStatus.NOT_EXECUTED;
         } else {
             status = StatusAndTiming.computeChunkStatus(run, chunk.getNodeBefore(), firstExecuted, chunk.getLastNode(), chunk.getNodeAfter());
+            startTime = TimingAction.getStartTime(firstExecuted);
         }
 
         // TODO pipeline graph analysis gets most of the metadata for the chunk in 1 pass
-        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, TimingAction.getStartTime(firstExecuted), StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
+        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
         ArrayList<AtomFlowNodeExt> internals = new ArrayList<AtomFlowNodeExt>(childNodeLength);

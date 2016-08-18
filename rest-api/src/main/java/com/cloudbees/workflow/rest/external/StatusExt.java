@@ -27,6 +27,7 @@ import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.GenericStatus;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -57,7 +58,10 @@ public enum StatusExt {
         }
     }
 
-    public static StatusExt fromGenericStatus(@Nonnull GenericStatus st) {
+    public static StatusExt fromGenericStatus(@CheckForNull GenericStatus st) {
+        if (st == null) {
+            return StatusExt.NOT_EXECUTED;
+        }
         switch (st) {
             case PAUSED_PENDING_INPUT: return StatusExt.PAUSED_PENDING_INPUT;
             case ABORTED: return StatusExt.ABORTED;

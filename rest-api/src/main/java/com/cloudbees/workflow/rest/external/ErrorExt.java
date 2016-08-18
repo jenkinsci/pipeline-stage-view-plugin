@@ -65,7 +65,7 @@ public class ErrorExt {
             errorExt.setMessage("No message: null Throwable on error");
             errorExt.setType("No type: null Throwable on error");
         }
-        
+
         return errorExt;
     }
 
