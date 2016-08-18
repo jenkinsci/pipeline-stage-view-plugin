@@ -42,15 +42,21 @@ public class ChunkVisitor extends StandardChunkVisitor {
 
     public static AtomFlowNodeExt makeAtomNode(@Nonnull WorkflowRun run, @CheckForNull FlowNode beforeNode, @Nonnull FlowNode node, @CheckForNull FlowNode next) {
         long pause = PauseAction.getPauseDuration(node);
-        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, node, node, next); // TODO pipeline graph analysis adds this to TimingInfo
+        TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, node, node, next);
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
         GenericStatus status = StatusAndTiming.computeChunkStatus(run, beforeNode, node, node, next);
         if (status == null) {
             status = GenericStatus.NOT_EXECUTED;
         }
+        ErrorAction err = node.getError();
+        if (status == GenericStatus.FAILURE && err == null) {
+            // Needed for FlowEndNode, since an ErrorAction isn't generated
+            // When build result is set directly
+            err = new ErrorAction(new Throwable("Run failed, assuming last chunk failed too!"));
+        }
 
-        AtomFlowNodeExt output = AtomFlowNodeExt.create(node, "", dur, TimingAction.getStartTime(node), StatusExt.fromGenericStatus(status), node.getError());
+        AtomFlowNodeExt output = AtomFlowNodeExt.create(node, "", dur, TimingAction.getStartTime(node), StatusExt.fromGenericStatus(status), err);
         return output;
     }
 

@@ -24,8 +24,10 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
+import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
 import com.cloudbees.workflow.rest.external.BuildArtifactExt;
 import com.cloudbees.workflow.rest.external.ChangeSetExt;
+import com.cloudbees.workflow.rest.external.ErrorExt;
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
@@ -148,6 +150,58 @@ public class JobAndRunAPITest {
         assertSinceQueryParamOkay(job, webClient);
     }
 
+    @Test
+    public void testErrorHandling() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Failing Job");
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "stage \"pass\"\n" +
+                "echo \"I'm passing\"\n" +
+                "\n" +
+                "stage \"catch-an-error\"\n" +
+                "catchError {\n" +
+                "   error \"You won't see me?\"\n" +
+                "}\n" +
+                "\n" +
+                "stage \"and now keep passing\"\n" +
+                "echo \"still passing\""));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
+
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        assertBasicJobInfoOkay(job, webClient);
+
+        String jobRunsUrl = job.getUrl() + "wfapi/runs?fullStages=true";
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt runExt = workflowRuns[0];
+        Assert.assertEquals(StatusExt.FAILED, runExt.getStatus());
+        Assert.assertEquals(3, runExt.getStages().size());
+
+        for (StageNodeExt st : runExt.getStages()) {
+            assertStageInfoOkay(st, true);
+        }
+
+        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(1).getStatus());
+        Assert.assertEquals(StatusExt.FAILED, runExt.getStages().get(2).getStatus());
+
+        StageNodeExt finalStage = runExt.getStages().get(2);
+        AtomFlowNodeExt finalNode = finalStage.getStageFlowNodes().get(finalStage.getStageFlowNodes().size()-1);
+        Assert.assertEquals(StatusExt.FAILED, finalNode.getStatus());
+        Assert.assertNotNull(finalNode.getError());
+        Assert.assertNotNull(finalNode.getError().getMessage());
+        Assert.assertNotNull(finalNode.getError().getType());
+    }
+
+
+
     /** Checks handling of one buggy FlowEndNode case */
     private void assertTimingHandlesBuggyFlowEndNode(WorkflowJob job, JenkinsRule.WebClient webClient) throws Exception {
         WorkflowRun run = job.getLastBuild();
@@ -212,10 +266,34 @@ public class JobAndRunAPITest {
         assertRunInfoOkay(job, workflowRun);
     }
 
-    private void assertStageInfoOkay(StageNodeExt stageNodeExt) {
+    private void assertStageInfoOkay(StageNodeExt stageNodeExt, boolean mustHaveChildNodes) {
         Assert.assertTrue("Stage has duration >0!", stageNodeExt.getDurationMillis() > 0);
         Assert.assertTrue("Stage has pause duration >= 0!", stageNodeExt.getPauseDurationMillis() >= 0);
         Assert.assertTrue("Stage has startTimeMillis >= 0!", stageNodeExt.getStartTimeMillis() > 0);
+
+        if (mustHaveChildNodes) {
+            Assert.assertNotNull(stageNodeExt.getStageFlowNodes());
+            Assert.assertTrue(stageNodeExt.getStageFlowNodes().size() > 0);
+        }
+
+        if (stageNodeExt.getStageFlowNodes() == null) {
+            return;
+        }
+        for (AtomFlowNodeExt childNode : stageNodeExt.getStageFlowNodes()) {
+            Assert.assertTrue(childNode.getName() != null && !(childNode.getName().isEmpty()));
+            Assert.assertTrue(childNode.getId() != null && !(childNode.getId().isEmpty()));
+            // Handle me: errorExt
+            ErrorExt err = childNode.getError();
+            if (err != null) {
+                Assert.assertNotNull(err.getMessage());
+                Assert.assertNotNull(err.getType());
+            }
+            Assert.assertNotNull(childNode.getStatus());
+
+            Assert.assertTrue("Start times should always be > 0 after 1970", childNode.getStartTimeMillis() > 0);
+            Assert.assertTrue("Durations should always be >= 0", childNode.getDurationMillis() >= 0);
+            Assert.assertTrue("Pause Durations should always be >= 0", childNode.getPauseDurationMillis() >= 0);
+        }
     }
 
     private void assertRunInfoOkay(WorkflowJob job, RunExt runExt) {
@@ -259,7 +337,7 @@ public class JobAndRunAPITest {
         }
 
         for (StageNodeExt st : runExt.getStages()) {
-            assertStageInfoOkay(st);
+            assertStageInfoOkay(st, false);
         }
     }
 
