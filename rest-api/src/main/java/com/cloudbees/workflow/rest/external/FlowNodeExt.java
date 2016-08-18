@@ -187,7 +187,7 @@ public class FlowNodeExt {
         set_links(new FlowNodeLinks());
         get_links().initSelf(Describe.getUrl(node));
         setStatus(status);
-        if (status != StatusExt.NOT_EXECUTED) {
+        if (status != StatusExt.NOT_EXECUTED && error != null) {
             setError(ErrorExt.create(error));
         }
 
