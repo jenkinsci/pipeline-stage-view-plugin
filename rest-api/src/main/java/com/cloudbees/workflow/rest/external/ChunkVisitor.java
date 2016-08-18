@@ -1,6 +1,7 @@
 package com.cloudbees.workflow.rest.external;
 
 import com.google.common.collect.Iterables;
+import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.BlockEndNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -26,7 +27,7 @@ import java.util.Collection;
  */
 public class ChunkVisitor extends StandardChunkVisitor {
     ArrayDeque<StageNodeExt> stages = new ArrayDeque<StageNodeExt>();
-//    FlowNode firstExecuted = null;
+    FlowNode firstExecuted = null;
     ArrayDeque<AtomFlowNodeExt> stageContents = new ArrayDeque<AtomFlowNodeExt>();
     WorkflowRun run;
 
@@ -56,18 +57,18 @@ public class ChunkVisitor extends StandardChunkVisitor {
     /** Do the final computations to materialize the stage */
     protected void handleChunkDone(@Nonnull MemoryFlowChunk chunk) {
         StageNodeExt stageExt = new StageNodeExt();
-        TimingInfo times = StatusAndTiming.computeChunkTiming(run, chunk.getPauseTimeMillis(), chunk);
+        TimingInfo times = StatusAndTiming.computeChunkTiming(run, chunk.getPauseTimeMillis(), firstExecuted, chunk.getLastNode(), chunk.getNodeAfter());
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
-        GenericStatus status = StatusAndTiming.computeChunkStatus(run, chunk);
-        if (status == null) {
+        GenericStatus status;
+        if (firstExecuted == null) {
             status = GenericStatus.NOT_EXECUTED;
+        } else {
+            status = StatusAndTiming.computeChunkStatus(run, chunk.getNodeBefore(), firstExecuted, chunk.getLastNode(), chunk.getNodeAfter());
         }
 
         // TODO pipeline graph analysis gets most of the metadata for the chunk in 1 pass
-
-        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, TimingAction.getStartTime(chunk.getFirstNode()), StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
-        stageExt.setStartTimeMillis(TimingAction.getStartTime(chunk.getFirstNode()));  // TODO pipeline graph analysis adds this to TimingInfo
+        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, TimingAction.getStartTime(firstExecuted), StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
         ArrayList<AtomFlowNodeExt> internals = new ArrayList<AtomFlowNodeExt>(childNodeLength);
@@ -80,9 +81,16 @@ public class ChunkVisitor extends StandardChunkVisitor {
     @Override
     protected void resetChunk(@Nonnull MemoryFlowChunk chunk) {
         super.resetChunk(chunk);
-//        firstExecuted = null;
+        firstExecuted = null;
     }
 
+    @Override
+    public void chunkStart(@Nonnull FlowNode startNode, @CheckForNull FlowNode beforeBlock, @Nonnull ForkScanner scanner) {
+        if (NotExecutedNodeAction.isExecuted(startNode)) {
+            firstExecuted = startNode;
+        }
+        super.chunkStart(startNode, beforeBlock, scanner);
+    }
 
     /** Called when hitting the end of a block (determined by the chunkEndPredicate) */
     public void chunkEnd(@Nonnull FlowNode endNode, @CheckForNull FlowNode afterBlock, @Nonnull ForkScanner scanner) {
@@ -91,6 +99,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         // Reset the stage internal state to start here
         stageContents.clear();
         chunk.setPauseTimeMillis(0);
+        firstExecuted = null;
 
         // if we're using marker-based (and not block-scoped) stages, add the last node as part of its contents
         if (!(endNode instanceof BlockEndNode)) {
@@ -99,9 +108,9 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     public void atomNode(@CheckForNull FlowNode before, @Nonnull FlowNode atomNode, @CheckForNull FlowNode after, @Nonnull ForkScanner scan) {
-        /*if (!NotExecutedNodeAction.isExecuted(atomNode)) {
-            firstExecuted = atomNode;  // See if we need this
-        }*/
+        if (NotExecutedNodeAction.isExecuted(atomNode)) {
+            firstExecuted = atomNode;
+        }
         long pause = PauseAction.getPauseDuration(atomNode);
         chunk.setPauseTimeMillis(chunk.getPauseTimeMillis()+pause);
 
