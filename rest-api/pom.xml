@@ -47,12 +47,12 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.2-beta-1</version> <!-- allows consuming the new APIs -->
+            <version>2.2-beta-2</version> <!-- allows consuming the new APIs -->
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>pipeline-graph-analysis</artifactId>
-            <version>0.1-beta-1</version>
+            <version>0.1-beta-2</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
