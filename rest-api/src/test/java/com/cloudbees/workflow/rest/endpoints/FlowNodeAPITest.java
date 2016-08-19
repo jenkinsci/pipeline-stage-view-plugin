@@ -194,8 +194,7 @@ public class FlowNodeAPITest {
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
         Assert.assertEquals("[5]", stageDesc.getStageFlowNodes().get(0).getParentNodes().toString());
 
-        // FIXME describe API only is returning a SUCCESS code here, no idea why.
-        //Assert.assertEquals(StatusExt.FAILED, stageDesc.getStageFlowNodes().get(0).getStatus()); // If flow continued, we succeeded
+        Assert.assertEquals(StatusExt.FAILED, stageDesc.getStageFlowNodes().get(0).getStatus()); // If flow continued, we succeeded
         Assert.assertEquals("my specific failure message", stageDesc.getStageFlowNodes().get(0).getError().getMessage());
         Assert.assertEquals("hudson.AbortException", stageDesc.getStageFlowNodes().get(0).getError().getType());
     }
