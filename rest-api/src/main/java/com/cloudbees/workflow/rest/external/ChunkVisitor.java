@@ -53,7 +53,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         if (status == GenericStatus.FAILURE && err == null) {
             // Needed for FlowEndNode, since an ErrorAction isn't generated
             // When build result is set directly
-            err = new ErrorAction(new Throwable("Run failed, assuming last chunk failed too!"));
+            err = new ErrorAction(new Throwable("Build marked as a failure, final stage will fail."));
         }
 
         AtomFlowNodeExt output = AtomFlowNodeExt.create(node, "", dur, TimingAction.getStartTime(node), StatusExt.fromGenericStatus(status), err);

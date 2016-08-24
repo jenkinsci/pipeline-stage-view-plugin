@@ -40,11 +40,14 @@ import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
+import org.jenkinsci.plugins.workflow.graph.FlowEndNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -52,6 +55,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -72,6 +76,7 @@ public class FlowNodeUtil {
     private static final List<CacheExtension> FALLBACK_CACHES = Arrays.asList(new CacheExtension());
 
     @Extension
+    @Restricted(NoExternalUse.class)
     public static class CacheExtension extends CacheExtensionPoint {
 
         // Larger cache of run data, for completed runs, keyed by flowexecution url, useful for serving info
@@ -112,20 +117,21 @@ public class FlowNodeUtil {
         return (execution != null && execution.isComplete());
     }
 
-    /** Find a node following this one */
+    /** Find a node following this one, using an optimized approach */
     @CheckForNull
     public static FlowNode getNodeAfter(@Nonnull final FlowNode node) {
-        if (node.isRunning()) {
+        if (node.isRunning() || node instanceof FlowEndNode) {
             return null;
         }
 
-        int iota = Integer.parseInt(node.getId());
-
-        FlowExecution exec = node.getExecution();
         FlowNode nextNode = null;
+        FlowExecution exec = node.getExecution();
+        int iota = 0;
 
         // Look for the next node or the one after it to see if it follows the current node, this can be much faster
+        // It relies on the IDs being an iota (a number), but falls back to exhaustive search in case of failure
         try {
+            iota = Integer.parseInt(node.getId());
              nextNode = exec.getNode(Integer.toString(iota + 1));
             if (nextNode != null && nextNode.getParents().contains(node)) {
                 return nextNode;
@@ -137,15 +143,17 @@ public class FlowNodeUtil {
                     return nextNode;
                 }
             } catch (IOException ioe2) {
-                // Nope miss again, let's do the harder thing.
+                // Thrown when node with that ID does not exist
             }
+        } catch (NumberFormatException nfe) {
+            // Can't parse iota as number, fall back to looking for parent
         }
 
         // Find node after this one, scanning everything until this one
         final FlowNode after = new ForkScanner().findFirstMatch(node.getExecution().getCurrentHeads(), Collections.singletonList(node), new Predicate<FlowNode>() {
             public boolean apply(@Nonnull FlowNode f) {
                 List<FlowNode> parents = f.getParents();
-                return (parents != null && parents.contains(node));
+                return (parents.contains(node));
             }
         });
         return after;
@@ -170,6 +178,18 @@ public class FlowNodeUtil {
         } else {
             return StatusExt.NOT_EXECUTED;
         }
+    }
+
+    /** List the stage node for each stage -- needed for back-compat */
+    public static List<FlowNode> getStageNodes(FlowExecution execution) {
+        // FIXME use new analysis API to get them
+        return null;
+    }
+
+    /** Needed for back-compat, returns nodes for a stage */
+    public static List<FlowNode> getStageNodes(FlowNode stageNode) {
+        // FIXME because I need it
+        return null;
     }
 
     /** This is used to cover an obscure case where a WorkflowJob is renamed BUT

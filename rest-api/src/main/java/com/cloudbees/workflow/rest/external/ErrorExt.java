@@ -58,13 +58,8 @@ public class ErrorExt {
         ErrorExt errorExt = new ErrorExt();
         Throwable throwable = errorAction.getError();
 
-        if (throwable != null) {
-            errorExt.setMessage(throwable.getMessage());
-            errorExt.setType(throwable.getClass().getName());
-        } else {
-            errorExt.setMessage("No message: null Throwable on error");
-            errorExt.setType("No type: null Throwable on error");
-        }
+        errorExt.setMessage(throwable.getMessage());
+        errorExt.setType(throwable.getClass().getName());
 
         return errorExt;
     }
