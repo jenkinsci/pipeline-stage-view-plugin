@@ -316,7 +316,6 @@ public class JobAndRunAPITest {
             Assert.assertEquals(1, stage.getStageFlowNodes().size());
         }
 
-
         // Stage 2 test
         stage = runExt.getStages().get(1);
         Assert.assertEquals("Test", stage.getName());
