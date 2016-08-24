@@ -1,6 +1,7 @@
 package com.cloudbees.workflow.rest.external;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
@@ -31,6 +32,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     FlowNode firstExecuted = null;
     ArrayDeque<AtomFlowNodeExt> stageContents = new ArrayDeque<AtomFlowNodeExt>();
     WorkflowRun run;
+    ArrayList<String> stageNodeIds = new ArrayList<String>();
 
     public ChunkVisitor(@Nonnull WorkflowRun run) {
         this.run = run;
@@ -84,6 +86,8 @@ public class ChunkVisitor extends StandardChunkVisitor {
         Iterables.addAll(internals, Iterables.limit(stageContents, StageNodeExt.MAX_CHILD_NODES));
         stageExt.setStageFlowNodes(internals);
 
+        stageExt.allChildNodeIds = new ArrayList<String>(Lists.reverse(stageNodeIds));
+
         this.stages.push(stageExt);
     }
 
@@ -91,6 +95,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     protected void resetChunk(@Nonnull MemoryFlowChunk chunk) {
         super.resetChunk(chunk);
         firstExecuted = null;
+        stageNodeIds.clear();
     }
 
     @Override
@@ -107,6 +112,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
 
         // Reset the stage internal state to start here
         stageContents.clear();
+        stageNodeIds.clear();
         chunk.setPauseTimeMillis(0);
         firstExecuted = null;
 
@@ -126,5 +132,6 @@ public class ChunkVisitor extends StandardChunkVisitor {
         // TODO this is rather inefficient, we should optimize to use a circular buffer or ArrayList with limited size
         // And then only create the node container objects when we hit the start (doing timing ETC at that point)
         stageContents.push(makeAtomNode(run, before, atomNode, after));
+        stageNodeIds.add(atomNode.getId());
     }
 }

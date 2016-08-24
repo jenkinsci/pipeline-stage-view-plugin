@@ -24,6 +24,7 @@
 package com.cloudbees.workflow.rest.external;
 
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
@@ -35,6 +36,7 @@ import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.kohsuke.stapler.Stapler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,6 +45,9 @@ import java.util.List;
 public class StageNodeExt extends FlowNodeExt {
 
     private List<AtomFlowNodeExt> stageFlowNodes;
+
+    /** Bit of a hack but this lets us cache all the child nodes, not just the limited subset without adding to JSON responses */
+    transient List<String> allChildNodeIds = new ArrayList<String>();
 
     // Limit the size of child nodes returned
     static final int MAX_CHILD_NODES = Integer.getInteger(StageNodeExt.class.getName()+".maxChildNodes", 100);
@@ -58,6 +63,12 @@ public class StageNodeExt extends FlowNodeExt {
 
     public static boolean isStageNode(FlowNode node) {
         return (node.getAction(LabelAction.class) != null && node.getAction(ThreadNameAction.class) == null);
+    }
+
+    /** Return full list of child node IDs */
+    @JsonIgnore // Just in case
+    public List<String> getAllChildNodeIds() {
+        return Collections.unmodifiableList(allChildNodeIds);
     }
 
     /** Hides child nodes, so we store a complete image but only return the minimal amount of data */

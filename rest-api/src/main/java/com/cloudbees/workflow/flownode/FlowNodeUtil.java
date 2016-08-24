@@ -26,6 +26,7 @@ package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
+import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
@@ -33,6 +34,7 @@ import com.google.common.cache.CacheBuilder;
 import hudson.Extension;
 import hudson.ExtensionPoint;
 import hudson.model.Item;
+import hudson.model.Queue;
 import hudson.model.listeners.ItemListener;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
@@ -52,6 +54,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -180,16 +183,81 @@ public class FlowNodeUtil {
         }
     }
 
-    /** List the stage node for each stage -- needed for back-compat */
-    public static List<FlowNode> getStageNodes(FlowExecution execution) {
-        // FIXME use new analysis API to get them
+    @CheckForNull
+    public static WorkflowRun getWorkflowRunForExecution(@CheckForNull FlowExecution exec) {
+        if (exec == null) {
+            return null;
+        }
+
+        try {
+            Queue.Executable executable =  exec.getOwner().getExecutable();
+            if (executable instanceof  WorkflowRun) {
+                WorkflowRun myRun = (WorkflowRun) executable;
+                return myRun;
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException("Execution probably has not begun, or invalid pipeline data!", ioe);
+        }
         return null;
     }
 
-    /** Needed for back-compat, returns nodes for a stage */
-    public static List<FlowNode> getStageNodes(FlowNode stageNode) {
-        // FIXME because I need it
-        return null;
+
+    /** List the stage nodes for a FlowExecution -- needed for back-compat.
+     *  Note: far more efficient than existing implementation because it uses the cache of run info.
+     */
+    @Nonnull
+    public static List<FlowNode> getStageNodes(@CheckForNull FlowExecution execution) throws RuntimeException {
+        WorkflowRun run = getWorkflowRunForExecution(execution);
+        if (run == null) {
+            return Collections.EMPTY_LIST;
+        }
+        RunExt runExt = RunExt.create(run);
+        if (runExt.getStages() != null) {
+            ArrayList<FlowNode> nodes = new ArrayList<FlowNode>(runExt.getStages().size());
+            try {
+                for (StageNodeExt st : runExt.getStages()) {
+                    nodes.add(execution.getNode(st.getId()));
+                }
+                return nodes;
+            } catch (IOException ioe) {
+                throw new RuntimeException("Unable to load flownode for valid run ", ioe);
+            }
+
+        } else {
+            return Collections.EMPTY_LIST;
+        }
+    }
+
+    /** Needed for back-compat, returns nodes inside a stage
+     *  Note: far more efficient than existing implementation because it uses the cache of run info.
+     */
+    @Nonnull
+    public static List<FlowNode> getStageNodes(@CheckForNull FlowNode stageNode) {
+        if (stageNode == null) { return Collections.EMPTY_LIST; }
+        FlowExecution exec = stageNode.getExecution();
+        WorkflowRun run = getWorkflowRunForExecution(exec);
+        if (run == null) { return Collections.EMPTY_LIST; }
+        RunExt runExt = RunExt.create(run);
+        if (runExt.getStages() == null || runExt.getStages().isEmpty()) { return Collections.EMPTY_LIST; }
+
+        List<String> childIds = null;
+        for (StageNodeExt st : runExt.getStages()) {
+            if (st.getId().equals(stageNode.getId())) {
+                childIds = st.getAllChildNodeIds();
+                break;
+            }
+        }
+
+        try {
+            if (childIds == null) { return Collections.EMPTY_LIST; }
+            List<FlowNode> nodes = new ArrayList<FlowNode>(childIds.size());
+            for (String s : childIds) {
+                nodes.add(exec.getNode(s));
+            }
+            return nodes;
+        } catch (IOException ioe) {
+            throw new RuntimeException("Failed to load a FlowNode, even though run exists! ", ioe);
+        }
     }
 
     /** This is used to cover an obscure case where a WorkflowJob is renamed BUT

@@ -307,7 +307,6 @@ public class JobAndRunAPITest {
         Assert.assertEquals("/jenkins/"+job.getUrl()+"1/wfapi/artifacts", runExt.get_links().getArtifacts().href);
         Assert.assertEquals(3, runExt.getStages().size());
 
-
         // Stage 1 test
         StageNodeExt stage = runExt.getStages().get(0);
         Assert.assertEquals("Build", stage.getName());
@@ -336,8 +335,20 @@ public class JobAndRunAPITest {
             Assert.assertEquals(3, stage.getStageFlowNodes().size());
         }
 
-        for (StageNodeExt st : runExt.getStages()) {
+        List<FlowNode> nodes = FlowNodeUtil.getStageNodes(job.getLastBuild().getExecution());
+        Assert.assertEquals(runExt.getStages().size(), nodes.size());
+        for (int i=0; i<runExt.getStages().size(); i++) {
+            StageNodeExt st = runExt.getStages().get(i);
             assertStageInfoOkay(st, false);
+            Assert.assertEquals(st.getId(), nodes.get(i).getId());
+
+            if (stage.getStageFlowNodes() != null) {
+                List<FlowNode> childNodes = FlowNodeUtil.getStageNodes(nodes.get(i));
+                Assert.assertEquals(st.getStageFlowNodes().size(), childNodes.size());
+                for (int j=0; j<childNodes.size(); j++) {
+                    Assert.assertEquals(st.getStageFlowNodes().get(j).getId(), childNodes.get(j).getId());
+                }
+            }
         }
     }
 
