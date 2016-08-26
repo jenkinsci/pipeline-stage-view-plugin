@@ -31,6 +31,8 @@ import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 
+import java.io.IOException;
+
 /**
  * API Action handler to return {@link FlowNode} information.
  * <p>
@@ -47,12 +49,12 @@ public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
     }
 
     @ServeJson
-    public Object doIndex() {
+    public Object doIndex() throws IOException {
         return Describe.get(getNode());
     }
 
     @ServeJson
-    public Object doDescribe() {
+    public Object doDescribe() throws IOException {
         return Describe.get(getNode());
     }
 
