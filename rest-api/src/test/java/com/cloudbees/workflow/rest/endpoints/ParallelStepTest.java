@@ -92,17 +92,17 @@ public class ParallelStepTest {
         jsonResponse = stageDescription.getWebResponse().getContentAsString();
 
         StageNodeExt stage1Desc = jsonReadWrite.fromString(jsonResponse, StageNodeExt.class);
-        Assert.assertEquals(2, stage1Desc.getStageFlowNodes().size());
-        Assert.assertEquals("10", stage1Desc.getStageFlowNodes().get(0).getId());
-        Assert.assertEquals("Print Message", stage1Desc.getStageFlowNodes().get(0).getName());
-        Assert.assertEquals("12", stage1Desc.getStageFlowNodes().get(1).getId());
-        Assert.assertEquals("Print Message", stage1Desc.getStageFlowNodes().get(1).getName());
+        Assert.assertEquals(7, stage1Desc.getStageFlowNodes().size());
+        Assert.assertEquals("6", stage1Desc.getStageFlowNodes().get(0).getId());
+        Assert.assertEquals("Print Message", stage1Desc.getStageFlowNodes().get(2).getName());
+        Assert.assertEquals("10", stage1Desc.getStageFlowNodes().get(5).getId());
+        Assert.assertEquals("Print Message", stage1Desc.getStageFlowNodes().get(5).getName());
 
         stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/15/wfapi/describe", "application/json");
         jsonResponse = stageDescription.getWebResponse().getContentAsString();
 
         StageNodeExt stage2Desc = jsonReadWrite.fromString(jsonResponse, StageNodeExt.class);
-        Assert.assertEquals(1, stage2Desc.getStageFlowNodes().size());
+        Assert.assertEquals(4, stage2Desc.getStageFlowNodes().size());
         Assert.assertEquals("16", stage2Desc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals("Print Message", stage2Desc.getStageFlowNodes().get(0).getName());
     }

@@ -23,6 +23,8 @@
  */
 package com.cloudbees.workflow.rest.external;
 
+import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.TimingInfo;
+
 /**
  * Exec duration.
  *
@@ -46,5 +48,12 @@ public class ExecDuration {
 
     public void setPauseDurationMillis(long pauseDurationMillis) {
         this.pauseDurationMillis = pauseDurationMillis;
+    }
+
+    public ExecDuration() { }
+
+    public ExecDuration(TimingInfo info) {
+        this.totalDurationMillis = info.getTotalDurationMillis();
+        this.pauseDurationMillis = info.getPauseDurationMillis();
     }
 }

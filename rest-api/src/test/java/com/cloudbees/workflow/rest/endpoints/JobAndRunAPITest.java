@@ -24,8 +24,10 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.flownode.FlowNodeUtil;
+import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
 import com.cloudbees.workflow.rest.external.BuildArtifactExt;
 import com.cloudbees.workflow.rest.external.ChangeSetExt;
+import com.cloudbees.workflow.rest.external.ErrorExt;
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
@@ -35,11 +37,13 @@ import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.Action;
 import hudson.model.Result;
 import hudson.model.queue.QueueTaskFuture;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.support.steps.StageStep;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,12 +56,65 @@ import java.net.URLEncoder;
 import java.util.List;
 
 /**
- * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
+ * Test the raw job/run APIs
  */
 public class JobAndRunAPITest {
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
+
+    @Test
+    public void testBlockStage() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Blocky job");
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "node {" +
+                "   stage ('Build') { " +
+                "     echo ('Building'); " +
+                "   } \n" +
+                "   stage ('Test') { " +
+                "     echo ('Testing'); " +
+                "   } \n" +
+                "   stage ('Deploy') { " +
+                "     writeFile file: 'file.txt', text:'content'; " +
+                "     archive(includes: 'file.txt'); " +
+                "     echo ('Deploying'); " +
+                "   } \n" +
+                "}"));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatusSuccess(build);
+
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        assertBasicJobInfoOkay(job, webClient);
+        assertArtifactsEndpointOkay(job, webClient);
+        assertChangesetsEndpointOkay(job, webClient);
+
+        /** Verify the runs show right stages as per {@link #assertBasicRunInfoOkay(WorkflowJob, JenkinsRule.WebClient)} */
+        String jobRunsUrl = job.getUrl() + "wfapi/runs?fullStages=true";
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt runExt = workflowRuns[0];
+        assertRunInfoOkay(job, runExt, 6, 11, 16);
+
+        /** Test the describe endpoint, similar to {@link #assertDescribeEndpointOkay(WorkflowJob, JenkinsRule.WebClient)} */
+        String descUrl = job.getUrl() + "1/wfapi/describe";
+        runsPage = webClient.goTo(descUrl, "application/json");
+        jsonResponse = runsPage.getWebResponse().getContentAsString();
+        RunExt workflowRun = jsonReadWrite.fromString(jsonResponse, RunExt.class);
+        assertRunInfoOkay(job, workflowRun, 6, 11, 16);
+
+        // Run another build and then test resultset narrowing using the 'since' query parameter
+        build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatusSuccess(build);
+        assertSinceQueryParamOkay(job, webClient);
+    }
 
     @Test
     public void test() throws Exception {
@@ -70,10 +127,8 @@ public class JobAndRunAPITest {
                 "   stage ('Test'); " +
                 "   echo ('Testing'); " +
                 "   stage ('Deploy'); " +
-                (hudson.Functions.isWindows() ? "   bat ('rmdir /s/q targs || echo no such dir\\n mkdir targs && echo hello> targs\\\\hello.txt'); "
-                        : "   sh ('rm -rf targs && mkdir targs && echo hello > targs/hello.txt'); "
-                ) +
-                "   archive(includes: 'targs/hello.txt'); " +
+                "     writeFile file: 'file.txt', text:'content'; " +
+                "     archive(includes: 'file.txt'); " +
                 "   echo ('Deploying'); " +
                 "}"));
 
@@ -95,6 +150,58 @@ public class JobAndRunAPITest {
         assertSinceQueryParamOkay(job, webClient);
     }
 
+    @Test
+    public void testErrorHandling() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Failing Job");
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "stage \"pass\"\n" +
+                "echo \"I'm passing\"\n" +
+                "\n" +
+                "stage \"catch-an-error\"\n" +
+                "catchError {\n" +
+                "   error \"You won't see me?\"\n" +
+                "}\n" +
+                "\n" +
+                "stage \"and now keep passing\"\n" +
+                "echo \"still passing\""));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
+
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        assertBasicJobInfoOkay(job, webClient);
+
+        String jobRunsUrl = job.getUrl() + "wfapi/runs?fullStages=true";
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt runExt = workflowRuns[0];
+        Assert.assertEquals(StatusExt.FAILED, runExt.getStatus());
+        Assert.assertEquals(3, runExt.getStages().size());
+
+        for (StageNodeExt st : runExt.getStages()) {
+            assertStageInfoOkay(st, true);
+        }
+
+        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(1).getStatus());
+        Assert.assertEquals(StatusExt.FAILED, runExt.getStages().get(2).getStatus());
+
+        StageNodeExt finalStage = runExt.getStages().get(2);
+        AtomFlowNodeExt finalNode = finalStage.getStageFlowNodes().get(finalStage.getStageFlowNodes().size()-1);
+        Assert.assertEquals(StatusExt.FAILED, finalNode.getStatus());
+        Assert.assertNotNull(finalNode.getError());
+        Assert.assertNotNull(finalNode.getError().getMessage());
+        Assert.assertNotNull(finalNode.getError().getType());
+    }
+
+
+
     /** Checks handling of one buggy FlowEndNode case */
     private void assertTimingHandlesBuggyFlowEndNode(WorkflowJob job, JenkinsRule.WebClient webClient) throws Exception {
         WorkflowRun run = job.getLastBuild();
@@ -105,18 +212,13 @@ public class JobAndRunAPITest {
         // Remove timing info from last node (root cause of one set of bugs) and flush the cache
         actions.remove(timing);
         FlowNodeUtil.CacheExtension ext = FlowNodeUtil.CacheExtension.all().get(0);
-        ext.getExecutionCache().invalidateAll();
         ext.getRunCache().invalidateAll();
 
         Page runsPage = webClient.goTo(run.getUrl() + "/wfapi/describe", "application/json");
         String jsonResponse = runsPage.getWebResponse().getContentAsString();
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         RunExt runData = jsonReadWrite.fromString(jsonResponse, RunExt.class);
-        System.out.println("Duration: "+runData.getDurationMillis());
-        assertRunInfoOkay(runData);
-
-        // Restore state
-        actions.add(timing);
+        assertRunInfoOkay(job, runData);
     }
 
     private void assertBasicJobInfoOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
@@ -129,10 +231,10 @@ public class JobAndRunAPITest {
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         JobExt jobExt = jsonReadWrite.fromString(jsonResponse, JobExt.class);
 
-        Assert.assertEquals("Noddy Job", jobExt.getName());
+        Assert.assertEquals(job.getName(), jobExt.getName());
         Assert.assertEquals(1, jobExt.getRunCount());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/wfapi/describe", jobExt.get_links().self.href);
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/wfapi/runs", jobExt.get_links().getRuns().href);
+        Assert.assertEquals("/jenkins/" + job.getUrl() + "wfapi/describe", jobExt.get_links().self.href);
+        Assert.assertEquals("/jenkins/" + job.getUrl() + "wfapi/runs", jobExt.get_links().getRuns().href);
     }
 
     private void assertBasicRunInfoOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
@@ -148,7 +250,7 @@ public class JobAndRunAPITest {
         Assert.assertEquals(1, workflowRuns.length);
         RunExt runExt = workflowRuns[0];
 
-        assertRunInfoOkay(runExt);
+        assertRunInfoOkay(job, runExt);
     }
 
     private void assertDescribeEndpointOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
@@ -161,34 +263,91 @@ public class JobAndRunAPITest {
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         RunExt workflowRun = jsonReadWrite.fromString(jsonResponse, RunExt.class);
 
-        assertRunInfoOkay(workflowRun);
+        assertRunInfoOkay(job, workflowRun);
     }
 
-    private void assertStageInfoOkay(StageNodeExt stageNodeExt) {
+    private void assertStageInfoOkay(StageNodeExt stageNodeExt, boolean mustHaveChildNodes) {
         Assert.assertTrue("Stage has duration >0!", stageNodeExt.getDurationMillis() > 0);
         Assert.assertTrue("Stage has pause duration >= 0!", stageNodeExt.getPauseDurationMillis() >= 0);
         Assert.assertTrue("Stage has startTimeMillis >= 0!", stageNodeExt.getStartTimeMillis() > 0);
+
+        if (mustHaveChildNodes) {
+            Assert.assertNotNull(stageNodeExt.getStageFlowNodes());
+            Assert.assertTrue(stageNodeExt.getStageFlowNodes().size() > 0);
+        }
+
+        if (stageNodeExt.getStageFlowNodes() == null) {
+            return;
+        }
+        for (AtomFlowNodeExt childNode : stageNodeExt.getStageFlowNodes()) {
+            Assert.assertTrue(childNode.getName() != null && !(childNode.getName().isEmpty()));
+            Assert.assertTrue(childNode.getId() != null && !(childNode.getId().isEmpty()));
+            // Handle me: errorExt
+            ErrorExt err = childNode.getError();
+            if (err != null) {
+                Assert.assertNotNull(err.getMessage());
+                Assert.assertNotNull(err.getType());
+            }
+            Assert.assertNotNull(childNode.getStatus());
+
+            Assert.assertTrue("Start times should always be > 0 after 1970", childNode.getStartTimeMillis() > 0);
+            Assert.assertTrue("Durations should always be >= 0", childNode.getDurationMillis() >= 0);
+            Assert.assertTrue("Pause Durations should always be >= 0", childNode.getPauseDurationMillis() >= 0);
+        }
     }
 
-    private void assertRunInfoOkay(RunExt runExt) {
+    private void assertRunInfoOkay(WorkflowJob job, RunExt runExt) {
+        assertRunInfoOkay(job, runExt, 5, 7, 9);
+    }
+
+    private void assertRunInfoOkay(WorkflowJob job, RunExt runExt,  int stageid1, int stageId2, int stageId3) {
         Assert.assertEquals("#1", runExt.getName());
         Assert.assertEquals(StatusExt.SUCCESS, runExt.getStatus());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/wfapi/describe", runExt.get_links().self.href);
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/wfapi/artifacts", runExt.get_links().getArtifacts().href);
-
+        Assert.assertEquals("/jenkins/" + job.getUrl() + "1/wfapi/describe", runExt.get_links().self.href);
+        Assert.assertEquals("/jenkins/"+job.getUrl()+"1/wfapi/artifacts", runExt.get_links().getArtifacts().href);
         Assert.assertEquals(3, runExt.getStages().size());
-        Assert.assertEquals("Build", runExt.getStages().get(0).getName());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", runExt.getStages().get(0).get_links().self.href);
-        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(0).getStatus());
-        Assert.assertEquals("Test", runExt.getStages().get(1).getName());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/7/wfapi/describe", runExt.getStages().get(1).get_links().self.href);
-        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(1).getStatus());
-        Assert.assertEquals("Deploy", runExt.getStages().get(2).getName());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/9/wfapi/describe", runExt.getStages().get(2).get_links().self.href);
-        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(2).getStatus());
 
-        for (StageNodeExt st : runExt.getStages()) {
-            assertStageInfoOkay(st);
+        // Stage 1 test
+        StageNodeExt stage = runExt.getStages().get(0);
+        Assert.assertEquals("Build", stage.getName());
+        Assert.assertEquals("/jenkins/"+job.getUrl()+"1/execution/node/"+stageid1+"/wfapi/describe", stage.get_links().self.href);
+        Assert.assertEquals(StatusExt.SUCCESS, stage.getStatus());
+        if (stage.getStageFlowNodes() != null) {
+            Assert.assertEquals(1, stage.getStageFlowNodes().size());
+        }
+
+        // Stage 2 test
+        stage = runExt.getStages().get(1);
+        Assert.assertEquals("Test", stage.getName());
+        Assert.assertEquals("/jenkins/"+job.getUrl()+"1/execution/node/"+stageId2+"/wfapi/describe", stage.get_links().self.href);
+        Assert.assertEquals(StatusExt.SUCCESS, stage.getStatus());
+        if (stage.getStageFlowNodes() != null) {
+            Assert.assertEquals(1, stage.getStageFlowNodes().size());
+        }
+
+        // Stage 3 test
+        stage = runExt.getStages().get(2);
+        Assert.assertEquals("Deploy", stage.getName());
+        Assert.assertEquals("/jenkins/"+job.getUrl()+"1/execution/node/"+stageId3+"/wfapi/describe", stage.get_links().self.href);
+        Assert.assertEquals(StatusExt.SUCCESS, stage.getStatus());
+        if (stage.getStageFlowNodes() != null) {
+            Assert.assertEquals(3, stage.getStageFlowNodes().size());
+        }
+
+        List<FlowNode> nodes = FlowNodeUtil.getStageNodes(job.getLastBuild().getExecution());
+        Assert.assertEquals(runExt.getStages().size(), nodes.size());
+        for (int i=0; i<runExt.getStages().size(); i++) {
+            StageNodeExt st = runExt.getStages().get(i);
+            assertStageInfoOkay(st, false);
+            Assert.assertEquals(st.getId(), nodes.get(i).getId());
+
+            if (stage.getStageFlowNodes() != null) {
+                List<FlowNode> childNodes = FlowNodeUtil.getStageNodes(nodes.get(i));
+                Assert.assertEquals(st.getStageFlowNodes().size(), childNodes.size());
+                for (int j=0; j<childNodes.size(); j++) {
+                    Assert.assertEquals(st.getStageFlowNodes().get(j).getId(), childNodes.get(j).getId());
+                }
+            }
         }
     }
 
@@ -204,14 +363,10 @@ public class JobAndRunAPITest {
         Assert.assertEquals(1, buildArtifactExts.length);
 
         Assert.assertEquals("n1", buildArtifactExts[0].getId());
-        Assert.assertEquals("hello.txt", buildArtifactExts[0].getName());
-        Assert.assertEquals("targs/hello.txt", buildArtifactExts[0].getPath());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/artifact/targs/hello.txt", buildArtifactExts[0].getUrl());
-        if (hudson.Functions.isWindows()) {
-            Assert.assertEquals(7, buildArtifactExts[0].getSize()); // Ends with CRLF
-        } else {
-            Assert.assertEquals(6, buildArtifactExts[0].getSize()); // Ends with LF only, so one less char
-        }
+        Assert.assertEquals("file.txt", buildArtifactExts[0].getName());
+        Assert.assertEquals("file.txt", buildArtifactExts[0].getPath());
+        Assert.assertEquals("/jenkins/"+job.getUrl()+"1/artifact/file.txt", buildArtifactExts[0].getUrl());
+        Assert.assertEquals(7, buildArtifactExts[0].getSize());
     }
 
     private void assertChangesetsEndpointOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {

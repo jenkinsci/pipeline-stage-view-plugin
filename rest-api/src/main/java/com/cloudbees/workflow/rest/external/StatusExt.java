@@ -24,7 +24,11 @@
 package com.cloudbees.workflow.rest.external;
 
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
+import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.GenericStatus;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
@@ -51,6 +55,23 @@ public enum StatusExt {
             return StatusExt.ABORTED;
         } else {
             return StatusExt.FAILED;
+        }
+    }
+
+    public static StatusExt fromGenericStatus(@CheckForNull GenericStatus st) {
+        if (st == null) {
+            return StatusExt.NOT_EXECUTED;
+        }
+        switch (st) {
+            case PAUSED_PENDING_INPUT: return StatusExt.PAUSED_PENDING_INPUT;
+            case ABORTED: return StatusExt.ABORTED;
+            case FAILURE: return StatusExt.FAILED;
+            case IN_PROGRESS: return StatusExt.IN_PROGRESS;
+            case UNSTABLE: return StatusExt.UNSTABLE;
+            case SUCCESS: return StatusExt.SUCCESS;
+            case NOT_EXECUTED: return StatusExt.NOT_EXECUTED;
+            default:
+                throw new IllegalStateException("Forbidden GenericStatus: "+st);
         }
     }
 }
