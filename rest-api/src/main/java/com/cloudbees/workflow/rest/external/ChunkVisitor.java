@@ -2,6 +2,7 @@ package com.cloudbees.workflow.rest.external;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
@@ -64,6 +65,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
 
     @Override
     /** Do the final computations to materialize the stage */
+    @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "We can actually get nulls")
     protected void handleChunkDone(@Nonnull MemoryFlowChunk chunk) {
         StageNodeExt stageExt = new StageNodeExt();
         TimingInfo times;
@@ -107,6 +109,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     @Override
+    @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "We can actually get nulls")
     public void chunkStart(@Nonnull FlowNode startNode, @CheckForNull FlowNode beforeBlock, @Nonnull ForkScanner scanner) {
         if (NotExecutedNodeAction.isExecuted(startNode)) {
             firstExecuted = startNode;
