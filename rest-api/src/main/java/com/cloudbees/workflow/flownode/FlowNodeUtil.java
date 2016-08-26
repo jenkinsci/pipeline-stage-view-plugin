@@ -24,41 +24,40 @@
  */
 package com.cloudbees.workflow.flownode;
 
-import com.cloudbees.workflow.rest.external.ExecDuration;
 import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
+import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import hudson.Extension;
 import hudson.ExtensionPoint;
 import hudson.model.Item;
+import hudson.model.Queue;
 import hudson.model.listeners.ItemListener;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
-import org.jenkinsci.plugins.workflow.actions.WorkspaceAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
-import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
+import org.jenkinsci.plugins.workflow.graph.FlowEndNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,35 +72,23 @@ public class FlowNodeUtil {
     }
 
     public abstract static class CacheExtensionPoint implements ExtensionPoint {
-        public abstract Cache<String,List<FlowNode>> getExecutionCache();
         public abstract Cache<String, RunExt> getRunCache();
-        public abstract Cache<FlowNode,String> getExecNodeNameCache();
     }
 
     // Used in testing where Jenkins is not running yet
     private static final List<CacheExtension> FALLBACK_CACHES = Arrays.asList(new CacheExtension());
 
     @Extension
+    @Restricted(NoExternalUse.class)
     public static class CacheExtension extends CacheExtensionPoint {
-
-        protected final Cache<String,List<FlowNode>> executionCache = CacheBuilder.newBuilder().weakValues().maximumSize(100).build();
 
         // Larger cache of run data, for completed runs, keyed by flowexecution url, useful for serving info
         // Actually can be used to serve Stage data too
         // Because the RunExt caps the total elements returned, and this is fully realized, this is the fastest way
         protected final Cache<String, RunExt> runData = CacheBuilder.newBuilder().maximumSize(1000).build();
 
-        protected final Cache<FlowNode,String> execNodeNameCache = CacheBuilder.newBuilder().weakKeys().expireAfterAccess(1, TimeUnit.HOURS).build();
-
-        public Cache<String,List<FlowNode>> getExecutionCache() {
-            return this.executionCache;
-        }
         public Cache<String, RunExt> getRunCache() {
             return this.runData;
-        }
-
-        public Cache<FlowNode,String> getExecNodeNameCache() {
-            return  this.execNodeNameCache;
         }
 
         public static List<CacheExtension> all() {
@@ -133,96 +120,46 @@ public class FlowNodeUtil {
         return (execution != null && execution.isComplete());
     }
 
-    public static long getNodeExecDuration(FlowNode node) {
-        long startTime = TimingAction.getStartTime(node);
-        if (startTime == 0L) {
-            // The node is running and the time has not been marked on it yet.  Return 0 as the duration for now.
-            return 0L;
+    /** Find a node following this one, using an optimized approach */
+    @CheckForNull
+    public static FlowNode getNodeAfter(@Nonnull final FlowNode node) {
+        if (node.isRunning() || node instanceof FlowEndNode) {
+            return null;
         }
 
-        // All we need to calculate exec duration is the last child nodes
-        FlowNode lastChild = getLastChildNode(node);
-        if (lastChild != null) {
-            long endTime = TimingAction.getStartTime(lastChild);
-            return (endTime - startTime);
-        } else {
-            return 0L;
-        }
-    }
+        FlowNode nextNode = null;
+        FlowExecution exec = node.getExecution();
+        int iota = 0;
 
-    public static FlowNode getLastChildNode(FlowNode node) {
-        List<FlowNode> allNodes = getIdSortedExecutionNodeList(node.getExecution());
-        for(int i=allNodes.size()-1; i>=0; i--) {
-            FlowNode f = allNodes.get(i);
-            if (f.getParents().contains(node)) {
-                return f;
+        // Look for the next node or the one after it to see if it follows the current node, this can be much faster
+        // It relies on the IDs being an iota (a number), but falls back to exhaustive search in case of failure
+        try {
+            iota = Integer.parseInt(node.getId());
+             nextNode = exec.getNode(Integer.toString(iota + 1));
+            if (nextNode != null && nextNode.getParents().contains(node)) {
+                return nextNode;
             }
-        }
-        return null;
-    }
-
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
-        justification = "Precondition of block ensures that null cannot be returned (FlowExecution checked)")
-    public static ExecDuration getStageExecDuration(FlowNode stageStartNode) {
-        FlowExecution execution = stageStartNode.getExecution();
-        if (execution != null && StageNodeExt.isStageNode(stageStartNode)) {
-            List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-            int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
-            FlowNode firstExecutedNode;
-
-            // Locate the first node in the stage that was actually executed.  This can
-            // vary e.g. when there's was a checkpoint restart, the first executed node
-            // in the stage could be in middle of the stage Pipeline definition.
-            firstExecutedNode = getStageExecStartNode(allNodesSorted, stageStartNodeIndex);
-
-            if (firstExecutedNode != null) {
-                long startTime = TimingAction.getStartTime(firstExecutedNode);
-                long endTime;
-
-                // The stage end time is either the start time of the next stage, or the start time
-                // of the last node started on the Pipeline (if there is no next stage).
-                FlowNode nextStageNode = getNextStageNode(allNodesSorted, stageStartNodeIndex);
-                if (nextStageNode != null) {
-                    endTime = TimingAction.getStartTime(nextStageNode);
-                } else {
-                    FlowNode flowEndNode = getFlowEndNode(execution);
-                    endTime = TimingAction.getStartTime(flowEndNode);
-
-                    // If the node is running then we might want to use the "now" time as the end time.
-                    // Otherwise we are using the start time of the node that is running, which is not
-                    // changing i.e. will look as though the node is not running.
-                    if (flowEndNode.isRunning() && !execution.isComplete()) {
-                        // But only do this if the node is not paused e.g. for input.
-                        if (!isPauseNode(flowEndNode)) {
-                            long currentTime = System.currentTimeMillis();
-                            if (currentTime > endTime) {
-                                endTime = currentTime;
-                            }
-                        }
-                    }
+        } catch (IOException ioe) {
+            try {
+                nextNode = exec.getNode(Integer.toString(iota + 2));
+                if (nextNode != null && nextNode.getParents().contains(node)) {
+                    return nextNode;
                 }
-
-                ExecDuration execDuration = new ExecDuration();
-                if (startTime != 0) {
-                    execDuration.setTotalDurationMillis(endTime - startTime);
-
-                    // Calculate the stage pause duration.
-                    int nextStageIndex;
-                    if (nextStageNode != null) {
-                        nextStageIndex = findStageStartNodeIndex(allNodesSorted, nextStageNode);
-                    } else {
-                        nextStageIndex = allNodesSorted.size(); // +1 from end of list
-                    }
-                    for (int i = stageStartNodeIndex; i < nextStageIndex; i++) {
-                        FlowNode node = allNodesSorted.get(i);
-                        execDuration.setPauseDurationMillis(execDuration.getPauseDurationMillis() + PauseAction.getPauseDuration(node));
-                    }
-                }
-                return execDuration;
+            } catch (IOException ioe2) {
+                // Thrown when node with that ID does not exist
             }
+        } catch (NumberFormatException nfe) {
+            // Can't parse iota as number, fall back to looking for parent
         }
 
-        return new ExecDuration();
+        // Find node after this one, scanning everything until this one
+        final FlowNode after = new ForkScanner().findFirstMatch(node.getExecution().getCurrentHeads(), Collections.singletonList(node), new Predicate<FlowNode>() {
+            public boolean apply(@Nonnull FlowNode f) {
+                List<FlowNode> parents = f.getParents();
+                return (parents.contains(node));
+            }
+        });
+        return after;
     }
 
     /**
@@ -232,183 +169,6 @@ public class FlowNodeUtil {
      */
     public static boolean isPauseNode(FlowNode flowNode) {
         return PauseAction.isPaused(flowNode);
-    }
-
-    /**
-     * Get the first node in the stage that executed.
-     * <p>
-     * An executed node is a node that does not have a {@link NotExecutedNodeAction} action.
-     * @param stageStartNode The stage start node (the stage node).
-     * @return The first node in the stage that executed.  This can be the stage node itself.
-     */
-    public static FlowNode getStageExecStartNode(FlowNode stageStartNode) {
-        FlowExecution execution = stageStartNode.getExecution();
-        List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
-
-        return getStageExecStartNode(allNodesSorted, stageStartNodeIndex);
-    }
-
-    private static FlowNode getStageExecStartNode(List<FlowNode> allNodesSorted, int stageStartNodeIndex) {
-        for (int i = stageStartNodeIndex; i < allNodesSorted.size(); i++) {
-            FlowNode node = allNodesSorted.get(i);
-
-            if (i > stageStartNodeIndex && StageNodeExt.isStageNode(node)) {
-                // we've reached the end of the stage, so seems like nothing was executed in it
-                return null;
-            }
-            if (NotExecutedNodeAction.isExecuted(node)) {
-                long nodeStartTime = TimingAction.getStartTime(node);
-                if (nodeStartTime > 0) {
-                    return node;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get the name of the node on which the supplied FlowNode executed.
-     *
-     * @param flowNode The node.
-     * @return The name of the node on which the supplied FlowNode executed.
-     */
-    public static String getExecNodeName(FlowNode flowNode) {
-        if (flowNode == null) {
-            return "master";
-        }
-
-        Cache<FlowNode, String> execNodeNameCache = CacheExtension.all().get(0).getExecNodeNameCache();
-        String execNodeName = execNodeNameCache.getIfPresent(flowNode);
-        if (execNodeName != null) {
-            return execNodeName;
-        }
-
-        // It is sufficient to walk through just the ancestry
-        ArrayDeque<FlowNode> ancestry = new ArrayDeque<FlowNode>(); // For these nodes, add cache entries
-
-        while (flowNode != null) {
-            // Always hit the cache first
-            execNodeName = execNodeNameCache.getIfPresent(flowNode);
-            if (execNodeName != null) {
-                break;
-            }
-
-            // Then we check for the node itself
-            WorkspaceAction executorAction = flowNode.getAction(WorkspaceAction.class);
-            if (executorAction != null) {
-                String node = executorAction.getNode();
-                if (node.length() > 0) {
-                    execNodeName = node;
-                }
-                break;
-            }
-
-            // Next look at ancestors
-            ancestry.push(flowNode);
-            List<FlowNode> parents = flowNode.getParents();
-            if (parents != null && !parents.isEmpty()) {
-                flowNode = parents.get(0);
-            } else {
-                break;
-            }
-        }
-        // Ran on master if no executor workspace
-        if (execNodeName == null) {
-            execNodeName = "master";
-        }
-        for (FlowNode f : ancestry) {
-            execNodeNameCache.put(f, execNodeName);
-        }
-        return execNodeName;
-    }
-
-    /**
-     * Get the first node in next stage, given the first node in the previous stage (the stage start node).
-     * @param stageStartNode The stage start node.
-     * @return The first node in the next stage, or null if there is no next stage.
-     */
-    public static FlowNode getNextStageNode(FlowNode stageStartNode) {
-        FlowExecution execution = stageStartNode.getExecution();
-        List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-
-        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
-
-        return getNextStageNode(allNodesSorted, stageStartNodeIndex);
-    }
-
-    private static FlowNode getNextStageNode(List<FlowNode> allNodesSorted, int stageStartNodeIndex) {
-        for (int i = (stageStartNodeIndex + 1); i < allNodesSorted.size(); i++) {
-            FlowNode node = allNodesSorted.get(i);
-            if (StageNodeExt.isStageNode(node)) {
-                return node;
-            }
-        }
-
-        return null;
-    }
-
-    // Pulled out because it is likely to get re-implemented
-    private static int findStageStartNodeIndex(List<FlowNode> allNodesSorted, FlowNode stageStartNode) {
-        return  allNodesSorted.indexOf(stageStartNode);
-    }
-
-    /**
-     * Get the last stage executed in the stage.
-     * @param stageStartNode The stage start node.
-     * @return The last stage executed in the stage.
-     */
-    public static FlowNode getStageEndNode(FlowNode stageStartNode) {
-        FlowExecution execution = stageStartNode.getExecution();
-        List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-
-        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, stageStartNode);
-
-        for (int i = (stageStartNodeIndex + 1); i < allNodesSorted.size(); i++) {
-            FlowNode node = allNodesSorted.get(i);
-            if (StageNodeExt.isStageNode(node)) {
-                return allNodesSorted.get(i - 1);
-            }
-        }
-
-        return allNodesSorted.get(allNodesSorted.size() - 1);
-    }
-
-    @CheckForNull
-    /**
-     * Get the last node to start in a flow.
-     * @param execution The flow execution.
-     * @return The last node to start in the flow.
-     */
-    public static FlowNode getFlowEndNode(FlowExecution execution) {
-        if (execution == null) {
-            return null;
-        }
-
-        // If there's no next stage, then use the last node in the workflow.
-        List<FlowNode> endNodes = new ArrayList<FlowNode>(execution.getCurrentHeads());
-        sortNodesById(endNodes);
-
-        return endNodes.get(endNodes.size() - 1);
-    }
-
-    public static List<FlowNode> getStageNodes(FlowExecution execution) {
-
-        if (execution == null) {
-            return Collections.EMPTY_LIST;
-        }
-
-        List<FlowNode> nodes = new ArrayList<FlowNode>();
-        List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(execution);
-
-        for (int i = 0; i < allNodesSorted.size(); i++) {
-            FlowNode sortedNode = allNodesSorted.get(i);
-            if (StageNodeExt.isStageNode(sortedNode)) {
-                nodes.add(sortedNode);
-            }
-        }
-
-        return nodes;
     }
 
     // Enables us to get the status of a node without creating a bunch of objects
@@ -423,65 +183,81 @@ public class FlowNodeUtil {
         }
     }
 
-    public static List<FlowNode> getStageNodes(FlowNode node) {
-        List<FlowNode> nodes = new ArrayList<FlowNode>();
-        List<FlowNode> allNodesSorted = getIdSortedExecutionNodeList(node.getExecution());
-
-        int stageStartNodeIndex = findStageStartNodeIndex(allNodesSorted, node);
-
-        if (StageNodeExt.isStageNode(node)) {
-            // Starting at the node after the supplied node, add all sorted nodes up to the
-            // next stage (or the end of the workflow)...
-            stageStartNodeIndex++;
-            for (int i = stageStartNodeIndex; i < allNodesSorted.size(); i++) {
-                FlowNode sortedNode = allNodesSorted.get(i);
-                if (StageNodeExt.isStageNode(sortedNode)) {
-                    break;
-                }
-                nodes.add(sortedNode);
-            }
+    @CheckForNull
+    public static WorkflowRun getWorkflowRunForExecution(@CheckForNull FlowExecution exec) {
+        if (exec == null) {
+            return null;
         }
 
-        return nodes;
+        try {
+            Queue.Executable executable =  exec.getOwner().getExecutable();
+            if (executable instanceof  WorkflowRun) {
+                WorkflowRun myRun = (WorkflowRun) executable;
+                return myRun;
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException("Execution probably has not begun, or invalid pipeline data!", ioe);
+        }
+        return null;
     }
 
-    // Throws ConcurrentModificationException if FlowGraph changes under the iterator
-    public static List<FlowNode> getIdSortedExecutionNodeList(FlowExecution execution) throws ConcurrentModificationException {
-        if (execution == null || execution.getCurrentHeads().isEmpty()) {
-            return Collections.EMPTY_LIST;
-        }
 
-        String executionUrl = null;
-        boolean isCacheable = false;
-        try {
-            executionUrl = execution.getUrl();
-        } catch (IOException ioe) {
-            LOGGER.severe("Can't get execution url for execution, IOException!");
+    /** List the stage nodes for a FlowExecution -- needed for back-compat.
+     *  Note: far more efficient than existing implementation because it uses the cache of run info.
+     */
+    @Nonnull
+    public static List<FlowNode> getStageNodes(@CheckForNull FlowExecution execution) throws RuntimeException {
+        WorkflowRun run = getWorkflowRunForExecution(execution);
+        if (run == null) {
+            return Collections.emptyList();
         }
-        Cache<String,List<FlowNode>> cache = CacheExtension.all().get(0).getExecutionCache();
-        if (executionUrl != null) {
-            List<FlowNode> sortedList = cache.getIfPresent(executionUrl);
-            if (sortedList != null) {
-                return sortedList;
+        RunExt runExt = RunExt.create(run);
+        if (runExt.getStages() != null) {
+            ArrayList<FlowNode> nodes = new ArrayList<FlowNode>(runExt.getStages().size());
+            try {
+                for (StageNodeExt st : runExt.getStages()) {
+                    nodes.add(execution.getNode(st.getId()));
+                }
+                return nodes;
+            } catch (IOException ioe) {
+                throw new RuntimeException("Unable to load flownode for valid run ", ioe);
+            }
+
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /** Needed for back-compat, returns nodes inside a stage
+     *  Note: far more efficient than existing implementation because it uses the cache of run info.
+     */
+    @Nonnull
+    public static List<FlowNode> getStageNodes(@CheckForNull FlowNode stageNode) {
+        if (stageNode == null) { return Collections.emptyList(); }
+        FlowExecution exec = stageNode.getExecution();
+        WorkflowRun run = getWorkflowRunForExecution(exec);
+        if (run == null) { return Collections.emptyList(); }
+        RunExt runExt = RunExt.create(run);
+        if (runExt.getStages() == null || runExt.getStages().isEmpty()) { return Collections.emptyList(); }
+
+        List<String> childIds = null;
+        for (StageNodeExt st : runExt.getStages()) {
+            if (st.getId().equals(stageNode.getId())) {
+                childIds = st.getAllChildNodeIds();
+                break;
             }
         }
 
-        if (isNotPartOfRunningBuild(execution)) {
-            isCacheable = true;
+        try {
+            if (childIds == null) { return Collections.emptyList(); }
+            List<FlowNode> nodes = new ArrayList<FlowNode>(childIds.size());
+            for (String s : childIds) {
+                nodes.add(exec.getNode(s));
+            }
+            return nodes;
+        } catch (IOException ioe) {
+            throw new RuntimeException("Failed to load a FlowNode, even though run exists! ", ioe);
         }
-
-        // Not in cache or can't cache
-        FlowGraphWalker walker = new FlowGraphWalker(execution);
-        ArrayList<FlowNode> nodes = new ArrayList<FlowNode>();
-        for (FlowNode node : walker) {
-            nodes.add(node);
-        }
-        sortNodesById(nodes);
-
-        if (isCacheable && executionUrl != null) {
-            cache.put(executionUrl, nodes);
-        }
-        return nodes;
     }
 
     /** This is used to cover an obscure case where a WorkflowJob is renamed BUT
@@ -490,18 +266,6 @@ public class FlowNodeUtil {
      **/
     @Extension
     public static class RenameHandler extends ItemListener {
-
-        private void invalidateExecutionCache(WorkflowRun run, CacheExtension ext){
-            try {
-                FlowExecution f = run.getExecution();
-                if (f != null) {
-                    String url = f.getUrl();
-                    ext.getExecutionCache().invalidate(url);
-                }
-            } catch (IOException ioe) {
-                LOGGER.log(Level.WARNING, "Can't get execution URL for WorkflowRun!", ioe);
-            }
-        }
 
         @Override
         public void onLocationChanged(Item item, String oldFullName, String newFullName) {
@@ -521,7 +285,6 @@ public class FlowNodeUtil {
                             rc.put(newFullName+"#"+r.getId(), cachedRun);
                         }
                     }
-                    invalidateExecutionCache(r, ext);
                 }
             }
         }
@@ -533,39 +296,9 @@ public class FlowNodeUtil {
                 RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds();
                 for (WorkflowRun r : runs) {
                     ext.getRunCache().invalidate(r.getExternalizableId());
-                    invalidateExecutionCache(r, ext);
                 }
             }
         }
-    }
-
-    public static final Comparator<FlowNode> sortComparator = new Comparator<FlowNode>() {
-        @Override
-        public int compare(FlowNode node1, FlowNode node2) {
-            int node1Iota = parseIota(node1);
-            int node2Iota = parseIota(node2);
-
-            if (node1Iota < node2Iota) {
-                return -1;
-            } else if (node1Iota > node2Iota) {
-                return 1;
-            }
-            return 0;
-        }
-
-        private int parseIota(FlowNode node) {
-            try {
-                return Integer.parseInt(node.getId());
-            } catch (NumberFormatException e) {
-                LOGGER.severe("Failed to parse FlowNode ID '" + node.getId() + "' on step '" + node.getDisplayName() + "'.  Expecting iota to be an integer value.");
-                return 0;
-            }
-        }
-    };
-
-    public static List<FlowNode> sortNodesById(List<FlowNode> nodes) {
-        Collections.sort(nodes, sortComparator);
-        return nodes;
     }
 
     /**

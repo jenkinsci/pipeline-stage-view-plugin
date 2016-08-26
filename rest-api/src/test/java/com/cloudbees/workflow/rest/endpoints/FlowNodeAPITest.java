@@ -24,6 +24,7 @@
 package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.Util;
+import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
 import com.cloudbees.workflow.rest.external.FlowNodeLogExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
@@ -118,6 +119,10 @@ public class FlowNodeAPITest {
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
         Assert.assertEquals("[5]", stageDesc.getStageFlowNodes().get(0).getParentNodes().toString());
         Assert.assertEquals(StatusExt.SUCCESS, stageDesc.getStageFlowNodes().get(0).getStatus());
+
+        for (StageNodeExt st : stages) {
+            validateChildNodeDescribeAPIs(st, webClient);
+        }
     }
 
     private void assert_log_ok(JenkinsRule.WebClient webClient, JSONReadWrite jsonReadWrite, RunExt[] workflowRuns) throws IOException, SAXException {
@@ -188,13 +193,47 @@ public class FlowNodeAPITest {
         Assert.assertEquals("Build", stageDesc.getName());
         Assert.assertEquals(StatusExt.FAILED, stageDesc.getStatus());
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", stageDesc.get_links().self.href);
-        Assert.assertEquals(1, stageDesc.getStageFlowNodes().size());
+        Assert.assertEquals(4, stageDesc.getStageFlowNodes().size());
         Assert.assertEquals("6", stageDesc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals(jenkinsRule.jenkins.getDescriptorByType(ErrorStep.DescriptorImpl.class).getDisplayName(), stageDesc.getStageFlowNodes().get(0).getName());
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
         Assert.assertEquals("[5]", stageDesc.getStageFlowNodes().get(0).getParentNodes().toString());
-        Assert.assertEquals(StatusExt.FAILED, stageDesc.getStageFlowNodes().get(0).getStatus());
+
+        Assert.assertEquals(StatusExt.FAILED, stageDesc.getStageFlowNodes().get(0).getStatus()); // If flow continued, we succeeded
         Assert.assertEquals("my specific failure message", stageDesc.getStageFlowNodes().get(0).getError().getMessage());
         Assert.assertEquals("hudson.AbortException", stageDesc.getStageFlowNodes().get(0).getError().getType());
+        validateChildNodeDescribeAPIs(stageDesc, webClient);
+    }
+
+    /** Exercise the describe APIs for a stage node */
+    private void validateChildNodeDescribeAPIs(StageNodeExt stage, JenkinsRule.WebClient client) throws IOException, SAXException {
+        JSONReadWrite jrw = new JSONReadWrite();
+        if (stage.getStageFlowNodes() == null) {
+            return;
+        }
+        for (AtomFlowNodeExt atom : stage.getStageFlowNodes()) {
+            String ref = atom.get_links().self.href.replace("/jenkins/", ""); // Strip off relative path prefix
+            String response = client.goTo(ref, "application/json").getWebResponse().getContentAsString();
+            AtomFlowNodeExt describeAtomNode = jrw.fromString(response, AtomFlowNodeExt.class);
+
+            Assert.assertEquals(atom.getDurationMillis(), describeAtomNode.getDurationMillis());
+            if (atom.getError() != null) {
+                Assert.assertEquals(atom.getError().getMessage(), describeAtomNode.getError().getMessage());
+            }
+            Assert.assertEquals(atom.getId(), describeAtomNode.getId());
+            Assert.assertEquals(atom.getStatus(), describeAtomNode.getStatus());
+            Assert.assertEquals(atom.getName(), describeAtomNode.getName());
+            if (describeAtomNode.getParentNodes().size() != 0) { // Actually just a FlowNodeExt
+                Assert.assertEquals(atom.getParentNodes(), describeAtomNode.getParentNodes());
+            }
+            Assert.assertEquals(atom.getPauseDurationMillis(), describeAtomNode.getPauseDurationMillis());
+            Assert.assertEquals(atom.getStartTimeMillis(), describeAtomNode.getStartTimeMillis());
+
+            // Fudge for cases where we get back a FlowNodeExt that isn't really an AtomFlowNodeExt
+            if (describeAtomNode.get_links() != null && describeAtomNode.get_links().getLog() != null) {
+                Assert.assertEquals(atom.get_links().getLog().href, describeAtomNode.get_links().getLog().href);
+            }
+        }
+
     }
 }

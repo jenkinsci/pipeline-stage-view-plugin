@@ -23,48 +23,55 @@
  */
 package com.cloudbees.workflow.rest.endpoints.flownode;
 
-import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
+import com.cloudbees.workflow.rest.external.ChunkVisitor;
 import com.cloudbees.workflow.rest.external.FlowNodeExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.endpoints.FlowNodeAPI;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import hudson.model.Queue;
+import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
-import javax.annotation.CheckForNull;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * {@link FlowNode} "describe" endpoint.
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class Describe {
-    private static final Logger LOGGER = Logger.getLogger(Describe.class.getName());
 
     public static String getUrl(FlowNode node) {
         return FlowNodeAPI.getUrl(node) + "/describe";
     }
 
-    public static FlowNodeExt get(FlowNode node) {
+    /**
+     * Fetch API results for a node or stage
+     * @param node Node to fetch, or start node for a stage
+     * @return Node API response object (may be a stage)
+     * @throws IOException In probably very rare transitory situations where a WorkflowRun doesn't have a queueExecutable
+     */
+    public static FlowNodeExt get(FlowNode node) throws IOException {
         if (StageNodeExt.isStageNode(node)) {
-            // TODO figure out a way to use the cache when we have the node+FlowExecution but not its parent run
-            /* RunExt cachedRunData = FlowNodeUtil.getCachedRun(node.getExecution());
-            if (cachedRunData != null) {
-                for (StageNodeExt stage : cachedRunData.getStages()) {
-                    if (stage.getId().equals(node.getId())) {
-                        return stage;
+
+            // Digest the WorkflowRun to get the stages, using cache if possible.
+            // Future optimization for big runs: use the blackLists in the ForkScanner only digest until the
+            // Node before the stage
+            Queue.Executable exec = node.getExecution().getOwner().getExecutable();
+            if (exec instanceof WorkflowRun) {
+                WorkflowRun run = (WorkflowRun)exec;
+                RunExt runExt = RunExt.create(run);
+                for (StageNodeExt st : runExt.getStages()) {
+                    if (st.getId().equals(node.getId())) {
+                        return st;
                     }
                 }
-            }*/
+            }
 
-            StageNodeExt stageNodeExt = StageNodeExt.create(node);
-            stageNodeExt.addStageFlowNodes(node);
-            return stageNodeExt;
+            // This would mean that the node is a stage node but not in its own run...
+            return null;
         } else if (node instanceof AtomNode) {
             return AtomFlowNodeExt.create(node);
         } else {

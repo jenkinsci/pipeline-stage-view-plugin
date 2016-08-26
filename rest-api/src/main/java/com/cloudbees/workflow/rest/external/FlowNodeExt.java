@@ -28,12 +28,19 @@ import com.cloudbees.workflow.rest.endpoints.flownode.Describe;
 import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import hudson.model.Queue;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.StatusAndTiming;
+import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.TimingInfo;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 import org.kohsuke.stapler.Stapler;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
@@ -154,10 +161,20 @@ public class FlowNodeExt {
 
     protected void calculateTimings(FlowNode node) {
         if (getStatus() != StatusExt.NOT_EXECUTED) {
-            setStartTimeMillis(TimingAction.getStartTime(node));
-            setDurationMillis(FlowNodeUtil.getNodeExecDuration(node));
-            setPauseDurationMillis(PauseAction.getPauseDuration(node));
-            setPauseDurationMillis(Math.min(getPauseDurationMillis(), getDurationMillis()));
+            try {
+                Queue.Executable exec = node.getExecution().getOwner().getExecutable();
+                if (exec instanceof WorkflowRun) {
+                    WorkflowRun run = (WorkflowRun) exec;
+                    TimingInfo ti = StatusAndTiming.computeChunkTiming(run, PauseAction.getPauseDuration(node), node, node, FlowNodeUtil.getNodeAfter(node));
+                    if (ti != null) {
+                        setStartTimeMillis(ti.getStartTimeMillis());
+                        setPauseDurationMillis(ti.getPauseDurationMillis());
+                        setDurationMillis(ti.getTotalDurationMillis());
+                    }
+                }
+            } catch (IOException ioe) {
+                // Only happens when the WorkflowRun is in an invalid state.  In this case,
+            }
         }
     }
 
@@ -170,7 +187,7 @@ public class FlowNodeExt {
         set_links(new FlowNodeLinks());
         get_links().initSelf(Describe.getUrl(node));
         setStatus(status);
-        if (status != StatusExt.NOT_EXECUTED) {
+        if (status != StatusExt.NOT_EXECUTED && error != null) {
             setError(ErrorExt.create(error));
         }
 
@@ -181,8 +198,7 @@ public class FlowNodeExt {
         }
     }
 
-    protected void addBasicNodeData(FlowNode node) {
-        String execNodeName = FlowNodeUtil.getExecNodeName(node);
+    protected void addBasicNodeData(@Nonnull FlowNode node) {
         boolean isExecuted = NotExecutedNodeAction.isExecuted(node);
         StatusExt status = null;
         ErrorAction errorAction = null;
@@ -194,7 +210,7 @@ public class FlowNodeExt {
         }
 
         // Placeholders are used for timing data until calculated explicitly
-        addBasicNodeData(node, execNodeName, null, 0L, status, errorAction);
+        addBasicNodeData(node, "", null, 0L, status, errorAction);
         calculateTimings(node);
     }
 
