@@ -47,25 +47,29 @@ public class Describe {
         return FlowNodeAPI.getUrl(node) + "/describe";
     }
 
-    public static FlowNodeExt get(FlowNode node) {
+    /**
+     * Fetch API results for a node or stage
+     * @param node Node to fetch, or start node for a stage
+     * @return Node API response object (may be a stage)
+     * @throws IOException In probably very rare transitory situations where a WorkflowRun doesn't have a queueExecutable
+     */
+    public static FlowNodeExt get(FlowNode node) throws IOException {
         if (StageNodeExt.isStageNode(node)) {
-            try {
-                // Digest the WorkflowRun to get the stages, using cache if possible.
-                // Future optimization for big runs: use the blackLists in the ForkScanner only digest until the
-                // Node before the stage
-                Queue.Executable exec = node.getExecution().getOwner().getExecutable();
-                if (exec instanceof WorkflowRun) {
-                    WorkflowRun run = (WorkflowRun)exec;
-                    RunExt runExt = RunExt.create(run);
-                    for (StageNodeExt st : runExt.getStages()) {
-                        if (st.getId().equals(node.getId())) {
-                            return st;
-                        }
+
+            // Digest the WorkflowRun to get the stages, using cache if possible.
+            // Future optimization for big runs: use the blackLists in the ForkScanner only digest until the
+            // Node before the stage
+            Queue.Executable exec = node.getExecution().getOwner().getExecutable();
+            if (exec instanceof WorkflowRun) {
+                WorkflowRun run = (WorkflowRun)exec;
+                RunExt runExt = RunExt.create(run);
+                for (StageNodeExt st : runExt.getStages()) {
+                    if (st.getId().equals(node.getId())) {
+                        return st;
                     }
                 }
-            } catch (IOException ioe) {
-                throw new RuntimeException(ioe);
             }
+
             // This would mean that the node is a stage node but not in its own run...
             return null;
         } else if (node instanceof AtomNode) {

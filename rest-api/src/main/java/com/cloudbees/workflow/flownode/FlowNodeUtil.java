@@ -209,7 +209,7 @@ public class FlowNodeUtil {
     public static List<FlowNode> getStageNodes(@CheckForNull FlowExecution execution) throws RuntimeException {
         WorkflowRun run = getWorkflowRunForExecution(execution);
         if (run == null) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         RunExt runExt = RunExt.create(run);
         if (runExt.getStages() != null) {
@@ -224,7 +224,7 @@ public class FlowNodeUtil {
             }
 
         } else {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 
@@ -233,12 +233,12 @@ public class FlowNodeUtil {
      */
     @Nonnull
     public static List<FlowNode> getStageNodes(@CheckForNull FlowNode stageNode) {
-        if (stageNode == null) { return Collections.EMPTY_LIST; }
+        if (stageNode == null) { return Collections.emptyList(); }
         FlowExecution exec = stageNode.getExecution();
         WorkflowRun run = getWorkflowRunForExecution(exec);
-        if (run == null) { return Collections.EMPTY_LIST; }
+        if (run == null) { return Collections.emptyList(); }
         RunExt runExt = RunExt.create(run);
-        if (runExt.getStages() == null || runExt.getStages().isEmpty()) { return Collections.EMPTY_LIST; }
+        if (runExt.getStages() == null || runExt.getStages().isEmpty()) { return Collections.emptyList(); }
 
         List<String> childIds = null;
         for (StageNodeExt st : runExt.getStages()) {
@@ -249,7 +249,7 @@ public class FlowNodeUtil {
         }
 
         try {
-            if (childIds == null) { return Collections.EMPTY_LIST; }
+            if (childIds == null) { return Collections.emptyList(); }
             List<FlowNode> nodes = new ArrayList<FlowNode>(childIds.size());
             for (String s : childIds) {
                 nodes.add(exec.getNode(s));
