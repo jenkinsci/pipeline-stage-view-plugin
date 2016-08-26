@@ -151,6 +151,40 @@ public class JobAndRunAPITest {
     }
 
     @Test
+    public void testEmptyStageHandling() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "EmptyStageJob");
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "stage 'empty'\n" +
+                "stage 'nope' \n" +
+                "echo \"I'm passing\"\n"));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.SUCCESS, build.get());
+
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        assertBasicJobInfoOkay(job, webClient);
+
+        String jobRunsUrl = job.getUrl() + "wfapi/runs?fullStages=true";
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+
+        Assert.assertEquals(2, run.getStages().size());
+        StageNodeExt first = run.getStages().get(0);
+        StageNodeExt second = run.getStages().get(1);
+        Assert.assertEquals(0, first.getStageFlowNodes().size());
+        Assert.assertEquals(2, second.getStageFlowNodes().size());
+        assertStageInfoOkay(first, false);
+        assertStageInfoOkay(second, true);
+        Assert.assertTrue(first.getDurationMillis() > 0);
+    }
+
+    @Test
     public void testErrorHandling() throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Failing Job");
 
@@ -182,17 +216,18 @@ public class JobAndRunAPITest {
         Assert.assertEquals(1, workflowRuns.length);
         RunExt runExt = workflowRuns[0];
         Assert.assertEquals(StatusExt.FAILED, runExt.getStatus());
-        Assert.assertEquals(3, runExt.getStages().size());
+        List<StageNodeExt> stages = runExt.getStages();
+        Assert.assertEquals(3, stages.size());
 
         for (StageNodeExt st : runExt.getStages()) {
             assertStageInfoOkay(st, true);
         }
 
-        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(0).getStatus());
-        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStages().get(1).getStatus());
-        Assert.assertEquals(StatusExt.FAILED, runExt.getStages().get(2).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, stages.get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, stages.get(1).getStatus());
+        Assert.assertEquals(StatusExt.FAILED, stages.get(2).getStatus());
 
-        StageNodeExt finalStage = runExt.getStages().get(2);
+        StageNodeExt finalStage = stages.get(2);
         AtomFlowNodeExt finalNode = finalStage.getStageFlowNodes().get(finalStage.getStageFlowNodes().size()-1);
         Assert.assertEquals(StatusExt.FAILED, finalNode.getStatus());
         Assert.assertNotNull(finalNode.getError());

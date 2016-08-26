@@ -66,7 +66,13 @@ public class ChunkVisitor extends StandardChunkVisitor {
     /** Do the final computations to materialize the stage */
     protected void handleChunkDone(@Nonnull MemoryFlowChunk chunk) {
         StageNodeExt stageExt = new StageNodeExt();
-        TimingInfo times = StatusAndTiming.computeChunkTiming(run, chunk.getPauseTimeMillis(), firstExecuted, chunk.getLastNode(), chunk.getNodeAfter());
+        TimingInfo times;
+        if (firstExecuted != null) {
+            FlowNode last = (chunk.getLastNode() != null) ? chunk.getLastNode() : chunk.getFirstNode(); // Extra safety measure for accidental nesting
+            times = StatusAndTiming.computeChunkTiming(run, chunk.getPauseTimeMillis(), firstExecuted, last, chunk.getNodeAfter());
+        } else {  // Stage never really ran :)
+            times = new TimingInfo(0, 0, run.getStartTimeInMillis());
+        }
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
         GenericStatus status;
@@ -78,7 +84,8 @@ public class ChunkVisitor extends StandardChunkVisitor {
             startTime = TimingAction.getStartTime(firstExecuted);
         }
 
-        // TODO pipeline graph analysis gets most of the metadata for the chunk in 1 pass
+        // TODO add and use pipeline graph analysis API to allow us to get most of the metadata for the chunk in 1 pass, efficiently
+        //  and only store the FlowNodes -- not the materialized objects.
         stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
@@ -96,12 +103,16 @@ public class ChunkVisitor extends StandardChunkVisitor {
         super.resetChunk(chunk);
         firstExecuted = null;
         stageNodeIds.clear();
+        stageContents.clear();
     }
 
     @Override
     public void chunkStart(@Nonnull FlowNode startNode, @CheckForNull FlowNode beforeBlock, @Nonnull ForkScanner scanner) {
         if (NotExecutedNodeAction.isExecuted(startNode)) {
             firstExecuted = startNode;
+        }
+        if (chunk.getLastNode() == null) { // Empty chunk, just a marker with nothing after
+            chunk.setLastNode(startNode);
         }
         super.chunkStart(startNode, beforeBlock, scanner);
     }
