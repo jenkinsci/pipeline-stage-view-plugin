@@ -2,8 +2,14 @@
     {{#each stageFlowNodes}}
         {{#if this._links.log.href}}
         <div class="node-log-frame {{this.status}}" cbwf-controller="node-log" objectUrl="{{this._links.log.href}}">
-            <div class="node-name"><span class="glyphicon glyphicon-collapse-down" title="Expand"></span><span class="glyphicon glyphicon-collapse-up" title="Collapse"></span> {{this.name}}</div>
+            <div class="node-name"><span class="glyphicon glyphicon-collapse-down" title="Expand"></span><span class="glyphicon glyphicon-collapse-up" title="Collapse"></span>
+                {{this.name}}  {{#if this.durationMillis}}(self time {{formatTime this.durationMillis}}){{/if}}
+            </div>
             <div class="log-details"></div>
+        </div>
+        {{else}}
+        <div class="node-log-frame {{this.status}}" objectUrl="{{this._links.self.href}}">
+            <div class="node-name">{{this.name}}  {{#if this.durationMillis}}(self time {{formatTime this.durationMillis}}){{/if}}</div>
         </div>
         {{/if}}
     {{/each}}

@@ -65,10 +65,8 @@ describe("view/stage-logs", function () {
             var nodeLogFrames = $('.node-log-frame');
 
             // TODO: hmmmm ... we may need to modify the test data model here ... see the comment below.
-            // There should only be 3 node log frames, even though there were 5 steps in the
-            // stage (see checkpoint_resumed_stage_description.json). That's because the first 2 steps
-            // were not executed because the run/build was a resumed from checkpoint build.
-            expect(nodeLogFrames.size()).toBe(3);
+            // There should only be 1 log frame per step (with ones not having logs omitting the step)
+            expect(nodeLogFrames.size()).toBe(5);
 
             // Click on the first log
             var firstLogNode = $(nodeLogFrames.get(0));
