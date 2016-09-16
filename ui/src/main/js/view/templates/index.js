@@ -91,6 +91,10 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         return date;
     }
 
+    if (myTimeZoneOffset) { // Do time zone conversion using parseData *sigh.*
+        //moment.locale(myTimeZone);
+    }
+
     var aliasFormat = formatAliases[toFormat];
     if (aliasFormat) {
         return moment(date).format(aliasFormat);
