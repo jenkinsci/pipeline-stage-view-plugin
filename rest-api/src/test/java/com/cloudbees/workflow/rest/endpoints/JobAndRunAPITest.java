@@ -178,7 +178,7 @@ public class JobAndRunAPITest {
         StageNodeExt first = run.getStages().get(0);
         StageNodeExt second = run.getStages().get(1);
         Assert.assertEquals(0, first.getStageFlowNodes().size());
-        Assert.assertEquals(2, second.getStageFlowNodes().size());
+        Assert.assertEquals(1, second.getStageFlowNodes().size());
         assertStageInfoOkay(first, false);
         assertStageInfoOkay(second, true);
         Assert.assertTrue(first.getDurationMillis() > 0);
@@ -229,10 +229,7 @@ public class JobAndRunAPITest {
 
         StageNodeExt finalStage = stages.get(2);
         AtomFlowNodeExt finalNode = finalStage.getStageFlowNodes().get(finalStage.getStageFlowNodes().size()-1);
-        Assert.assertEquals(StatusExt.FAILED, finalNode.getStatus());
-        Assert.assertNotNull(finalNode.getError());
-        Assert.assertNotNull(finalNode.getError().getMessage());
-        Assert.assertNotNull(finalNode.getError().getType());
+        Assert.assertEquals(StatusExt.SUCCESS, finalNode.getStatus());
     }
 
 
