@@ -1,5 +1,6 @@
 <div class="cbwf-stage-logs">
     {{#each stageFlowNodes}}
+        {{#ifCond this.status '!=' 'NOT_EXECUTED'}}
         {{#if this._links.log.href}}
         <div class="node-log-frame {{this.status}}" cbwf-controller="node-log" objectUrl="{{this._links.log.href}}">
             <div class="node-name"><span class="glyphicon glyphicon-collapse-down" title="Expand"></span><span class="glyphicon glyphicon-collapse-up" title="Collapse"></span>
@@ -12,5 +13,6 @@
             <div class="node-name">{{this.name}}  {{#if this.durationMillis}}(self time {{formatTime this.durationMillis}}){{/if}}</div>
         </div>
         {{/if}}
+        {{/ifCond}}
     {{/each}}
 </div>
