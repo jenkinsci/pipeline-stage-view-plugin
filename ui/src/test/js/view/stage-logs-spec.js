@@ -66,13 +66,14 @@ describe("view/stage-logs", function () {
 
             // TODO: hmmmm ... we may need to modify the test data model here ... see the comment below.
             // There should only be 1 log frame per step (with ones not having logs omitting the step)
-            expect(nodeLogFrames.size()).toBe(5);
+            expect(nodeLogFrames.size()).toBe(3);
 
             // Click on the first log
             var firstLogNode = $(nodeLogFrames.get(0));
             firstLogNode.click();
 
             // logDetails of that log should be filled in...
+            helper.log(firstLogNode.html());
             expect($('.log-details .console-output', firstLogNode).text()).toBe('build');
             expect($('.log-details .console-output', firstLogNode).is(':visible')).toBe(true);
 
