@@ -193,7 +193,7 @@ public class FlowNodeAPITest {
         Assert.assertEquals("Build", stageDesc.getName());
         Assert.assertEquals(StatusExt.FAILED, stageDesc.getStatus());
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", stageDesc.get_links().self.href);
-        Assert.assertEquals(4, stageDesc.getStageFlowNodes().size());
+        Assert.assertEquals(1, stageDesc.getStageFlowNodes().size());
         Assert.assertEquals("6", stageDesc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals(jenkinsRule.jenkins.getDescriptorByType(ErrorStep.DescriptorImpl.class).getDisplayName(), stageDesc.getStageFlowNodes().get(0).getName());
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
