@@ -239,7 +239,7 @@ public class JobAndRunAPITest {
         WorkflowRun run = job.getLastBuild();
         FlowNode lastNode = run.getExecution().getCurrentHeads().get(0);
         List<Action> actions = lastNode.getActions();
-        TimingAction timing = lastNode.getAction(TimingAction.class);
+        TimingAction timing = lastNode.getDirectAction(TimingAction.class);
 
         // Remove timing info from last node (root cause of one set of bugs) and flush the cache
         actions.remove(timing);

@@ -62,7 +62,7 @@ public class StageNodeExt extends FlowNodeExt {
     }
 
     public static boolean isStageNode(FlowNode node) {
-        return (node.getAction(LabelAction.class) != null && node.getAction(ThreadNameAction.class) == null);
+        return (node.getDirectAction(LabelAction.class) != null && node.getDirectAction(ThreadNameAction.class) == null);
     }
 
     /** Return full list of child node IDs */
