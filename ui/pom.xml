@@ -33,7 +33,7 @@
     </parent>
 
     <artifactId>pipeline-stage-view</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.2-optimized-SNAPSHOT</version>
     <name>Pipeline: Stage View Plugin</name>
     <description>Provides a swimlane view of the different stages in a pipeline.
     </description>
