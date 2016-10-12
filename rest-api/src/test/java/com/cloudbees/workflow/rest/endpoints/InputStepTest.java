@@ -120,7 +120,7 @@ public class InputStepTest {
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         WorkflowRun run = build.getStartCondition().get();
         CpsFlowExecution flowExecution = (CpsFlowExecution) run.getExecutionPromise().get();
-        while (run.getDirectAction(InputAction.class) == null) {
+        while (run.getAction(InputAction.class) == null) {
             flowExecution.waitForSuspension();
         }
 
