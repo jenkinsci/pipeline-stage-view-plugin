@@ -105,7 +105,7 @@ public class FlowNodeLogExt {
         logExt.setNodeId(node.getId());
         logExt.setNodeStatus(StatusExt.valueOf(node.getError()));
 
-        LogAction logAction = node.getAction(LogAction.class);
+        LogAction logAction = node.getDirectAction(LogAction.class);
         if (logAction != null) {
             logExt.setConsoleUrl(ModelUtil.getFullItemUrl(node) + logAction.getUrlName());
 
