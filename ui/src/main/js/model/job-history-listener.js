@@ -45,19 +45,19 @@ function setupJobPoll(jobUrl, callback, jobRunsData) {
         for (; i >= 0; i--) {
             var runStatus = jobRunsData[i].status;
             if (runStatus === 'IN_PROGRESS' || runStatus === 'PAUSED_PENDING_INPUT') {
-                return jobRunsData[i].name;
+                return jobRunsData[i].id;
             }
         }
         if (jobRunsData.length > 0) {
-            return jobRunsData[0].name;
+            return jobRunsData[0].id;
         } else {
             return undefined;
         }
     }
 
-    function findRunIndex(name) {
+    function findRunIndex(id) {
         for (var i = 0; i < jobRunsData.length; i++) {
-            if (jobRunsData[i].name === name) {
+            if (jobRunsData[i].id === id) {
                 return i;
             }
         }
@@ -78,7 +78,7 @@ function setupJobPoll(jobUrl, callback, jobRunsData) {
                 // or potentially changed...
                 for (var i = sinceJobRunsData.length - 1; i >= 0; i--) {
                     var aSinceRun = sinceJobRunsData[i];
-                    var knownRunIndex = findRunIndex(aSinceRun.name);
+                    var knownRunIndex = findRunIndex(aSinceRun.id);
 
                     if (knownRunIndex === -1) {
                         // We don't know this run... it's a new one.  Add it to the start.
