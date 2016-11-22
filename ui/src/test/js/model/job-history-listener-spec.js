@@ -16,8 +16,8 @@ describe("model/job-history-listener", function () {
         var lastParams;
         var listenCallbackCallCount = 0;
 
-        function addRun(name, status) {
-            jobsToReturnFromRestAPI = [{name: name, status: status}].concat(jobsToReturnFromRestAPI);
+        function addRun(name, id, status) {
+            jobsToReturnFromRestAPI = [{name: name, id: id, status: status}].concat(jobsToReturnFromRestAPI);
         }
 
         helper.mock('model/rest-api', {
@@ -58,7 +58,7 @@ describe("model/job-history-listener", function () {
 
         // Add a run to the job and then call pollJobRunsFunc again... should trigger the
         // the listen callback and inc listenCallbackCallCount.
-        addRun('#1', 'SUCCESS');
+        addRun('#1', 1, 'SUCCESS');
         pollJobRunsFunc();
         expect(listenCallbackCallCount).toEqual(2);
 
@@ -70,7 +70,7 @@ describe("model/job-history-listener", function () {
         // Now add an IN_PROGRESS run.  This should behave differently.  We always treat
         // IN_PROGRESS as being "dirty", so calling pollJobRunsFunc a few times after should
         // inc listenCallbackCallCount
-        addRun('#2', 'IN_PROGRESS');
+        addRun('#2', 2, 'IN_PROGRESS');
         pollJobRunsFunc();
         expect(listenCallbackCallCount).toEqual(3);
         pollJobRunsFunc();
