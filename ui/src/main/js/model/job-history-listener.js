@@ -39,17 +39,17 @@ exports.schedulePoll = function (callback) {
 function setupJobPoll(jobUrl, callback, jobRunsData) {
     function findSinceRunParam() {
         // console.log('findSinceRunParam');
-        // Find the oldest build that has an in progress type status.  If there's non
-        // that fit that, use the latest build.
+        // Find the name of the oldest build that has an in progress type status.
+        // If there's none that fit that, use the latest build.
         var i = jobRunsData.length - 1;
         for (; i >= 0; i--) {
             var runStatus = jobRunsData[i].status;
             if (runStatus === 'IN_PROGRESS' || runStatus === 'PAUSED_PENDING_INPUT') {
-                return jobRunsData[i].id;
+                return jobRunsData[i].name;
             }
         }
         if (jobRunsData.length > 0) {
-            return jobRunsData[0].id;
+            return jobRunsData[0].name;
         } else {
             return undefined;
         }
@@ -85,7 +85,7 @@ function setupJobPoll(jobUrl, callback, jobRunsData) {
                         notifyListeners = true;
                         addRun(aSinceRun);
                     } else {
-                        // We know this run... has it changes?
+                        // We know this run... has it changed?
                         var knownRun = jobRunsData[knownRunIndex];
                         if (aSinceRun.status !== knownRun.status) {
                             // status has changed
