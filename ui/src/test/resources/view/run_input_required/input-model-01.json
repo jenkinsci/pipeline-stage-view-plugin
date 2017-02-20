@@ -12,6 +12,14 @@
       }
     },
     {
+      "type": "BooleanParameterDefinition",
+      "name": "Good boy?",
+      "description": "A checkbox option",
+      "definition": {
+        "defaultVal": false
+      }
+    },
+    {
       "type": "StringParameterDefinition",
       "name": "Enter some text",
       "description": "A text option",

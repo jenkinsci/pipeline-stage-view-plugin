@@ -7,7 +7,7 @@
             {{#ifCond type '===' 'BooleanParameterDefinition'}}
                 <div class="checkbox">
                     <label>
-                        <input name="{{name}}" type="checkbox" checked="{{definition.defaultVal}}">{{name}}
+                        <input name="{{name}}" type="checkbox" {{#if definition.defaultVal}}checked="checked"{{/if}}>{{name}}
                     </label>
                     {{#if description}}<p class="help-block">{{description}}</p>{{/if}}
                 </div>
