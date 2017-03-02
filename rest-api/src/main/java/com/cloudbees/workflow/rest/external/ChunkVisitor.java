@@ -6,7 +6,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
-import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.BlockEndNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
@@ -35,6 +34,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     ArrayDeque<AtomFlowNodeExt> stageContents = new ArrayDeque<AtomFlowNodeExt>();
     WorkflowRun run;
     ArrayList<String> stageNodeIds = new ArrayList<String>();
+    boolean isLastChunk = true;
 
     public ChunkVisitor(@Nonnull WorkflowRun run) {
         this.run = run;
@@ -45,10 +45,6 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     public static AtomFlowNodeExt makeAtomNode(@Nonnull WorkflowRun run, @CheckForNull FlowNode beforeNode, @Nonnull FlowNode node, @CheckForNull FlowNode next) {
-        if (!(node instanceof AtomNode)) {
-            return null;
-        }
-
         long pause = PauseAction.getPauseDuration(node);
         TimingInfo times = StatusAndTiming.computeChunkTiming(run, pause, node, node, next);
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
@@ -150,10 +146,17 @@ public class ChunkVisitor extends StandardChunkVisitor {
 
         // TODO this is rather inefficient, we should optimize to use a circular buffer or ArrayList with limited size
         // And then only create the node container objects when we hit the start (doing timing ETC at that point)
-        AtomFlowNodeExt ext = makeAtomNode(run, before, atomNode, after);
-        if (ext != null) {
-            stageContents.push(ext);
-        }
+        stageContents.push(makeAtomNode(run, before, atomNode, after));
         stageNodeIds.add(atomNode.getId());
+    }
+
+    @Override
+    public void parallelEnd(@Nonnull FlowNode parallelStartNode, @Nonnull FlowNode parallelEndNode, @Nonnull ForkScanner scanner) {
+        if (isLastChunk) {
+            // Filthy hack, but for incomplete parallels, we use this event to reset the chunk boundaries
+            // This works around issues due to branches being visited in order DECLARED, not TIME-ordered
+            chunk.setLastNode(parallelEndNode);
+        }
+        isLastChunk = false;
     }
 }
