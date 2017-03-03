@@ -242,7 +242,8 @@ public class JobAndRunAPITest {
         TimingAction timing = lastNode.getAction(TimingAction.class);
 
         // Remove timing info from last node (root cause of one set of bugs) and flush the cache
-        actions.remove(timing);
+        int timingIndex = actions.indexOf(timing);
+        actions.remove(timingIndex);
         FlowNodeUtil.CacheExtension ext = FlowNodeUtil.CacheExtension.all().get(0);
         ext.getRunCache().invalidateAll();
 
