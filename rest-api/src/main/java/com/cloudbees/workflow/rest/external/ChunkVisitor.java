@@ -35,6 +35,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     ArrayDeque<AtomFlowNodeExt> stageContents = new ArrayDeque<AtomFlowNodeExt>();
     WorkflowRun run;
     ArrayList<String> stageNodeIds = new ArrayList<String>();
+    boolean isLastChunk = true;
 
     public ChunkVisitor(@Nonnull WorkflowRun run) {
         this.run = run;
@@ -155,5 +156,15 @@ public class ChunkVisitor extends StandardChunkVisitor {
             stageContents.push(ext);
         }
         stageNodeIds.add(atomNode.getId());
+    }
+
+    @Override
+    public void parallelEnd(@Nonnull FlowNode parallelStartNode, @Nonnull FlowNode parallelEndNode, @Nonnull ForkScanner scanner) {
+        if (isLastChunk) {
+            // Filthy hack, but for incomplete parallels, we use this event to reset the chunk boundaries
+            // This works around issues due to branches being visited in order DECLARED, not TIME-ordered
+            chunk.setLastNode(parallelEndNode);
+        }
+        isLastChunk = false;
     }
 }
