@@ -29,16 +29,14 @@ import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.model.Queue;
+import org.jenkinsci.plugins.workflow.actions.ArgumentsAction;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
-import org.jenkinsci.plugins.workflow.actions.StepInfoAction;
-import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.StatusAndTiming;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.TimingInfo;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
-import org.kohsuke.stapler.Stapler;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -208,7 +206,7 @@ public class FlowNodeExt {
             this.setDurationMillis(duration.getTotalDurationMillis());
         }
 
-        setParameterDescription(StepInfoAction.getParameterDescriptionString(node));
+        setParameterDescription(ArgumentsAction.getArgumentDescriptionString(node));
     }
 
     protected void addBasicNodeData(@Nonnull FlowNode node) {
@@ -226,7 +224,7 @@ public class FlowNodeExt {
         addBasicNodeData(node, "", null, 0L, status, errorAction);
         calculateTimings(node);
 
-        setParameterDescription(StepInfoAction.getParameterDescriptionString(node));
+        setParameterDescription(ArgumentsAction.getArgumentDescriptionString(node));
     }
 
     @Override public String toString() {
