@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.model.Queue;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
+import org.jenkinsci.plugins.workflow.actions.StepInfoAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -54,6 +55,7 @@ public class FlowNodeExt {
     private String execNode;
     private StatusExt status;
     private ErrorExt error;
+    private String parameterDescription;
     private long startTimeMillis;
     private long durationMillis;
     private long pauseDurationMillis;
@@ -103,6 +105,15 @@ public class FlowNodeExt {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public ErrorExt getError() {
         return error;
+    }
+
+    public void setParameterDescription(String desc) {
+        this.parameterDescription = desc;
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public String getParameterDescription() {
+        return parameterDescription;
     }
 
     public void setError(ErrorExt error) {
@@ -196,6 +207,8 @@ public class FlowNodeExt {
             this.setPauseDurationMillis(duration.getPauseDurationMillis());
             this.setDurationMillis(duration.getTotalDurationMillis());
         }
+
+        setParameterDescription(StepInfoAction.getParameterDescriptionString(node));
     }
 
     protected void addBasicNodeData(@Nonnull FlowNode node) {
@@ -212,6 +225,8 @@ public class FlowNodeExt {
         // Placeholders are used for timing data until calculated explicitly
         addBasicNodeData(node, "", null, 0L, status, errorAction);
         calculateTimings(node);
+
+        setParameterDescription(StepInfoAction.getParameterDescriptionString(node));
     }
 
     @Override public String toString() {
