@@ -206,7 +206,7 @@ public class FlowNodeExt {
             this.setDurationMillis(duration.getTotalDurationMillis());
         }
 
-        setParameterDescription(ArgumentsAction.getArgumentDescriptionString(node));
+        setParameterDescription(ArgumentsAction.getStepArgumentsAsString(node));
     }
 
     protected void addBasicNodeData(@Nonnull FlowNode node) {
@@ -224,7 +224,7 @@ public class FlowNodeExt {
         addBasicNodeData(node, "", null, 0L, status, errorAction);
         calculateTimings(node);
 
-        setParameterDescription(ArgumentsAction.getArgumentDescriptionString(node));
+        setParameterDescription(ArgumentsAction.getStepArgumentsAsString(node));
     }
 
     @Override public String toString() {
