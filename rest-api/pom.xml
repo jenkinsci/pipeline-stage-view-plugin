@@ -28,12 +28,12 @@
     <parent>
         <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>2.7-stepstorage4-beta-SNAPSHOT</version>
+        <version>2.7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>pipeline-rest-api</artifactId>
-    <version>2.7-stepstorage4-beta-SNAPSHOT</version>
+    <version>2.7-SNAPSHOT</version>
     <name>Pipeline: REST API Plugin</name>
     <description>Provides a REST API to access pipeline and pipeline run data</description>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Stage+View+Plugin</url> <!-- TODO update -->
@@ -48,7 +48,7 @@
             <!-- Temporary version due to upstream dependency, just until that is released -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.14-stepstorage4-beta</version>
+            <version>2.15</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -80,7 +80,7 @@
             <!-- Temporary version due to upstream dependency, just until that is released -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.30-stepstorage4-beta</version>
+            <version>2.31</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -103,7 +103,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.10-stepstorage4-beta</version>
+            <version>2.10</version>
         </dependency>
 
         <!-- May be able to remove these due to core -->
