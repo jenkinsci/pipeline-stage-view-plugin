@@ -45,9 +45,10 @@
 
     <dependencies>
         <dependency>
+            <!-- Temporary version due to upstream dependency, just until that is released -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.12</version>
+            <version>2.15</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -76,10 +77,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Trying this for block-scoped stage support -->
+            <!-- Temporary version due to upstream dependency, just until that is released -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.2</version>
+            <version>2.31</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -97,14 +98,12 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
-            <version>2.1</version>
-            <!-- If you don't force v 2.1 then you get conflicts with block-scoped stage -->
+            <version>2.14</version>
         </dependency>
         <dependency>
-            <!-- For block-scoped stage support, and some version needed for StatusExt -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.1</version>
+            <version>2.10</version>
         </dependency>
 
         <!-- May be able to remove these due to core -->
