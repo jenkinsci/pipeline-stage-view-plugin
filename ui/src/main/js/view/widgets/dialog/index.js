@@ -45,14 +45,14 @@ exports.show = function(title, body, options) {
         dialog.css('width', options.width);
     } else {
         var winWidth = $(theWindow).width();
-        var popoverWidth = Math.min(800, (winWidth * 0.7));
+        var popoverWidth = winWidth - 20;
         dialog.css('max-width', popoverWidth);
     }
     if (options.height) {
         dialog.css('height', options.height);
     } else {
         var winHeight = $(theWindow).height();
-        var popoverHeight = Math.min(600, (winHeight * 0.7));
+        var popoverHeight = winHeight - 20;
         dialog.css('max-height', popoverHeight);
     }
 

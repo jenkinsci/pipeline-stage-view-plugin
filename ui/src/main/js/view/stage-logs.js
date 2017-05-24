@@ -31,8 +31,8 @@ exports.render = function (stageDescription, onElement) {
     var stageLogsDom = templates.apply('stage-logs', stageDescription);
     var winWidth = $(theWindow).width();
     var winHeight = $(theWindow).height();
-    var dialogWidth = Math.min(800, (winWidth * 0.7));
-    var dialogHeight = Math.min(800, (winHeight * 0.7));
+    var dialogWidth = winWidth - 20;
+    var dialogHeight = winHeight - 20;
     var nodeLogFrames = $('.node-log-frame', stageLogsDom);
     var nodeNameBars = $('.node-name', stageLogsDom);
 
