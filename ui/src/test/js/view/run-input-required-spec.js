@@ -41,11 +41,13 @@ describe("view/run-input-required-spec", function () {
 
             // Check the inputs
             var inputs = $('.inputs :input', inputPopover);
-            expect(inputs.length).toBe(4);
-            expect($(inputs.get(0)).is(':checkbox')).toBe(true);            
-            expect($(inputs.get(1)).is(':text')).toBe(true);            
-            expect($(inputs.get(2)).is(':password')).toBe(true);            
-            expect($(inputs.get(3)).is('select')).toBe(true);            
+            expect(inputs.length).toBe(5);
+            var index = 0;
+            expect($(inputs.get(index++)).is(':checkbox')).toBe(true);
+            expect($(inputs.get(index++)).is(':checkbox')).toBe(true);
+            expect($(inputs.get(index++)).is(':text')).toBe(true);
+            expect($(inputs.get(index++)).is(':password')).toBe(true);
+            expect($(inputs.get(index++)).is('select')).toBe(true);
 
             // Check the buttons
             var buttons = $('.buttons button', inputPopover);
@@ -108,14 +110,17 @@ describe("view/run-input-required-spec", function () {
                 
                 var inputNVPs = JSON.parse(parameters.json);
                 // console.log(inputNVPs);
-                expect(inputNVPs.parameter[0].name).toBe('Run test suites?');
-                expect(inputNVPs.parameter[0].value).toBe(true);
-                expect(inputNVPs.parameter[1].name).toBe('Enter some text');
-                expect(inputNVPs.parameter[1].value).toBe('Hello');
-                expect(inputNVPs.parameter[2].name).toBe('Enter a passord');
-                expect(inputNVPs.parameter[2].value).toBe('MyPasswd');
-                expect(inputNVPs.parameter[3].name).toBe('Take your pick');
-                expect(inputNVPs.parameter[3].value).toBe('Choice 1');
+                var index = 0;
+                expect(inputNVPs.parameter[index].name).toBe('Run test suites?');
+                expect(inputNVPs.parameter[index++].value).toBe(true);
+                expect(inputNVPs.parameter[index].name).toBe('Good boy?');
+                expect(inputNVPs.parameter[index++].value).toBe(false);
+                expect(inputNVPs.parameter[index].name).toBe('Enter some text');
+                expect(inputNVPs.parameter[index++].value).toBe('Hello');
+                expect(inputNVPs.parameter[index].name).toBe('Enter a passord');
+                expect(inputNVPs.parameter[index++].value).toBe('MyPasswd');
+                expect(inputNVPs.parameter[index].name).toBe('Take your pick');
+                expect(inputNVPs.parameter[index++].value).toBe('Choice 1');
                 
                 callback();
                 
