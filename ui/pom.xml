@@ -75,12 +75,6 @@
             <version>1.18</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-api</artifactId>
-            <version>2.0</version>
-            <scope>test</scope>
-        </dependency>-->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
@@ -127,25 +121,6 @@
             </resource>
         </resources>
         <plugins>
-            <!-- Workaround for failing to package the adjuncts with the plugin parent-pom until
-                on a version including https://github.com/jenkinsci/plugin-pom/pull/27 -->
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <id>gulp bundle</id>
-                        <goals>
-                            <goal>gulp</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>bundle</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>com.github.klieber</groupId>
                 <artifactId>phantomjs-maven-plugin</artifactId>
