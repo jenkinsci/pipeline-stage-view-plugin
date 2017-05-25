@@ -8,6 +8,10 @@
     "moment": "~2.8.3",
     "window-handle": "^1.0.0"
   },
+  "scripts": {
+    "mvnbuild": "gulp bundle",
+    "mvntest": "gulp test"
+  },
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",
