@@ -24,7 +24,6 @@
  */
 package com.cloudbees.workflow.flownode;
 
-import com.cloudbees.workflow.rest.external.JobExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
@@ -36,7 +35,6 @@ import hudson.ExtensionPoint;
 import hudson.model.Item;
 import hudson.model.Queue;
 import hudson.model.listeners.ItemListener;
-import hudson.util.RunList;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
@@ -58,6 +56,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -267,36 +267,33 @@ public class FlowNodeUtil {
     @Extension
     public static class RenameHandler extends ItemListener {
 
-        @Override
-        public void onLocationChanged(Item item, String oldFullName, String newFullName) {
-            // Better solution: scam through cache, find all instances where oldFullName matches
-            // Replace with newFullName
+        /** Removes all cache entries, because the pipeline has been deleted/renamed.
+         *  Works by scanning the cache -- which is faster than iterating all builds because
+         *  it does not require deserializing build records, and cache is capped at 1000 entries.
+         */
+        private void removeCachedRuns(String pipelineFullName) {
+            String runPrefix = pipelineFullName+"#"; // See Run#getExternalizableId - this is hardcoded
             CacheExtension ext = CacheExtension.all().get(0);
             Cache<String, RunExt> rc = ext.getRunCache();
-
-            if (item instanceof WorkflowJob) {
-                RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds().limit(JobExt.MAX_RUNS_PER_JOB+5);  // Add a few to help invalidate just-completed
-                for (WorkflowRun r : runs) {
-                    if (!r.isBuilding()) {
-                        String path = oldFullName+"#"+r.getId();
-                        RunExt cachedRun = rc.getIfPresent(path);
-                        if (cachedRun != null) {
-                            rc.invalidate(path);
-                            rc.put(newFullName+"#"+r.getId(), cachedRun);
-                        }
-                    }
+            ConcurrentMap<String, RunExt> runMap = rc.asMap();
+            for (String cacheRunId : runMap.keySet()) {  // Put the Concurrent in ConcurrentMap to work for us
+                // Null-check may not be needed, but just in case of mutation by another thread
+                if (cacheRunId != null && cacheRunId.startsWith(runPrefix)) {
+                    runMap.remove(cacheRunId); // Map view writes through modifications
                 }
             }
         }
 
         @Override
+        public void onLocationChanged(Item item, String oldFullName, String newFullName) {
+            // We need to invalidate cache entries because all the URLs within the run will have changed, such as for logs
+            removeCachedRuns(oldFullName);
+        }
+
+        @Override
         public void onDeleted(Item item) {
-            CacheExtension ext = CacheExtension.all().get(0);
             if (item instanceof WorkflowJob) {
-                RunList<WorkflowRun> runs = ((WorkflowJob) item).getBuilds();
-                for (WorkflowRun r : runs) {
-                    ext.getRunCache().invalidate(r.getExternalizableId());
-                }
+                removeCachedRuns(item.getFullName());
             }
         }
     }
