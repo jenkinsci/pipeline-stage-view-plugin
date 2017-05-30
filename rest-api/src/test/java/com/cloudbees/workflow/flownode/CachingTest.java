@@ -103,8 +103,8 @@ public class CachingTest {
         // Check we still have the jobs cached appropriately
         job.renameTo("NewName");
         String newJobKey = build.getExternalizableId();
-        Assert.assertNull("Cache should be moved for renamed job", cache.getIfPresent(runKey));
+        Assert.assertNull("Cache entry should be removed for renamed job", cache.getIfPresent(runKey));
         Assert.assertEquals("Non-renamed jobs should still be cached", r2, cache.getIfPresent(runKey2));
-        Assert.assertEquals("Moved cached entry should be present after rename", r, cache.getIfPresent(newJobKey));
+        Assert.assertNull("Cache entry should not be present with new job name", cache.getIfPresent(newJobKey));
     }
 }
