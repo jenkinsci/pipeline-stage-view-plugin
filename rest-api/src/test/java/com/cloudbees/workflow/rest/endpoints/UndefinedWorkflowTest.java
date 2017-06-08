@@ -43,7 +43,7 @@ public class UndefinedWorkflowTest {
     public JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Test
-    public void test_success_flow() throws Exception {
+    public void testUndefinedRun() throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
         // Purposely not setting a workflow definition on the job
@@ -65,8 +65,8 @@ public class UndefinedWorkflowTest {
 
     private void assertRunOkay(RunExt workflowRun) {
         Assert.assertEquals(0, workflowRun.getStages().size());
-        Assert.assertEquals(0L, workflowRun.getEndTimeMillis());
+        Assert.assertTrue("Run that should be near instant wasn't", workflowRun.getDurationMillis() < 100);
         Assert.assertEquals(0L, workflowRun.getPauseDurationMillis());
-        Assert.assertEquals(0L, workflowRun.getQueueDurationMillis());
+        Assert.assertTrue("Run reports excessive queuing time", workflowRun.getQueueDurationMillis() < 100);
     }
 }
