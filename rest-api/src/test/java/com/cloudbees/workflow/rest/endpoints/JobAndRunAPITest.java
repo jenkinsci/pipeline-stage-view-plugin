@@ -182,6 +182,55 @@ public class JobAndRunAPITest {
         Assert.assertTrue(first.getDurationMillis() > 0);
     }
 
+    @Issue("JENKINS-40162")  // Zero duration for run
+    @Test
+    public void testDuration0EdgeCase() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "DurationBug");
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "echo 'hello guys'\n" +
+                "stage 'one'\n" +
+                "node {\n" +
+                "    sh 'sleep 5'\n" +
+                "}\n" +
+                "stage 'two'\n" +
+                "node {\n" +
+                "    sh 'sleep 5'\n" +
+                "}\n" +
+                "stage 'three'\n" +
+                "echo 'we are going to crash....'\n" +
+                "throw new Exception(\"crash!!!\")\n"
+                ));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        assertBasicJobInfoOkay(job, webClient);
+
+        String jobRunsUrl = job.getUrl() + "wfapi/runs?fullStages=true";
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+        Assert.assertTrue("Zero duration run!", run.getDurationMillis() > 0);
+
+        // Some extra sanity checks here just to ensure there's no deeper wackiness happening
+        Assert.assertEquals(3, run.getStages().size());
+        StageNodeExt first = run.getStages().get(0);
+        StageNodeExt second = run.getStages().get(1);
+        StageNodeExt third = run.getStages().get(1);
+        Assert.assertEquals(1, first.getStageFlowNodes().size());
+        Assert.assertEquals(1, second.getStageFlowNodes().size());
+        Assert.assertEquals(1, third.getStageFlowNodes().size());
+        assertStageInfoOkay(first, true);
+        assertStageInfoOkay(second, true);
+        assertStageInfoOkay(third, true);
+        Assert.assertTrue(first.getDurationMillis() > 0);
+    }
+
     @Test
     public void testErrorHandling() throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Failing Job");
