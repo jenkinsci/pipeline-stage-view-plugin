@@ -24,13 +24,11 @@
 package com.cloudbees.workflow.rest.endpoints.flownode;
 
 import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
-import com.cloudbees.workflow.rest.external.ChunkVisitor;
 import com.cloudbees.workflow.rest.external.FlowNodeExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.endpoints.FlowNodeAPI;
 import hudson.model.Queue;
-import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;

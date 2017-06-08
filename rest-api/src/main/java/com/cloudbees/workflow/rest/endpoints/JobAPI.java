@@ -29,12 +29,9 @@ import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.util.ModelUtil;
 import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
-import hudson.model.Fingerprint;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.CheckForNull;
 import java.util.List;
 
 /**

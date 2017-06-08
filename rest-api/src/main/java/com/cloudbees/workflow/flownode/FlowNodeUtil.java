@@ -56,17 +56,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class FlowNodeUtil {
-
-    private static final Logger LOGGER = Logger.getLogger(FlowNodeUtil.class.getName());
 
     private FlowNodeUtil() {
     }
