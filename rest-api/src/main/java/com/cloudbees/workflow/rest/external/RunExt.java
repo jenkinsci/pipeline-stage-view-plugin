@@ -189,7 +189,10 @@ public class RunExt {
 
     /** Computes timings after the stages have been set up
      *  That means timing of the stage has been computed, and the stages are sorted
+     *
+     *  Deprecated but retained for external APIs consuming it, use {@link #createNew(WorkflowRun)} instead
      */
+    @Deprecated
     public static RunExt computeTimings(RunExt runExt) {
 
         // Pause is the sum of stage pauses
@@ -322,23 +325,18 @@ public class RunExt {
         long currentTimeMillis = System.currentTimeMillis();
         if (runExt.getStatus() == StatusExt.IN_PROGRESS || runExt.getStatus() == StatusExt.PAUSED_PENDING_INPUT) {
             runExt.setEndTimeMillis(currentTimeMillis);
-        }
-
-        if (runExt.getStages().isEmpty()) {
-            if (run.isBuilding()) { // In-progress == in queue
-                runExt.setQueueDurationMillis(currentTimeMillis - runExt.getStartTimeMillis());
-            } else {
-                runExt.setQueueDurationMillis(0L);
-            }
-
         } else {
-            StageNodeExt firstExecutedStage = runExt.getFirstExecutedStage();
-            if (firstExecutedStage != null) {
-                runExt.setQueueDurationMillis(firstExecutedStage.getStartTimeMillis() - runExt.getStartTimeMillis());
-            }
+            runExt.setEndTimeMillis(run.getStartTimeInMillis()+run.getDuration());
         }
 
-        runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis() - runExt.getQueueDurationMillis()));
+        // Run has a timestamp when enqueued, and start time when it gets and Executor and begins running
+        if (run.hasntStartedYet()) {
+            runExt.setQueueDurationMillis(currentTimeMillis - run.getTimeInMillis());  // Enqueued time, not runtime
+        } else {
+            runExt.setQueueDurationMillis(Math.max(0, run.getStartTimeInMillis()-run.getTimeInMillis()));
+        }
+
+        runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis()));
 
         return runExt;
     }

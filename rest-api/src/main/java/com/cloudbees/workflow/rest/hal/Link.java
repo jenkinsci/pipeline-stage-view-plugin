@@ -23,7 +23,6 @@
  */
 package com.cloudbees.workflow.rest.hal;
 
-import com.cloudbees.workflow.util.ModelUtil;
 
 /**
  * HAL <a href="https://tools.ietf.org/html/draft-kelly-json-hal-06#section-5">link</a>

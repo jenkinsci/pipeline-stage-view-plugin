@@ -36,6 +36,7 @@ import com.cloudbees.workflow.util.JSONReadWrite;
 import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.Action;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -182,6 +183,55 @@ public class JobAndRunAPITest {
         Assert.assertTrue(first.getDurationMillis() > 0);
     }
 
+    @Issue("JENKINS-40162")  // Zero duration for run
+    @Test
+    public void testDuration0EdgeCase() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "DurationBug");
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "echo 'hello guys'\n" +
+                "stage 'one'\n" +
+                "node {\n" +
+                "    sh 'sleep 5'\n" +
+                "}\n" +
+                "stage 'two'\n" +
+                "node {\n" +
+                "    sh 'sleep 5'\n" +
+                "}\n" +
+                "stage 'three'\n" +
+                "echo 'we are going to crash....'\n" +
+                "throw new Exception(\"crash!!!\")\n"
+                ));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        assertBasicJobInfoOkay(job, webClient);
+
+        String jobRunsUrl = job.getUrl() + "wfapi/runs?fullStages=true";
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt run = workflowRuns[0];
+        assertRunPassesSanity(build.get(), run, true);
+
+        // Some extra sanity checks here just to ensure there's no deeper wackiness happening
+        Assert.assertEquals(3, run.getStages().size());
+        StageNodeExt first = run.getStages().get(0);
+        StageNodeExt second = run.getStages().get(1);
+        StageNodeExt third = run.getStages().get(1);
+        Assert.assertEquals(1, first.getStageFlowNodes().size());
+        Assert.assertEquals(1, second.getStageFlowNodes().size());
+        Assert.assertEquals(1, third.getStageFlowNodes().size());
+        assertStageInfoOkay(first, true);
+        assertStageInfoOkay(second, true);
+        assertStageInfoOkay(third, true);
+        Assert.assertTrue(first.getDurationMillis() > 0);
+    }
+
     @Test
     public void testErrorHandling() throws Exception {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Failing Job");
@@ -214,6 +264,7 @@ public class JobAndRunAPITest {
         Assert.assertEquals(1, workflowRuns.length);
         RunExt runExt = workflowRuns[0];
         Assert.assertEquals(StatusExt.FAILED, runExt.getStatus());
+        assertRunPassesSanity(build.get(), runExt, true);
         List<StageNodeExt> stages = runExt.getStages();
         Assert.assertEquals(3, stages.size());
 
@@ -249,7 +300,7 @@ public class JobAndRunAPITest {
         String jsonResponse = runsPage.getWebResponse().getContentAsString();
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         RunExt runData = jsonReadWrite.fromString(jsonResponse, RunExt.class);
-        assertRunInfoOkay(job, runData);
+        assertRunInfoOkay(job, runData, 5, 7, 9);
     }
 
     private void assertBasicJobInfoOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
@@ -281,7 +332,28 @@ public class JobAndRunAPITest {
         Assert.assertEquals(1, workflowRuns.length);
         RunExt runExt = workflowRuns[0];
 
-        assertRunInfoOkay(job, runExt);
+        assertRunPassesSanity(job.getLastBuild(), runExt, false);
+        assertRunInfoOkay(job, runExt, 5, 7, 9);
+    }
+
+    private void assertRunPassesSanity(WorkflowRun myRun, RunExt runExt, boolean testStageChildren) {
+        long stageRunTime = 0;
+        long stagePauseTime = 0;
+        if (runExt.getStages() != null && runExt.getStages().size() > 0) {
+            for (StageNodeExt stage : runExt.getStages()) {
+                assertStageInfoOkay(stage, testStageChildren);
+                stageRunTime += stage.getDurationMillis();
+                stagePauseTime += stage.getPauseDurationMillis();
+            }
+        }
+        Assert.assertTrue("Run has zero duration!", runExt.getDurationMillis() > 0);
+        Assert.assertTrue(String.format("Run duration (%d) ms is shorter than sum of stage runtimes (%d ms), this is insane!",
+                    runExt.getDurationMillis(), stageRunTime),
+                runExt.getDurationMillis() >= stageRunTime);
+        Assert.assertEquals(stagePauseTime, runExt.getPauseDurationMillis());
+        Assert.assertEquals(myRun.getId(), runExt.getId());
+        Assert.assertEquals(myRun.getDisplayName(), runExt.getName());
+        Assert.assertEquals(myRun.getStartTimeInMillis(), runExt.getStartTimeMillis());
     }
 
     private void assertDescribeEndpointOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
@@ -294,7 +366,7 @@ public class JobAndRunAPITest {
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         RunExt workflowRun = jsonReadWrite.fromString(jsonResponse, RunExt.class);
 
-        assertRunInfoOkay(job, workflowRun);
+        assertRunInfoOkay(job, workflowRun, 5, 7, 9);
     }
 
     private void assertStageInfoOkay(StageNodeExt stageNodeExt, boolean mustHaveChildNodes) {
@@ -327,11 +399,9 @@ public class JobAndRunAPITest {
         }
     }
 
-    private void assertRunInfoOkay(WorkflowJob job, RunExt runExt) {
-        assertRunInfoOkay(job, runExt, 5, 7, 9);
-    }
-
     private void assertRunInfoOkay(WorkflowJob job, RunExt runExt,  int stageid1, int stageId2, int stageId3) {
+        assertRunPassesSanity(job.getLastBuild(), runExt, false);
+
         Assert.assertEquals("#1", runExt.getName());
         Assert.assertEquals(StatusExt.SUCCESS, runExt.getStatus());
         Assert.assertEquals("/jenkins/" + job.getUrl() + "1/wfapi/describe", runExt.get_links().self.href);
@@ -369,7 +439,7 @@ public class JobAndRunAPITest {
         Assert.assertEquals(runExt.getStages().size(), nodes.size());
         for (int i=0; i<runExt.getStages().size(); i++) {
             StageNodeExt st = runExt.getStages().get(i);
-            assertStageInfoOkay(st, false);
+            // assertStageInfoOkay is called in the assertRunPassesSanity above
             Assert.assertEquals(st.getId(), nodes.get(i).getId());
 
             if (stage.getStageFlowNodes() != null) {
@@ -458,11 +528,12 @@ public class JobAndRunAPITest {
         QueueTaskFuture<WorkflowRun> build = passUnstable.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.UNSTABLE, build.get());
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
-        RunExt[] workflowRuns = getRuns(passUnstable, webClient, "wfapi/runs/");
+        RunExt[] workflowRuns = getRuns(passUnstable, webClient, "wfapi/runs?fullStages=true");
 
         // Confirm that in the case of success with overriding, all stages are marked as unstable
         Assert.assertEquals(1, workflowRuns.length);
         RunExt run = workflowRuns[0];
+        assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
         Assert.assertEquals(3, run.getStages().size());
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
@@ -492,9 +563,10 @@ public class JobAndRunAPITest {
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
 
         // Confirms that unstable & status override works with try/catch per JENKINS-34212 as well
-        RunExt[] workflowRuns = getRuns(failUnstable, webClient, "wfapi/runs/");
+        RunExt[] workflowRuns = getRuns(failUnstable, webClient, "wfapi/runs?fullStages=true");
         Assert.assertEquals(1, workflowRuns.length);
         RunExt run = workflowRuns[0];
+        assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
         Assert.assertEquals(2, run.getStages().size());
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
@@ -519,9 +591,10 @@ public class JobAndRunAPITest {
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
 
         // Single stage should reflect final build state
-        RunExt[] workflowRuns = getRuns(oneStageCatch, webClient, "wfapi/runs");
+        RunExt[] workflowRuns = getRuns(oneStageCatch, webClient, "wfapi/runs?fullStages=true");
         Assert.assertEquals(1, workflowRuns.length);
         RunExt run = workflowRuns[0];
+        assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.SUCCESS, run.getStatus());
         Assert.assertEquals(1, run.getStages().size());
         Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
@@ -547,9 +620,10 @@ public class JobAndRunAPITest {
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
 
         // Confirm that try/catch was handled: all stages should be marked successful
-        RunExt[] workflowRuns = getRuns(multiStageCatch, webClient, "wfapi/runs");
+        RunExt[] workflowRuns = getRuns(multiStageCatch, webClient, "wfapi/runs?fullStages=true");
         Assert.assertEquals(1, workflowRuns.length);
         RunExt run = workflowRuns[0];
+        assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.SUCCESS, run.getStatus());
         Assert.assertEquals(2, run.getStages().size());
         Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
@@ -579,11 +653,12 @@ public class JobAndRunAPITest {
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
 
         // Confirm that in the case of success with overriding, all stages are marked as unstable
-        String jsonResponse = webClient.goTo(job.getUrl()+"wfapi/runs/", "application/json")
+        String jsonResponse = webClient.goTo(job.getUrl()+"wfapi/runs?fullStages=true", "application/json")
                 .getWebResponse().getContentAsString();
         RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
         Assert.assertEquals(1, workflowRuns.length);
         RunExt run = workflowRuns[0];
+        assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.FAILED, run.getStatus());
         Assert.assertEquals(1, run.getStages().size());
         Assert.assertEquals(StatusExt.FAILED, run.getStages().get(0).getStatus());
