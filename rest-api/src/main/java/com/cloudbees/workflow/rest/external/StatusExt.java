@@ -71,7 +71,7 @@ public enum StatusExt {
             case SUCCESS: return StatusExt.SUCCESS;
             case NOT_EXECUTED: return StatusExt.NOT_EXECUTED;
             default:
-                throw new IllegalStateException("Forbidden GenericStatus: "+st);
+                return StatusExt.IN_PROGRESS;
         }
     }
 }

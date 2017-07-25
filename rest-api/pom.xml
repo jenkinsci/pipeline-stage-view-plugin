@@ -45,15 +45,14 @@
 
     <dependencies>
         <dependency>
-            <!-- Temporary version due to upstream dependency, just until that is released -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.19-20170703.153905-1</version> <!-- TODO: update to release once https://github.com/jenkinsci/workflow-api-plugin/pull/42 is merged and released -->
+            <version>2.19</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>pipeline-graph-analysis</artifactId>
-            <version>1.5-20170703.154511-4</version> <!-- TODO: update to release when https://github.com/jenkinsci/pipeline-graph-analysis-plugin/pull/11 is merged and released -->
+            <version>1.5-20170725.205119-9</version> <!-- TODO: update to release when https://github.com/jenkinsci/pipeline-graph-analysis-plugin/pull/11 is merged and released -->
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -77,10 +76,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <!-- Temporary version due to upstream dependency, just until that is released -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.37-20170628.162114-1</version> <!-- TODO: update to 2.37 when released for https://github.com/jenkinsci/workflow-cps-plugin/commit/cabca496e481f0800f45a708533ffccc88a62ec4 -->
+            <version>2.37</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -92,7 +90,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-durable-task-step</artifactId>
-            <version>2.13-20170703.154226-4</version> <!-- TODO: Switch to release once https://github.com/jenkinsci/workflow-durable-task-step-plugin/pull/42 is merged and released -->
+            <version>2.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -111,6 +109,13 @@
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
             <version>2.14</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-support</artifactId>
+            <version>2.14</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
