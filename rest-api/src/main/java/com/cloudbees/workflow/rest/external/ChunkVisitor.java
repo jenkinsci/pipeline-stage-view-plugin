@@ -83,18 +83,22 @@ public class ChunkVisitor extends StandardChunkVisitor {
         }
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
 
-        GenericStatus status;
+        StatusExt status;
         long startTime = 0;
         if (firstExecuted == null) {
-            status = GenericStatus.NOT_EXECUTED;
+            status = StatusExt.fromGenericStatus(GenericStatus.NOT_EXECUTED);
         } else {
-            status = StatusAndTiming.computeChunkStatus(run, chunk.getNodeBefore(), firstExecuted, chunk.getLastNode(), chunk.getNodeAfter());
+            if (stageNodeIds.size() != 0) {
+                status = StatusExt.fromGenericStatus(StatusAndTiming.computeChunkStatus(run, chunk.getNodeBefore(), firstExecuted, chunk.getLastNode(), chunk.getNodeAfter()));
+            } else {
+                status = StatusExt.EMPTY;
+            }
             startTime = TimingAction.getStartTime(firstExecuted);
         }
 
         // TODO add and use pipeline graph analysis API to allow us to get most of the metadata for the chunk in 1 pass, efficiently
         //  and only store the FlowNodes -- not the materialized objects.
-        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
+        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, status, chunk.getLastNode().getError());
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
         ArrayList<AtomFlowNodeExt> internals = new ArrayList<AtomFlowNodeExt>(childNodeLength);
