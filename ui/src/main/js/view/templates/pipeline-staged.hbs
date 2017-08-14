@@ -93,6 +93,7 @@
                 {{/ifCond}}
                 {{#ifCond this.status '===' 'EMPTY'}}
                     <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Empty" />
+                    <div class="status">empty</div>
                 {{/ifCond}}
                 {{#ifCond this.status '===' 'PAUSED_PENDING_INPUT'}}
                     <div cbwf-controller="run-input-required" objectUrl="{{../../_links.nextPendingInputAction.href}}" />
