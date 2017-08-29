@@ -39,9 +39,6 @@
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Stage+View+Plugin</url> <!-- TODO update -->
     <packaging>hpi</packaging>
 
-    <properties>
-        <jackson.version>2.4.0</jackson.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -106,21 +103,10 @@
             <version>2.10</version>
         </dependency>
 
-        <!-- May be able to remove these due to core -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>jackson2-api</artifactId>
+            <version>2.7.3</version>
         </dependency>
 
         <dependency>
