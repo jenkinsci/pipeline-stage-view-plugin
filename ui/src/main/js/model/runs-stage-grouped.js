@@ -144,7 +144,6 @@ function addStageTotals(runGroup) {
                 var stage = run.stages[ii];
 
                 runGroup.numStages++;
-
                 if (stage.status !== 'NOT_EXECUTED') {
                     var stageData = getStageData(stage.name, runGroup);
 
@@ -152,22 +151,24 @@ function addStageTotals(runGroup) {
                         stageData = {name: stage.name};
                         runGroup.stageData.push(stageData);
                     }
-
                     if (stageData.runs === undefined) {
                         stageData.runs = 0;
                         stageData.durationMillis = 0;
                         stageData.durationMillisNoPause = 0;
                         stageData.avgDurationMillis = 0;
                     }
-
-                    stage.durationMillisNoPause = stage.durationMillis - stage.pauseDurationMillis;
-
-                    stageData.runs++;
+                    if (stage.status === 'SKIPPED'){
+                        stage.durationMillis = 0;
+                        stage.durationMillisNoPause = 0;
+                    }
+                    else{
+                        stage.durationMillisNoPause = stage.durationMillis - stage.pauseDurationMillis;
+                        stageData.runs++;
+                    }
                     stageData.durationMillis += stage.durationMillis;
                     stageData.durationMillisNoPause += stage.durationMillisNoPause;
                     stageData.avgDurationMillis = Math.floor(stageData.durationMillis / stageData.runs);
                     stageData.avgDurationMillisNoPause = Math.floor(stageData.durationMillisNoPause / stageData.runs);
-                    // console.log(stage.durationMillis);
                     // this will give us a number between 1 and 1.5
                     stage.emphasise = (stage.durationMillisNoPause / run.durationMillisNoPause / 2) + 1;
                     stage.emphasise = Math.min(stage.emphasise, 1.5);

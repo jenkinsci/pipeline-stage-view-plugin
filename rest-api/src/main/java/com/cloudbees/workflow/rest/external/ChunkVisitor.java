@@ -3,8 +3,10 @@ package com.cloudbees.workflow.rest.external;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import hudson.model.Action;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
+import org.jenkinsci.plugins.workflow.actions.TagsAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.BlockEndNode;
@@ -20,6 +22,7 @@ import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,6 +72,20 @@ public class ChunkVisitor extends StandardChunkVisitor {
         return output;
     }
 
+    public static boolean isSkippedStage(@Nullable FlowNode node){
+        if(node == null){
+            return false;
+        }
+        for (Action action : node.getActions()) {
+            if (action instanceof TagsAction && ((TagsAction) action).getTagValue("STAGE_STATUS") != null) {
+                TagsAction tagsAction = (TagsAction) action;
+                String value = tagsAction.getTagValue("STAGE_STATUS");
+                return value != null && value.equals("SKIPPED_FOR_CONDITIONAL");
+            }
+        }
+        return false;
+    }
+
     @Override
     /** Do the final computations to materialize the stage */
     @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "We can actually get nulls")
@@ -82,19 +99,21 @@ public class ChunkVisitor extends StandardChunkVisitor {
             times = new TimingInfo(0, 0, run.getStartTimeInMillis());
         }
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
-
         GenericStatus status;
         long startTime = 0;
-        if (firstExecuted == null) {
-            status = GenericStatus.NOT_EXECUTED;
+        if(isSkippedStage(chunk.getFirstNode())){
+            stageExt.addBasicNodeData(chunk.getFirstNode(), "", null, startTime, StatusExt.SKIPPED, chunk.getLastNode().getError());
+        }
+        else if (firstExecuted == null) {
+            stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.NOT_EXECUTED, chunk.getLastNode().getError());
         } else {
             status = StatusAndTiming.computeChunkStatus(run, chunk.getNodeBefore(), firstExecuted, chunk.getLastNode(), chunk.getNodeAfter());
+            stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
             startTime = TimingAction.getStartTime(firstExecuted);
         }
 
         // TODO add and use pipeline graph analysis API to allow us to get most of the metadata for the chunk in 1 pass, efficiently
         //  and only store the FlowNodes -- not the materialized objects.
-        stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
         ArrayList<AtomFlowNodeExt> internals = new ArrayList<AtomFlowNodeExt>(childNodeLength);

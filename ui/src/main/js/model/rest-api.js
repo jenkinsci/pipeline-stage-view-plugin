@@ -32,7 +32,7 @@ var cache = {};
 
 function addCacheEntry (key, ob) {
     if (typeof ob === 'object') {
-        if (ob.status && (ob.status === 'SUCCESS' || ob.status === 'ABORTED' || ob.status === 'FAILED' || ob.status === 'UNSTABLE')) {
+        if (ob.status && (ob.status === 'SUCCESS' || ob.status === 'ABORTED' || ob.status === 'FAILED' || ob.status === 'SKIPPED' || ob.status === 'UNSTABLE')) {
             cache[key] = ob;
         }
     }
