@@ -1,0 +1,461 @@
+.sr-only {text-indent:-99999em; oveflow:hidden; font-size:0; position:fixed; top:-999em; display:block;}
+
+.run-timing {
+  position: absolute;
+  display: block;
+  z-index: 2;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: rgba(0, 0, 0, .5) 3px 3px 3px;
+}
+
+.time-in-queue {
+  position: absolute;
+  width: 80px;
+  right: 2px;
+  top: 50%;
+  margin-top: -10px;
+  text-shadow: none;
+}
+
+#pipeline-box {
+  position: relative;
+  box-sizing: border-box;
+
+  .extension-dock {
+    font-size: 11px;
+    text-align: center;
+
+    .extension {
+      cursor: pointer;
+      float: left;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .table-box {
+    padding: 0 0 0 17em;
+    .cell-color {
+      padding: 1px;
+      position:relative;
+    }
+    col:nth-child(even) {
+      background: rgba(0, 0, 0, .03)
+    }
+    td.NOT_EXECUTED .cell-color {
+      display: none;
+    }
+    td.SUCCESS .cell-color {
+      background: rgba(0, 255, 0, .1)
+    }
+    td.UNSTABLE .cell-color {
+      background: rgba(230, 230, 9, .2)
+    }
+    tr.UNSTABLE .cell-color {
+          background: rgba(230, 230, 9, .2)
+    }
+    tr.FAILED .cell-color {
+      background: rgba(255, 50, 0, .1)
+    }
+    tr.FAILED .FAILED .duration {
+      background: repeating-linear-gradient(-45deg, rgba(255, 50, 0, .1), rgba(255, 50, 0, .1) 20px, rgba(255, 000, 0, .15) 20px, rgba(255, 000, 0, .15) 40px);
+      box-shadow:0 0 0 1px;
+      span {
+        opacity: 1 !important;
+      }
+
+    }
+    tr.job td {
+      height: 6em;
+    }
+    tr {
+      td.totalComplete .progress {
+        margin: 2px 5px;
+        position: relative;
+        height: 15px;
+        background: rgba(0, 0, 0, .1);
+        box-shadow: inset 0 5px 10px rgba(0, 0, 0, .33);
+        .time-remaining {
+          .run-timing;
+          left: 10px;
+        }
+      }
+      td.hide-cell {
+        border: none;
+        padding: 0;
+        width: 0;
+        font-size: 0;
+      }
+      td {
+        border: 1px solid rgba(0, 0, 0, .05);
+        text-shadow: #fff 0 1px 1px, #fff 0 1px 2px;
+        padding: 0;
+        .cell-color {
+          min-height: 5.8em;
+        }
+        .duration {
+          position: absolute;
+          white-space: nowrap;
+          top:0;left:0;right:0;bottom:0;
+          height:auto;
+          padding:.33em .33em 1.33em;
+
+          span{
+              display:inline-block;
+          }
+        }
+      }
+    }
+    tr.header th {
+      border: 1px solid rgba(0, 0, 0, .025);
+      border-bottom: 2px solid rgba(0, 0, 0, .1);
+      padding: 1em;
+    }
+    tr.header th.stage-start {
+      border: none;
+    }
+
+    tr:nth-of-type(4n+3), tr.in-progress-run {
+      background: rgba(0, 0, 0, .05);
+      .stage-start .cell-box {
+        background: rgba(0, 0, 0, .05);
+        box-shadow: inset 0 50px 50px -50px rgba(0, 0, 0, .025);
+      }
+
+    }
+    .table-viewPort {
+      display: inline-block;
+      border: 1px solid #ccc;
+      overflow-x: auto;
+      overflow-y: hidden;
+      box-shadow: rgba(0, 0, 0, .25) 1px 3px 5px;
+      table {
+        border-spacing: 0
+      }
+      tr.totals {
+        .cell-color {
+          box-shadow: rgba(0, 0, 0, 0.25) 0 -10px 10px -10px inset;
+          background: rgba(0, 0, 0, .05);
+          padding: 1.33em .5em 0;
+          min-height:3.5em;
+          .duration{}
+        }
+        .stage-start {
+          border: none;
+          .cell-color {
+            text-align: right;
+            padding: .33em 1em;
+            margin:2px 0 0;
+            background: none;
+            color: rgba(0, 0, 0, .25);
+            font-weight: bold;
+            overflow:hidden;
+
+          }
+        }
+
+      }
+
+      .stage-end {
+        left: auto;
+        right: 0;
+        position: absolute;
+        width: 100px;
+      }
+      .stage-start {
+        position: absolute;
+        left: 0px;
+        text-align: center;
+        border-top: 1px solid rgba(0, 0, 0, .1);
+        width: 17em;
+        border-left: 1px solid rgba(0, 0, 0, .1);
+        overflow:hidden;
+        margin:-1px 0 0;
+        .cell-color {
+          padding: 0;
+        }
+        .cell-box {
+          display: block;
+          text-align: center;
+          position: relative;
+          font-size: 11px;
+          padding: .5em 0;
+          width:100%;
+          overflow:hidden;
+
+          .stage-end-icons {
+            width: 8em;
+            position: absolute;
+            top: 0;
+            left: 10em;
+            border: 1px solid transparent;
+
+            .link {
+              display: block;
+              padding: 3px;
+              font-weight: bold;
+              cursor: pointer;
+              color: #204A87;
+            }
+          }
+          .stage-start-box {
+            margin: 1.3em 1em 1.3em 2em;
+            clear: both;
+            text-align: left;
+            display: block;
+            width: 14em;
+            position: relative;
+          }
+          .stage-start-time {
+            border: 1px solid #acb;
+            border-radius: 0;
+            box-shadow: rgba(0, 0, 0, .2) 0 1px 3px;
+            float: none;
+            display: inline-block;
+            width: 5em;
+            background: #fff;
+            position: relative;
+            z-index: 2;
+          }
+
+          .jobName {
+            position: absolute;
+            top: .68em;
+            left: .5em;
+            z-index: 3;
+          }
+
+          .stage-start-content {
+            float: left;
+            border: 1px solid;
+          }
+
+          .icon-md {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+          }
+        }
+
+      }
+
+      .stage-wrapper {
+        min-width: 130px;
+        min-height: 5.8em;
+
+        .extension-dock {
+          position: absolute;
+          right: 0px;
+          width: 16px;
+          top: 3px;
+          bottom: 3px;
+        }
+      }
+    }
+  }
+}
+
+.jobsTableWrapper {
+  position: relative;
+
+  .historybar {
+    position: absolute;
+    top: 100px;
+    bottom: 0px;
+    left: 14px;
+    z-index: -1;
+    display: block;
+    width: 2px;
+    content: "";
+    background-color: #f3f3f3;
+  }
+}
+
+.jobsTable {
+  .header td {
+    text-align: center;
+    font-weight: bold;
+    font-size: larger;
+    padding-bottom: 10px;
+  }
+
+  .stage-wrapper {
+    table {
+      width: 100%;
+    }
+  }
+
+  .totals {
+    .cell-color {
+      background: rgba(0, 0, 0, .1)
+    }
+    .stage-wrapper {
+
+    }
+
+    td {
+      width: 130px;
+      text-align: center;
+
+      .stage-avg-text .duration {
+        font-weight: bold;
+      }
+    }
+  }
+
+  td {
+    padding: 5px 10px;
+    vertical-align: middle;
+  }
+
+  .stage-start-time, .stage-start-content {
+    text-align: center;
+    float: left;
+    height: 100%;
+  }
+
+  .stage-start-time, .stage-wrapper {
+    border: solid 1px @light-border-color;
+    border-radius: @cbwf-border-radius;
+  }
+
+  .stage-start-time {
+    .date, .time {
+      padding: 3px 5px;
+    }
+    .date {
+      background-color: #f0f0f0;
+    }
+  }
+
+  .stage-start-content {
+    padding: 5px 5px 5px 15px;
+    width: 40px;
+  }
+
+  .stage-wrapper:hover {
+    border: solid 1px @dark-border-color;
+    box-shadow: inset 0px -10px 100px -20px #fff, inset @dark-border-color 0 0 0 1px
+  }
+
+  .jobName {
+    font-weight: bold;
+    width: 30px;
+  }
+
+  .stage-cell {
+    .stage-wrapper {
+      position: relative;
+      height: 45px;
+
+      .duration {
+        text-align: center;
+        line-height: 4.8em;
+        padding-bottom:1em;
+        box-shadow:0 0 0 1px rgba(0,0,0,.1);
+        border-radius:4px;
+      }
+
+      .status {
+        .text-muted;
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+        font-size: 0.75em;
+      }
+      .exec-node {
+        text-shadow: none;
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+        font-size: 60%;
+      }
+
+      .pause-duration {
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        bottom: 15px;
+        font-size: 60%;
+        text-align: center;
+        .text-muted;
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .stage-cell.NOT_EXECUTED .stage-wrapper .label {
+    display: none;
+  }
+
+  .jobName .badge {
+    font-weight: bold;
+    background-color: #89AED1;
+    font-size: 11px;
+    text-shadow: rgba(0, 0, 0, .5) 0 -1px 1px;
+  }
+  .UNSTABLE .jobName .badge {
+      background-color: #E2E203;
+  }
+  .FAILED .jobName .badge {
+    background-color: @error-highlight;
+  }
+
+  .stage-cell.PENDING_START .stage-wrapper {
+    border: none;
+  }
+  .stage-cell.FAILED .stage-wrapper {
+    color: @error-highlight;
+    box-shadow: 0 1px 2px;
+    text-shadow: 0 1px 1px #fff;
+    font-weight: bold;
+    .status {
+      color: @error-highlight;
+    }
+  }
+  .stage-cell.PAUSED_PENDING_INPUT .stage-wrapper {
+    .status {
+      color: #376fff;
+    }
+    border: dashed 1px;
+  }
+  .stage-cell.IN_PROGRESS, .stage-cell.PAUSED_PENDING_INPUT {
+    .stage-wrapper {
+      background-position: top right;
+      background-size: 16px 16px;
+    }
+  }
+  .stage-cell {
+    .progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: auto;
+      margin: 0;
+      border: none;
+      border-radius: none;
+    }
+  }
+
+  .stage-header-name-0, .stage-total-0, .stage-cell-0, stage-end {
+    padding-left: 0px;
+  }
+
+  .stage-end-icons .icon-label {
+    display: none;
+  }
+  .stage-end-icons:hover .icon-label {
+    display: inline-block;
+  }
+}
+
+.stage-actions-popover {
+  .cbwf-info-action-popover:before {
+    .bottom-left-caret;
+  }
+}

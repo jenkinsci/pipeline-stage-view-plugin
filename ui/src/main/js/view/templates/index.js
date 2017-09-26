@@ -36,6 +36,7 @@ var moment = require('moment');
 var templateCache = {
     'info-action-popover': require('./info-action-popover.hbs'),
     'dialog': require('../widgets/dialog/template.hbs'),
+    'one-run-pipeline': require('./one-run-pipeline.hbs'),
     'pipeline-staged': require('./pipeline-staged.hbs'),
     'menu-popout': require('./menu-popout.hbs'),
     'stage-logs': require('./stage-logs.hbs'),
