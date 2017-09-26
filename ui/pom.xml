@@ -28,12 +28,12 @@
     <parent>
         <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
         <artifactId>parent-pom</artifactId>
-        <version>2.9-SNAPSHOT</version>
+        <version>2.9</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>pipeline-stage-view</artifactId>
-    <version>2.9-SNAPSHOT</version>
+    <version>2.9</version>
     <name>Pipeline: Stage View Plugin</name>
     <description>Provides a swimlane view of the different stages in a pipeline.
     </description>
