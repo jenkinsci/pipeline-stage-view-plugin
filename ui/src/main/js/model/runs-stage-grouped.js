@@ -169,6 +169,10 @@ function addStageTotals(runGroup) {
                     stageData.durationMillisNoPause += stage.durationMillisNoPause;
                     stageData.avgDurationMillis = Math.floor(stageData.durationMillis / stageData.runs);
                     stageData.avgDurationMillisNoPause = Math.floor(stageData.durationMillisNoPause / stageData.runs);
+		    if(isNaN(stageData.avgDurationMillisNoPause)){
+                        stageData.avgDurationMillis = 0;
+                        stageData.avgDurationMillisNoPause = 0;
+                    }
                     // this will give us a number between 1 and 1.5
                     stage.emphasise = (stage.durationMillisNoPause / run.durationMillisNoPause / 2) + 1;
                     stage.emphasise = Math.min(stage.emphasise, 1.5);
