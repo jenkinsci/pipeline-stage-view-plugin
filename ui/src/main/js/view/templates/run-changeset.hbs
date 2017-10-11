@@ -2,7 +2,7 @@
     {{#if contributors.0.authorJenkinsId}}
     <div class="header">{{commitCount}} commit{{#ifCond commitCount '>' 1}}s{{/ifCond}} by <span class="contributor">{{contributors.0.authorJenkinsId}}</span>{{#ifCond contributorCount '>' 1}} and others{{/ifCond}}</div>
     {{else}}
-        <div class="header">{{commitCount}} commits</div>
+        <div class="header">{{commitCount}} commit{{#ifCond commitCount '>' 1}}s{{/ifCond}}</div>
     {{/if}}
     <div class="body">
         <table>
