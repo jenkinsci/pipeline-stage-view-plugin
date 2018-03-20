@@ -51,7 +51,7 @@ public class ModelUtil {
         if (!itemUrl.endsWith("/")) {
             itemUrl += "/";
         }
-        return rootUrl + "/" + itemUrl;
+        return (rootUrl.endsWith("/")) ? rootUrl+itemUrl : rootUrl + "/" + itemUrl;
     }
 
     public static String getRootUrl() {
