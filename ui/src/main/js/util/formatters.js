@@ -48,7 +48,7 @@ exports.memory = function (amount) {
 }
 
 exports.time = function (millis, numUnitsToShow) {
-    if (millis <= 0) {
+    if (millis <= 0 || Number.isNaN(millis)) {
         return '0ms';
     }
 
