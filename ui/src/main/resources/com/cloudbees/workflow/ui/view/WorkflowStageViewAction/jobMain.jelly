@@ -5,5 +5,5 @@
     It loads jobMain.jelly for all Action impls bound to a WorkflowJob.
 -->
 <j:jelly xmlns:j="jelly:core" xmlns:wf="/com/cloudbees/workflow">
-    <wf:controller name="pipeline-staged" fragCaption="Stage View" />
+    <wf:controller name="pipeline-staged" fragCaption="${%Stage View}" />
 </j:jelly>
