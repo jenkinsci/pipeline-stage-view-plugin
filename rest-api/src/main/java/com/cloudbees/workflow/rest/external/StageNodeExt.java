@@ -42,7 +42,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
-public class StageNodeExt extends FlowNodeExt {
+public class StageNodeExt extends FlowNodeExt implements Comparable {
 
     private List<AtomFlowNodeExt> stageFlowNodes;
 
@@ -124,6 +124,20 @@ public class StageNodeExt extends FlowNodeExt {
             }
         }
         this.setStageFlowNodes(newNodes);
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        StageNodeExt other = (StageNodeExt) o;
+        int c1 = Long.signum((this.getStartTimeMillis() - other.getStartTimeMillis())/1000);
+        if (c1 != 0) {
+            return c1;
+        }
+        int c2 = Integer.parseInt(this.getId()) - Integer.parseInt(other.getId());
+        if (c2 != 0) {
+            return c2;
+        }
+        return this.getName().compareTo(other.getName());
     }
 
 }

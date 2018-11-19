@@ -319,7 +319,16 @@ public class RunExt {
         if (execution != null) {
             ChunkVisitor visitor = new ChunkVisitor(run);
             ForkScanner.visitSimpleChunks(execution.getCurrentHeads(), visitor, new StageChunkFinder());
-            runExt.setStages(new ArrayList<StageNodeExt>(visitor.stages));
+
+            List<StageNodeExt> stages = new ArrayList();
+            for (StageNodeExt stage : visitor.stages) {
+                if (!collectionContainsStage(stages, stage)) {
+                    stages.add(stage);
+                }
+            }
+
+            Collections.sort(stages);
+            runExt.setStages(stages);
         }
 
         long currentTimeMillis = System.currentTimeMillis();
@@ -351,6 +360,19 @@ public class RunExt {
         }
         return false;
     }
+
+    private static boolean collectionContainsStage(List<StageNodeExt> stages, StageNodeExt stage) {
+        if (stage != null) {
+            for (StageNodeExt s : stages) {
+                if (s != null && s.getId() != null && s.getId().equals(stage.getId())) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
 
     private void initStatus(WorkflowRun run) {
         FlowExecution execution = run.getExecution();
