@@ -25,7 +25,6 @@ package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.Util;
 import com.cloudbees.workflow.rest.external.AtomFlowNodeExt;
-import com.cloudbees.workflow.rest.external.FlowNodeExt;
 import com.cloudbees.workflow.rest.external.FlowNodeLogExt;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
@@ -134,10 +133,8 @@ public class FlowNodeAPITest {
         jsonResponse = stageDescription.getWebResponse().getContentAsString();
         StageNodeExt stageDesc = jsonReadWrite.fromString(jsonResponse, StageNodeExt.class);
 
-        FlowNodeExt.FlowNodeLinks links = stageDesc.getStageFlowNodes().get(0).get_links();
-        String logUrl = links.getLog().href;
+        String logUrl = stageDesc.getStageFlowNodes().get(0).get_links().getLog().href;
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/log", logUrl);
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/log", links.getConsole().href);
 
         Page nodeLog = webClient.goTo(Util.removeRootUrl(logUrl), "application/json");
         jsonResponse = nodeLog.getWebResponse().getContentAsString();

@@ -39,7 +39,6 @@ import org.jenkinsci.plugins.workflow.support.steps.input.InputAction;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputStepExecution;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.DoNotUse;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -97,7 +96,7 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
         return doDescribe();
     }
 
-    @Restricted(NoExternalUse.class) // WebMethod
+    @Restricted(DoNotUse.class) // WebMethod
     @ServeJson
     public RunExt doDescribe() {
         return RunExt.create(getRun()).createWrapper();

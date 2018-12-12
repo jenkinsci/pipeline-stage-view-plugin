@@ -25,7 +25,6 @@ package com.cloudbees.workflow.rest.external;
 
 import com.cloudbees.workflow.rest.endpoints.flownode.Log;
 import com.cloudbees.workflow.rest.hal.Link;
-import com.cloudbees.workflow.util.ModelUtil;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.LogAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -70,10 +69,8 @@ public class AtomFlowNodeExt extends FlowNodeExt {
         // It would be super awesome if we didn't need to make a throwaway object
         basic.addBasicNodeData(node, execNodeName, duration, startTimeMillis, status, error);
         if (basic.getStatus() != StatusExt.NOT_EXECUTED && Stapler.getCurrentRequest() != null) {
-            LogAction la = node.getAction(LogAction.class);
-            if (la != null) {
+            if (node.getAction(LogAction.class) != null) {
                 basic.get_links().setLog(Link.newLink(Log.getUrl(node)));
-                basic.get_links().setConsole(Link.newLink(ModelUtil.getFullItemUrl(node) + la.getUrlName()));
             }
         }
         basic.addParentNodeRefs(node);

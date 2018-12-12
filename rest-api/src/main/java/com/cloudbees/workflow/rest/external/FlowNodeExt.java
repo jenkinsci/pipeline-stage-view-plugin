@@ -143,10 +143,7 @@ public class FlowNodeExt {
     }
 
     public static final class FlowNodeLinks extends Links {
-        /** Link to rest API for the console */
         private Link log;
-        /** Link to the human consumable console page */
-        private Link console;
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public Link getLog() {
@@ -155,15 +152,6 @@ public class FlowNodeExt {
 
         public void setLog(Link log) {
             this.log = log;
-        }
-
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        public Link getConsole() {
-            return console;
-        }
-
-        public void setConsole(Link console) {
-            this.console = console;
         }
     }
 
