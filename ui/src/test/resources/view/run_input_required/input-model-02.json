@@ -1,6 +1,7 @@
 {
   "id": "Run-test-suites",
   "proceedText": "Okay",
+  "abortText": "Abort",
   "message": "Workflow Configuration",
   "inputs": [
     {

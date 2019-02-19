@@ -43,6 +43,7 @@ public class PendingInputActionsExt {
     private String id;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String proceedText;
+    private String abortText;
     private String message;
     private List<InputParameterDefExt> inputs;
     private String proceedUrl; // Not a rest endpoint YET, so not including in _links
@@ -62,9 +63,11 @@ public class PendingInputActionsExt {
         return proceedText;
     }
 
-    public void setProceedText(String proceedText) {
-        this.proceedText = proceedText;
-    }
+    public void setProceedText(String proceedText) { this.proceedText = proceedText; }
+
+    public String getAbortText() { return abortText; }
+
+    public void setAbortText(String abortText) { this.abortText = abortText; }
 
     public String getMessage() {
         return message;
@@ -111,6 +114,7 @@ public class PendingInputActionsExt {
         String inputId = inputStepExecution.getId();
         inputActionExt.setId(inputId);
         inputActionExt.setProceedText(inputStepExecution.getInput().getOk());
+        inputActionExt.setAbortText(inputStepExecution.getInput().getAbort());
         inputActionExt.setMessage(inputStepExecution.getInput().getMessage());
 
         String runUrl = ModelUtil.getFullItemUrl(run.getUrl());
