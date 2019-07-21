@@ -64,7 +64,7 @@ public class InputStepTest {
                 "   sleep (1); " +
                 "   input(message: 'Is the build okay?') " +
                 "   error ('break'); " +
-                "}"));
+                "}", true));
 
         // schedule the workflow and then wait for it to enter
         // the pending input state
@@ -114,7 +114,7 @@ public class InputStepTest {
 
         InputStream sampleFlowRes = getClass().getResourceAsStream("sample-flow.groovy");
         String sampleFlow = IOUtils.toString(sampleFlowRes);
-        job.setDefinition(new CpsFlowDefinition(sampleFlow));
+        job.setDefinition(new CpsFlowDefinition(sampleFlow, true));
 
         // Start the job and wait for it to pause at the input action
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);

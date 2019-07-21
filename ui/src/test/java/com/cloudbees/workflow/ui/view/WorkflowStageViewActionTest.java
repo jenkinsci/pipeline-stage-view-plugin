@@ -64,7 +64,7 @@ public class WorkflowStageViewActionTest extends AbstractPhantomJSTest {
                 "   sh ('echo Testing'); " +
                 "   stage ('Deploy'); " +
                 "   sh ('echo Deploying'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);

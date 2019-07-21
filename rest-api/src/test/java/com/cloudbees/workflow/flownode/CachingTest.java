@@ -49,8 +49,8 @@ public class CachingTest {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "BlinkinJob");
         job.setDefinition(new CpsFlowDefinition("" +
                 "stage 'first' \n" +
-                "echo 'done' "
-        ));
+                "echo 'done' ",
+                true));
         WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));
         RunExt r = RunExt.create(build);
         String runKey = build.getExternalizableId();
@@ -60,8 +60,8 @@ public class CachingTest {
         WorkflowJob job2 = jenkinsRule.jenkins.createProject(WorkflowJob.class, "StableJob");
         job2.setDefinition(new CpsFlowDefinition("" +
                 "stage 'second' \n" +
-                "echo 'done' "
-        ));
+                "echo 'done' ",
+                true));
         WorkflowRun build2 = jenkinsRule.assertBuildStatusSuccess(job2.scheduleBuild2(0));
         RunExt r2 = RunExt.create(build2);
         String runKey2 = build2.getExternalizableId();
@@ -81,8 +81,8 @@ public class CachingTest {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "BlinkinJob");
         job.setDefinition(new CpsFlowDefinition("" +
                 "stage 'first' \n" +
-                "echo 'done'"
-        ));
+                "echo 'done'",
+                true));
         WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));
         jenkinsRule.assertBuildStatusSuccess(build);
         RunExt r = RunExt.create(build);
@@ -93,8 +93,8 @@ public class CachingTest {
         WorkflowJob job2 = jenkinsRule.jenkins.createProject(WorkflowJob.class, "StableJob");
         job2.setDefinition(new CpsFlowDefinition("" +
                 "stage 'second' \n" +
-                "echo 'done'"
-        ));
+                "echo 'done'",
+                true));
         WorkflowRun build2 = jenkinsRule.assertBuildStatusSuccess(job2.scheduleBuild2(0));
         RunExt r2 = RunExt.create(build2);
         String runKey2 = build2.getExternalizableId();

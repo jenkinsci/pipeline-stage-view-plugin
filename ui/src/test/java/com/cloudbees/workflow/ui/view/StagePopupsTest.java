@@ -60,7 +60,7 @@ public class StagePopupsTest extends AbstractPhantomJSTest {
                 "   stage ('Build'); " +
                 "   sh ('ls'); " +
                 "   sh ('blah'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());

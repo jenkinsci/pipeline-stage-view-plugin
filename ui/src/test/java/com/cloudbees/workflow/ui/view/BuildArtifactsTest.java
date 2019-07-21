@@ -59,7 +59,7 @@ public class BuildArtifactsTest extends AbstractPhantomJSTest {
                 "   stage ('Archiving'); " +
                 "   sh('mkdir targs && echo hello > targs/hello1.txt && echo hello > targs/hello2.txt'); " +
                 "   archive(includes: 'targs/*.txt'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);

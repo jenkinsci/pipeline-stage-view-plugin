@@ -59,7 +59,7 @@ public class FailedJobTest extends AbstractPhantomJSTest {
                 "node {" +
                 "   stage ('Build'); " +
                 "   sh ('blah'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());

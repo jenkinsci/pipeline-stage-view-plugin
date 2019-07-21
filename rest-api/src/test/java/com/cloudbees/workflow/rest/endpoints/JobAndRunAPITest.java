@@ -79,7 +79,7 @@ public class JobAndRunAPITest {
                 "     archive(includes: 'file.txt'); " +
                 "     echo ('Deploying'); " +
                 "   } \n" +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
@@ -129,7 +129,7 @@ public class JobAndRunAPITest {
                 "     writeFile file: 'file.txt', text:'content'; " +
                 "     archive(includes: 'file.txt'); " +
                 "   echo ('Deploying'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
@@ -156,7 +156,7 @@ public class JobAndRunAPITest {
         job.setDefinition(new CpsFlowDefinition("" +
                 "stage 'empty'\n" +
                 "stage 'nope' \n" +
-                "echo \"I'm passing\"\n"));
+                "echo \"I'm passing\"\n", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.SUCCESS, build.get());
@@ -200,8 +200,8 @@ public class JobAndRunAPITest {
                 "}\n" +
                 "stage 'three'\n" +
                 "echo 'we are going to crash....'\n" +
-                "throw new Exception(\"crash!!!\")\n"
-                ));
+                "throw new Exception(\"crash!!!\")\n",
+                true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
@@ -246,7 +246,7 @@ public class JobAndRunAPITest {
                 "}\n" +
                 "\n" +
                 "stage \"and now keep passing\"\n" +
-                "echo \"still passing\""));
+                "echo \"still passing\"", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
@@ -523,8 +523,8 @@ public class JobAndRunAPITest {
                 "currentBuild.result = 'UNSTABLE'\n" +
                 "echo 'ran things'\n" +
                 "stage 'end'\n" +
-                "echo 'done'"
-        ));
+                "echo 'done'",
+                true));
         QueueTaskFuture<WorkflowRun> build = passUnstable.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.UNSTABLE, build.get());
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
@@ -556,7 +556,7 @@ public class JobAndRunAPITest {
                 "catch (Exception e) {\n" +
                 "    currentBuild.result = 'UNSTABLE'    \n" +
                 "    echo 'eaten error!' \n" +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = failUnstable.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.UNSTABLE, build.get());
@@ -584,8 +584,8 @@ public class JobAndRunAPITest {
                 "    error('Trusted Grand Maester Pycelle')\n" +
                 "} catch (Exception e) {\n" +
                 "    echo 'It was a trap - Tyriowned!'\n" +
-                "}"
-        ));
+                "}",
+                true));
         QueueTaskFuture<WorkflowRun> build = oneStageCatch.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
@@ -613,8 +613,8 @@ public class JobAndRunAPITest {
                 "    echo 'Ran away to Dragonstone'\n" +
                 "}\n" +
                 "stage 'Flee to the North'\n" +
-                "echo 'Helped defeat the Wildlings'"
-        ));
+                "echo 'Helped defeat the Wildlings'",
+                true));
         QueueTaskFuture<WorkflowRun> build = multiStageCatch.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
@@ -643,8 +643,8 @@ public class JobAndRunAPITest {
                 "} catch (Exception ex) {\n" +
                 "    echo 'Stage failed'\n" +
                 "    currentBuild.result = 'FAILURE'\n" +
-                "}"
-        ));
+                "}",
+                true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
