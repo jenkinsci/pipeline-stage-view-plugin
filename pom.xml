@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.22</version>
+        <version>2.31</version>
     </parent>
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
@@ -46,7 +46,7 @@
     </scm>
 
     <properties>
-        <jenkins.version>1.642.3</jenkins.version>
+        <jenkins.version>2.7.3</jenkins.version>
         <java.level>7</java.level>
         <workflow.version>2.0</workflow.version>
     </properties>

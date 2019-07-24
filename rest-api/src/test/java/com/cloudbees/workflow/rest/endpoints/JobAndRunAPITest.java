@@ -36,13 +36,14 @@ import com.cloudbees.workflow.util.JSONReadWrite;
 import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.Action;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
+import hudson.slaves.DumbSlave;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.test.steps.SemaphoreStep;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -663,4 +664,77 @@ public class JobAndRunAPITest {
         Assert.assertEquals(1, run.getStages().size());
         Assert.assertEquals(StatusExt.FAILED, run.getStages().get(0).getStatus());
     }
+
+    @Issue("JENKINS-44636")
+    @Test
+    public void queuedAndRunningOnAgent() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "queuedAndRunning");
+        job.setDefinition(new CpsFlowDefinition("stage('some-stage') {\n" +
+                "  node('test') {\n" +
+                "    echo 'hello'\n" +
+                "    semaphore 'wait'\n" +
+                "  }\n" +
+                "}\n", true));
+
+        WorkflowRun b1 = job.scheduleBuild2(0).waitForStart();
+        jenkinsRule.waitForMessage("Still waiting to schedule task", b1);
+
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        assertBasicJobInfoOkay(job, webClient);
+
+        String jobRunsUrl = job.getUrl() + "wfapi/runs?fullStages=true";
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+
+        // Verify that QUEUED translates to IN_PROGRESS.
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, workflowRuns.length);
+        RunExt runExt = workflowRuns[0];
+        Assert.assertEquals(StatusExt.IN_PROGRESS, runExt.getStatus());
+        List<StageNodeExt> stages = runExt.getStages();
+        Assert.assertEquals(1, stages.size());
+
+        Assert.assertEquals(StatusExt.IN_PROGRESS, stages.get(0).getStatus());
+
+        // Verify that IN_PROGRESS is correct.
+        DumbSlave agent = jenkinsRule.createSlave("test-agent", "test", null);
+
+        SemaphoreStep.waitForStart("wait/1", b1);
+
+        runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        jsonResponse = runsPage.getWebResponse().getContentAsString();
+        workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+        Assert.assertEquals(1, workflowRuns.length);
+        runExt = workflowRuns[0];
+        Assert.assertEquals(StatusExt.IN_PROGRESS, runExt.getStatus());
+        stages = runExt.getStages();
+        Assert.assertEquals(1, stages.size());
+
+        Assert.assertEquals(StatusExt.IN_PROGRESS, stages.get(0).getStatus());
+
+        // And finally, verify that we've completed correctly.
+        SemaphoreStep.success("wait/1", null);
+        jenkinsRule.assertBuildStatusSuccess(jenkinsRule.waitForCompletion(b1));
+
+        runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        jsonResponse = runsPage.getWebResponse().getContentAsString();
+        workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+        Assert.assertEquals(1, workflowRuns.length);
+        runExt = workflowRuns[0];
+        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStatus());
+        assertRunPassesSanity(b1, runExt, true);
+        stages = runExt.getStages();
+        Assert.assertEquals(1, stages.size());
+
+        for (StageNodeExt st : runExt.getStages()) {
+            assertStageInfoOkay(st, true);
+        }
+
+        Assert.assertEquals(StatusExt.SUCCESS, stages.get(0).getStatus());
+
+    }
+
 }
