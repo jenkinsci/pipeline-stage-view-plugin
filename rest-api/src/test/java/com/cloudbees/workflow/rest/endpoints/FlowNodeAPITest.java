@@ -72,7 +72,7 @@ public class FlowNodeAPITest {
                 "   echo ('Testing'); " +
                 "   stage ('Deploy'); " +
                 "   echo ('Deploying'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
@@ -163,7 +163,7 @@ public class FlowNodeAPITest {
                 "   error ('echo Testing'); " +
                 "   stage ('Deploy'); " +
                 "   error ('echo Deploying'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());

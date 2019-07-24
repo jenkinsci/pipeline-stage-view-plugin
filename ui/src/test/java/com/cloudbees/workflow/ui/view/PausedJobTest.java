@@ -61,7 +61,7 @@ public class PausedJobTest extends AbstractPhantomJSTest {
                 "   stage ('Build'); " +
                 "   echo ('build'); " +
                 "   input (message: 'Is the build okay?'); " +
-                "}"));
+                "}", true));
 
         QueueTaskFuture<WorkflowRun> q = job.scheduleBuild2(0);
         WorkflowRun b = q.getStartCondition().get();

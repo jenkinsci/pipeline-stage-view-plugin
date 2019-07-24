@@ -63,7 +63,7 @@ public class ParallelStepTest {
                 "}";
 
         // System.out.println(script);
-        job.setDefinition(new CpsFlowDefinition(script));
+        job.setDefinition(new CpsFlowDefinition(script, true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         build.waitForStart();
