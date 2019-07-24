@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.model.Queue;
 import org.jenkinsci.plugins.workflow.actions.ArgumentsAction;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
+import org.jenkinsci.plugins.workflow.actions.ExecutorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -204,7 +205,12 @@ public class FlowNodeExt {
 
         setId(node.getId());
         setName(node.getDisplayName());
-        setExecNode(execNodeName);
+        ExecutorAction executor = node.getAction(ExecutorAction.class);
+        if(executor != null) {
+            setExecNode(executor.getExecutorName());
+        } else {
+            setExecNode(execNodeName);
+        }
         set_links(new FlowNodeLinks());
         get_links().initSelf(Describe.getUrl(node));
         setStatus(status);
