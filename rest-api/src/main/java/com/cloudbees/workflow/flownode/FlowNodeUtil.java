@@ -87,7 +87,7 @@ public class FlowNodeUtil {
         }
 
         public static List<CacheExtension> all() {
-            Jenkins myJenkins = Jenkins.getInstance();
+            Jenkins myJenkins = Jenkins.getInstanceOrNull();
             if ( myJenkins == null) {
                 return FALLBACK_CACHES;
             } else {
