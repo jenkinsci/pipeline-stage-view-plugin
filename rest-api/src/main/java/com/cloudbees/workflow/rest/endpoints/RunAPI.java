@@ -47,6 +47,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * API Action handler to return a single WorkflowJob run.
@@ -123,11 +124,15 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
         InputAction inputAction = getRun().getAction(InputAction.class);
 
         if (inputAction != null) {
-            List<InputStepExecution> executions = inputAction.getExecutions();
-            if (executions != null && !executions.isEmpty()) {
-                for (InputStepExecution inputStepExecution : executions) {
-                    pendingInputActions.add(PendingInputActionsExt.create(inputStepExecution, getRun()));
+            try {
+                List<InputStepExecution> executions = inputAction.getExecutions();
+                if (executions != null && !executions.isEmpty()) {
+                    for (InputStepExecution inputStepExecution : executions) {
+                        pendingInputActions.add(PendingInputActionsExt.create(inputStepExecution, getRun()));
+                    }
                 }
+            } catch (InterruptedException | TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -140,13 +145,17 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
         InputAction inputAction = getRun().getAction(InputAction.class);
 
         if (inputAction != null) {
-            List<InputStepExecution> executions = inputAction.getExecutions();
-            if (executions != null && !executions.isEmpty()) {
-                for (InputStepExecution inputStepExecution : executions) {
-                    if (!inputStepExecution.isSettled()) {
-                        return PendingInputActionsExt.create(inputStepExecution, getRun());
+            try {
+                List<InputStepExecution> executions = inputAction.getExecutions();
+                if (executions != null && !executions.isEmpty()) {
+                    for (InputStepExecution inputStepExecution : executions) {
+                        if (!inputStepExecution.isSettled()) {
+                            return PendingInputActionsExt.create(inputStepExecution, getRun());
+                        }
                     }
                 }
+            } catch (InterruptedException | TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -179,23 +188,27 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
                     " have an InputAction.");
         }
 
-        InputStepExecution execution = inputAction.getExecution(inputId);
-        if (execution == null) {
-            // Note that InputStep normalizes the input ID it is given as part of the
-            // input flow def (capitalizes the first char). InputAction.getExecution(id) (used above)
-            // does not perform the same normalization on the id it is given, assuming
-            // the supplied id is pre-normalized (e.g. came from a call to InputStep.getId()).
-            // If the id is coming from a different source (and is not pre-normalized), this
-            // assumption obviously fails, as will the call to InputAction.getExecution(id).
-            throw new ServletException(String.format("Error processing Input Submit request. This Run instance does not" +
-                    " have an Input with an ID of '%s'. The input ID may not be pre-normalized appropriately.", inputId));
-        }
-
         try {
-            // Pass the request off to the InputStepExecution, allowing it to process input data.
-            execution.doProceed(Stapler.getCurrentRequest());
-        } catch (Exception e) {
-            throw new ServletException("Error processing Input Submit request.", e);
+            InputStepExecution execution = inputAction.getExecution(inputId);
+            if (execution == null) {
+                // Note that InputStep normalizes the input ID it is given as part of the
+                // input flow def (capitalizes the first char). InputAction.getExecution(id) (used above)
+                // does not perform the same normalization on the id it is given, assuming
+                // the supplied id is pre-normalized (e.g. came from a call to InputStep.getId()).
+                // If the id is coming from a different source (and is not pre-normalized), this
+                // assumption obviously fails, as will the call to InputAction.getExecution(id).
+                throw new ServletException(String.format("Error processing Input Submit request. This Run instance does not" +
+                        " have an Input with an ID of '%s'. The input ID may not be pre-normalized appropriately.", inputId));
+            }
+
+            try {
+                // Pass the request off to the InputStepExecution, allowing it to process input data.
+                execution.doProceed(Stapler.getCurrentRequest());
+            } catch (Exception e) {
+                throw new ServletException("Error processing Input Submit request.", e);
+            }
+        } catch (InterruptedException | TimeoutException e) {
+            throw new RuntimeException(e);
         }
     }
 }

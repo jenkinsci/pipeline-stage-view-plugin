@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * External API response object for pipeline run
@@ -344,9 +345,13 @@ public class RunExt {
     public static boolean isPendingInput(WorkflowRun run) {
         InputAction inputAction = run.getAction(InputAction.class);
         if (inputAction != null) {
-            List<InputStepExecution> executions = inputAction.getExecutions();
-            if (executions != null && !executions.isEmpty()) {
-                return true;
+            try {
+                List<InputStepExecution> executions = inputAction.getExecutions();
+                if (executions != null && !executions.isEmpty()) {
+                    return true;
+                }
+            } catch (InterruptedException | TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
         return false;
