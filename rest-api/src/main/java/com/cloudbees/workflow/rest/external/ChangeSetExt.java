@@ -170,7 +170,7 @@ public class ChangeSetExt {
         RepositoryBrowser<?> repoBrowser = changeset.getBrowser();
 
         setKind(changeset.getKind());
-        setCommits(new ArrayList<Commit>());
+        setCommits(new ArrayList<>());
         setConsoleUrl(getRunUrl(run) + "changes");
 
         while(iterator.hasNext()) {

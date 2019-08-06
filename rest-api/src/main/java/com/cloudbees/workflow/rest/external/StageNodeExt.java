@@ -47,7 +47,7 @@ public class StageNodeExt extends FlowNodeExt {
     private List<AtomFlowNodeExt> stageFlowNodes;
 
     /** Bit of a hack but this lets us cache all the child nodes, not just the limited subset without adding to JSON responses */
-    transient List<String> allChildNodeIds = new ArrayList<String>();
+    transient List<String> allChildNodeIds = new ArrayList<>();
 
     // Limit the size of child nodes returned
     static final int MAX_CHILD_NODES = Integer.getInteger(StageNodeExt.class.getName()+".maxChildNodes", 100);

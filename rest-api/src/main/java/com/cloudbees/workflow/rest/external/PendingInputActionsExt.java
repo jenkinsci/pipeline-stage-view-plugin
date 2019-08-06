@@ -132,7 +132,7 @@ public class PendingInputActionsExt {
                 InputStepExecution execution = inputAction.getExecution(inputId);
                 if (execution != null) {
                     List<ParameterDefinition> inputParamDefs = execution.getInput().getParameters();
-                    List<InputParameterDefExt> inputParameters = new ArrayList<InputParameterDefExt>();
+                    List<InputParameterDefExt> inputParameters = new ArrayList<>();
 
                     for (ParameterDefinition inputParamDef : inputParamDefs) {
                         inputParameters.add(new InputParameterDefExt(inputParamDef));

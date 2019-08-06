@@ -30,11 +30,11 @@ import java.util.Collection;
  * @author Sam Van Oort
  */
 public class ChunkVisitor extends StandardChunkVisitor {
-    ArrayDeque<StageNodeExt> stages = new ArrayDeque<StageNodeExt>();
+    ArrayDeque<StageNodeExt> stages = new ArrayDeque<>();
     FlowNode firstExecuted = null;
-    ArrayDeque<AtomFlowNodeExt> stageContents = new ArrayDeque<AtomFlowNodeExt>();
+    ArrayDeque<AtomFlowNodeExt> stageContents = new ArrayDeque<>();
     WorkflowRun run;
-    ArrayList<String> stageNodeIds = new ArrayList<String>();
+    ArrayList<String> stageNodeIds = new ArrayList<>();
     boolean isLastChunk = true;
 
     public ChunkVisitor(@Nonnull WorkflowRun run) {
@@ -97,7 +97,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
-        ArrayList<AtomFlowNodeExt> internals = new ArrayList<AtomFlowNodeExt>(childNodeLength);
+        ArrayList<AtomFlowNodeExt> internals = new ArrayList<>(childNodeLength);
         Iterables.addAll(internals, Iterables.limit(stageContents, StageNodeExt.MAX_CHILD_NODES));
         stageExt.setStageFlowNodes(internals);
 

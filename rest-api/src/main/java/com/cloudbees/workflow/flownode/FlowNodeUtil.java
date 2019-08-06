@@ -148,12 +148,9 @@ public class FlowNodeUtil {
         }
 
         // Find node after this one, scanning everything until this one
-        final FlowNode after = new ForkScanner().findFirstMatch(node.getExecution().getCurrentHeads(), Collections.singletonList(node), new Predicate<FlowNode>() {
-            public boolean apply(@Nonnull FlowNode f) {
-                List<FlowNode> parents = f.getParents();
-                return (parents.contains(node));
-            }
-        });
+        final FlowNode after = new ForkScanner().findFirstMatch(node.getExecution().getCurrentHeads(),
+                                                                Collections.singletonList(node),
+                                                                input -> input.getParents().contains( node ));
         return after;
     }
 
@@ -208,7 +205,7 @@ public class FlowNodeUtil {
         }
         RunExt runExt = RunExt.create(run);
         if (runExt.getStages() != null) {
-            ArrayList<FlowNode> nodes = new ArrayList<FlowNode>(runExt.getStages().size());
+            ArrayList<FlowNode> nodes = new ArrayList<>(runExt.getStages().size());
             try {
                 for (StageNodeExt st : runExt.getStages()) {
                     nodes.add(execution.getNode(st.getId()));
@@ -245,7 +242,7 @@ public class FlowNodeUtil {
 
         try {
             if (childIds == null) { return Collections.emptyList(); }
-            List<FlowNode> nodes = new ArrayList<FlowNode>(childIds.size());
+            List<FlowNode> nodes = new ArrayList<>(childIds.size());
             for (String s : childIds) {
                 nodes.add(exec.getNode(s));
             }

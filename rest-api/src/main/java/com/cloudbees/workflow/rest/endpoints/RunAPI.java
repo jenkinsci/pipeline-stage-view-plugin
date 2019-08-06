@@ -107,7 +107,7 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     @Restricted(DoNotUse.class) // WebMethod
     @ServeJson
     public List<ChangeSetExt> doChangesets() {
-        List<ChangeSetExt> changeSetExts = new ArrayList<ChangeSetExt>();
+        List<ChangeSetExt> changeSetExts = new ArrayList<>();
         List<ChangeLogSet<? extends ChangeLogSet.Entry>> changesets = getRun().getChangeSets();
 
         for (ChangeLogSet<? extends ChangeLogSet.Entry> changeset : changesets) {
@@ -120,7 +120,7 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     @Restricted(DoNotUse.class) // WebMethod
     @ServeJson
     public List<PendingInputActionsExt> doPendingInputActions() {
-        List<PendingInputActionsExt> pendingInputActions = new ArrayList<PendingInputActionsExt>();
+        List<PendingInputActionsExt> pendingInputActions = new ArrayList<>();
         InputAction inputAction = getRun().getAction(InputAction.class);
 
         if (inputAction != null) {
@@ -165,7 +165,7 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     @Restricted(DoNotUse.class) // WebMethod
     @ServeJson
     public List<BuildArtifactExt> doArtifacts() {
-        List<BuildArtifactExt> artifactExts = new ArrayList<BuildArtifactExt>();
+        List<BuildArtifactExt> artifactExts = new ArrayList<>();
         List<Run<WorkflowJob, WorkflowRun>.Artifact> artifacts = getRun().getArtifacts();
 
         if (artifacts != null && !artifacts.isEmpty()) {
