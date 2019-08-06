@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.22</version>
+        <version>3.48</version>
     </parent>
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
@@ -36,7 +36,7 @@
     <version>2.12-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Pipeline Stage View Plugin: Parent POM</name>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Stage+View+Plugin</url>
+    <url>https://wiki.jenkins.io/display/JENKINS/Pipeline+Stage+View+Plugin</url>
 
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/pipeline-stage-view-plugin.git</connection>
@@ -46,21 +46,21 @@
     </scm>
 
     <properties>
-        <jenkins.version>1.642.3</jenkins.version>
-        <java.level>7</java.level>
+        <jenkins.version>2.60.3</jenkins.version>
+        <java.level>8</java.level>
         <workflow.version>2.0</workflow.version>
     </properties>
 
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
 

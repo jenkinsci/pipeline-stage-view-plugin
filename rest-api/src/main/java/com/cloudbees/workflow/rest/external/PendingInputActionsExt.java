@@ -34,6 +34,7 @@ import org.jenkinsci.plugins.workflow.support.steps.input.InputStepExecution;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
@@ -127,16 +128,20 @@ public class PendingInputActionsExt {
         InputAction inputAction = run.getAction(InputAction.class);
 
         if (inputAction != null) {
-            InputStepExecution execution = inputAction.getExecution(inputId);
-            if (execution != null) {
-                List<ParameterDefinition> inputParamDefs = execution.getInput().getParameters();
-                List<InputParameterDefExt> inputParameters = new ArrayList<InputParameterDefExt>();
+            try {
+                InputStepExecution execution = inputAction.getExecution(inputId);
+                if (execution != null) {
+                    List<ParameterDefinition> inputParamDefs = execution.getInput().getParameters();
+                    List<InputParameterDefExt> inputParameters = new ArrayList<InputParameterDefExt>();
 
-                for (ParameterDefinition inputParamDef : inputParamDefs) {
-                    inputParameters.add(new InputParameterDefExt(inputParamDef));
+                    for (ParameterDefinition inputParamDef : inputParamDefs) {
+                        inputParameters.add(new InputParameterDefExt(inputParamDef));
+                    }
+
+                    return inputParameters;
                 }
-
-                return inputParameters;
+            } catch (InterruptedException | TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
 
