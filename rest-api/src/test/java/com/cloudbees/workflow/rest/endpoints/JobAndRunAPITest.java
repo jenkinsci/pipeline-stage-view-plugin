@@ -36,7 +36,6 @@ import com.cloudbees.workflow.util.JSONReadWrite;
 import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.Action;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -53,6 +52,9 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
+
+import static java.lang.System.getProperty;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test the raw job/run APIs
@@ -186,6 +188,9 @@ public class JobAndRunAPITest {
     @Issue("JENKINS-40162")  // Zero duration for run
     @Test
     public void testDuration0EdgeCase() throws Exception {
+        // Test can't run on windows machines (JENKINS-33708). The flow definition contains the sh command.
+        assumeFalse(getProperty("os.name").toLowerCase().startsWith("win"));
+
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "DurationBug");
 
         job.setDefinition(new CpsFlowDefinition("" +
