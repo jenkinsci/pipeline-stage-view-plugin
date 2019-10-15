@@ -101,7 +101,7 @@ public abstract class AbstractPhantomJSTest {
     }
 
     protected List<WebElement> waitForElementsAdded(WebElement inElement, String cssSelector) {
-        List<WebElement> elements = Collections.EMPTY_LIST;
+        List<WebElement> elements = Collections.emptyList();
 
         long start = System.currentTimeMillis();
         while (elements.isEmpty() && System.currentTimeMillis() < (start + 20000)) {
