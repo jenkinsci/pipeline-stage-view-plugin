@@ -20,7 +20,7 @@ describe("view/run-changesets-spec", function () {
 //            helper.log('[' + expectedFrag + ']');
 //            helper.compareMultilineText(veiwFarg.html(), expectedFrag);
 
-            expect(veiwFarg.html().replace(/\r?\n/g, '\n')).toEqual(expectedFrag).replace(/\r?\n/g, '\n');
+            expect(veiwFarg.html().replace(/\r?\n/g, '\n')).toEqual(expectedFrag.replace(/\r?\n/g, '\n'));
 
             done();
         });
