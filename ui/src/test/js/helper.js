@@ -124,8 +124,8 @@ exports.trim = function(str) {
 }
 
 exports.compareMultilineText = function(text1, text2, trimLines) {
-    var text1Lines = text1.split(/^/m);
-    var text2Lines = text2.split(/^/m);
+    var text1Lines = text1.match(/[^\r\n]+/g);
+    var text2Lines = text2.match(/[^\r\n]+/g);
 
     if (text1Lines.length !== text2Lines.length) {
         console.log("Text1 has " + text1Lines.length + " lines of text, while Text2 has " + text2Lines.length);
