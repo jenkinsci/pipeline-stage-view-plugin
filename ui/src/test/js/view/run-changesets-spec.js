@@ -12,7 +12,7 @@ describe("view/run-changesets-spec", function () {
             var run_changeset_model = helper.requireTestRes('model/run_changesets/01_run_changeset_post_model');
             var templates = helper.require('view/templates');
 
-            var veiwFarg = templates.apply('run-changeset', run_changeset_model);
+            var viewFrag = templates.apply('run-changeset', run_changeset_model);
 
             var expectedFrag = helper.requireTestRes('view/run_changesets/expected_01.html');
 //            helper.log('[' + veiwFarg.html() + ']');
@@ -20,7 +20,10 @@ describe("view/run-changesets-spec", function () {
 //            helper.log('[' + expectedFrag + ']');
 //            helper.compareMultilineText(veiwFarg.html(), expectedFrag);
 
-            expect(veiwFarg.html().replace(/\r?\n/g, '\n')).toEqual(expectedFrag.replace(/\r?\n/g, '\n'));
+            var currentHtml = viewFrag.html().replace(/\r?\n/g, '\n');
+            var expectedHtml = expectedFrag.replace(/\r?\n/g, '\n');
+
+            expect(currentHtml).toEqual(expectedHtml);
 
             done();
         });
