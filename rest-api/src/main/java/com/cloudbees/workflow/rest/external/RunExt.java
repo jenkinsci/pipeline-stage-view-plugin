@@ -366,19 +366,7 @@ public class RunExt {
             setStatus(StatusExt.valueOf(execution.getCauseOfFailure()));
         } else if (execution.isComplete()) {
             Result r = run.getResult();
-            if (r == Result.NOT_BUILT) {
-                setStatus(StatusExt.NOT_EXECUTED);
-            } else if (r == Result.ABORTED) {
-                setStatus(StatusExt.ABORTED);
-            } else if (r == Result.FAILURE ) {
-                setStatus(StatusExt.FAILED);
-            } else if (r == Result.UNSTABLE ) {
-                setStatus(StatusExt.UNSTABLE);
-            } else if (r == Result.SUCCESS) {
-                setStatus(StatusExt.SUCCESS);
-            } else {
-                setStatus(StatusExt.FAILED);
-            }
+            setStatus(StatusExt.valueOf(r));
         } else if (isPendingInput(run)) {
             setStatus(StatusExt.PAUSED_PENDING_INPUT);
         } else {

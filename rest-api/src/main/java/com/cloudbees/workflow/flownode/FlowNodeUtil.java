@@ -100,7 +100,13 @@ public class FlowNodeUtil {
     public static RunExt getCachedRun(@Nonnull WorkflowRun run) {
         RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(run.getExternalizableId());
         if (cachedRun != null) {
-            return cachedRun;
+            // Sanity check the cache see JENKINS-43556
+            StatusExt status = StatusExt.valueOf(run.getResult());
+            if (cachedRun.getStatus().equals(status)) {
+                return cachedRun;
+            } else {
+                CacheExtension.all().get(0).getRunCache().invalidate(run.getExternalizableId());
+            }
         }
         return null;
     }

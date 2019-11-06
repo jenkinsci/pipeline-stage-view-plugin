@@ -24,6 +24,7 @@
 package com.cloudbees.workflow.flownode;
 
 import com.cloudbees.workflow.rest.external.RunExt;
+import com.cloudbees.workflow.rest.external.StatusExt;
 import com.google.common.cache.Cache;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -106,5 +107,26 @@ public class CachingTest {
         Assert.assertNull("Cache entry should be removed for renamed job", cache.getIfPresent(runKey));
         Assert.assertEquals("Non-renamed jobs should still be cached", r2, cache.getIfPresent(runKey2));
         Assert.assertNull("Cache entry should not be present with new job name", cache.getIfPresent(newJobKey));
+    }
+
+    @Test
+    public void sanityCheckTest() throws Exception {
+        Cache<String, RunExt> cache = FlowNodeUtil.CacheExtension.all().get(0).getRunCache();
+
+        // Create one job
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "BlinkinJob");
+        job.setDefinition(new CpsFlowDefinition("" +
+                "stage 'first' \n" +
+                "echo 'done'",
+                true));
+        WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        jenkinsRule.assertBuildStatusSuccess(build);
+        //Create invalid cache entry
+        RunExt r = RunExt.createNew(build);
+        r.setStatus(StatusExt.FAILED);
+        String runKey = build.getExternalizableId();
+        cache.put(runKey, r);
+        //Assert invalid cache entry not returned
+        Assert.assertNull(FlowNodeUtil.getCachedRun(build));
     }
 }
