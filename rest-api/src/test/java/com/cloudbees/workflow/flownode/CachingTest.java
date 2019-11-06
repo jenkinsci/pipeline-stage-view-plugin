@@ -126,7 +126,8 @@ public class CachingTest {
         r.setStatus(StatusExt.FAILED);
         String runKey = build.getExternalizableId();
         cache.put(runKey, r);
-        //Assert invalid cache entry not returned
+        //Assert invalid cache entry not returned and invalidated
         Assert.assertNull(FlowNodeUtil.getCachedRun(build));
+        Assert.assertNull(cache.getIfPresent(runKey));
     }
 }
