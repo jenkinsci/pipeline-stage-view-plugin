@@ -27,8 +27,9 @@ import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.GenericStatus;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 
+import hudson.model.Result;
+
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
@@ -55,6 +56,22 @@ public enum StatusExt {
             return StatusExt.ABORTED;
         } else {
             return StatusExt.FAILED;
+        }
+    }
+
+    public static StatusExt valueOf(Result r) {
+        if (r == Result.NOT_BUILT) {
+            return StatusExt.NOT_EXECUTED;
+        } else if (r == Result.ABORTED) {
+            return StatusExt.ABORTED;
+        } else if (r == Result.FAILURE) {
+            return StatusExt.FAILED;
+        } else if (r == Result.UNSTABLE ) {
+            return StatusExt.UNSTABLE;
+        } else if (r == Result.SUCCESS) {
+            return StatusExt.SUCCESS;
+        } else {
+            throw new IllegalStateException("Illegal Result type: " + r);
         }
     }
 
