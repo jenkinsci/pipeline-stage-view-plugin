@@ -37,6 +37,13 @@
     <packaging>pom</packaging>
     <name>Pipeline Stage View Plugin: Parent POM</name>
     <url>https://wiki.jenkins.io/display/JENKINS/Pipeline+Stage+View+Plugin</url>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/pipeline-stage-view-plugin.git</connection>
