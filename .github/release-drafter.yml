@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: pipeline-stage-view-plugin-$NEXT_MINOR_VERSION
