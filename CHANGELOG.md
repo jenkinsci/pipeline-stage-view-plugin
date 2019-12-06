@@ -1,6 +1,7 @@
 # Changelog:
 
-#### 2.12 (August 6, 2019)
+## 2.12
+August 6, 2019
 
 -   Fix Internet Explorer 11
     compatibly [JENKINS-58808](https://issues.jenkins-ci.org/browse/JENKINS-58808)
