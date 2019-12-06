@@ -1,5 +1,9 @@
 # Pipeline Stage View Plugin
 
+[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/pipeline-stage-view)](https://plugins.jenkins.io/pipeline-stage-view)
+[![Changelog](https://img.shields.io/github/v/tag/jenkinsci/pipeline-stage-view-plugin?label=changelog)](https://github.com/jenkinsci/pipeline-stage-view-plugin/blob/master/CHANGELOG.md)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/pipeline-stage-view?color=blue)](https://plugins.jenkins.io/pipeline-stage-view)
+
 # Stage View: 
 
 ## ![](docs/images/who-broke-it.png)
@@ -105,5 +109,4 @@ System.setProperty("com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCom
         - com.cloudbees.workflow.rest.external.StageNodeExt.maxChildNodes -
         note: this may have a very large performance impact with complex
         builds.
-
 
