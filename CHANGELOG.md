@@ -114,8 +114,6 @@ August 6, 2019
         -   Mitigation: UI switches to use API below, so it just gets
             this data with the run request
 
-&nbsp;
-
 -   Performance:  Fetch full stage data when requesting runs, and
     doesn't issue separate requests for individual stages
     ([JENKINS-34036](https://issues.jenkins-ci.org/browse/JENKINS-34036))

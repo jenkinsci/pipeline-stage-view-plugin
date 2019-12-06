@@ -4,13 +4,17 @@
 [![Changelog](https://img.shields.io/github/v/tag/jenkinsci/pipeline-stage-view-plugin?label=changelog)](https://github.com/jenkinsci/pipeline-stage-view-plugin/blob/master/CHANGELOG.md)
 [![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/pipeline-stage-view?color=blue)](https://plugins.jenkins.io/pipeline-stage-view)
 
+## Version history
+
+See [the changelog](CHANGELOG.md)
+
 # Stage View: 
 
 ## ![](docs/images/who-broke-it.png)
 
 ## ![](docs/images/green-and-mean.png)
 
-When you have complex builds Pipelines, it is useful to be able to see
+When you have complex build Pipelines, it is useful to be able to see
 the progress of each stage.  The Pipeline Stage View plugin includes an
 extended visualization of Pipeline build history on the index page of a
 flow project, under *Stage View*. (You can also click on *Full Stage
@@ -58,9 +62,7 @@ expected to take, based on historical averages.
     ``` syntaxhighlighter-pre
     stage('name'){ echo 'steps here' }
     ```
-
-&nbsp;
-
+    
 -   **Dynamic stages**: in general, if you want to visualize dynamically
     changing stages, make it conditional to execute the stage contents,
     not conditional to **include** the stage\*\* Stage view can handle a
@@ -76,37 +78,35 @@ expected to take, based on historical averages.
 
 -   At runtime or startup, you may turn off Jenkins user lookup for
     changesets with property
-     com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors
+     `com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors`
 
-&nbsp;
-
--   -   This is a workaround for rare cases where you are relying on an
+    -   This is a workaround for rare cases where you are relying on an
         external security realm for user information and have
         performance issues with many calls:
     -   In the script console this setting may be changed at runtime
         (with immediate impact):
 
-``` syntaxhighlighter-pre
-System.setProperty("com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors","false");
-```
+        ``` syntaxhighlighter-pre
+        System.setProperty("com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors","false");
+        ```
 
--   -   To turn user lookup back on: 
+    -   To turn user lookup back on: 
 
-``` syntaxhighlighter-pre
-System.setProperty("com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors","true");
-```
+        ``` syntaxhighlighter-pre
+        System.setProperty("com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors","true");
+        ```
 
 -   Hardcoded API limits that may be overridden by setting the
     properties at startup (requires restarting Jenkins to see the
     change):
     -   Characters in each step's log entry (default: 10240 or 10kB) -
-        com.cloudbees.workflow.rest.external.FlowNodeLogExt.maxReturnChars
+        `com.cloudbees.workflow.rest.external.FlowNodeLogExt.maxReturnChars`
     -   Runs displayed per job (default: 10)
-        - com.cloudbees.workflow.rest.external.JobExt.maxRunsPerJob
+        - `com.cloudbees.workflow.rest.external.JobExt.maxRunsPerJob`
     -   Artifacts shown per run (default: 100)
-        - com.cloudbees.workflow.rest.external.RunExt.maxArtifactsCount
+        - `com.cloudbees.workflow.rest.external.RunExt.maxArtifactsCount`
     -   Steps displayed per stage (default: 100)
-        - com.cloudbees.workflow.rest.external.StageNodeExt.maxChildNodes -
+        - `com.cloudbees.workflow.rest.external.StageNodeExt.maxChildNodes` -
         note: this may have a very large performance impact with complex
         builds.
 
