@@ -1,4 +1,4 @@
-# Changelog:
+# Changelog
 
 ## 2.12
 August 6, 2019
