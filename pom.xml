@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.48</version>
+        <version>3.54</version>
     </parent>
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
@@ -36,7 +36,16 @@
     <version>2.13-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Pipeline Stage View Plugin: Parent POM</name>
+
     <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/pipeline-stage-view-plugin.git</connection>
