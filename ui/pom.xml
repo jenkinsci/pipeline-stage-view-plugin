@@ -38,7 +38,7 @@
     <description>Provides a swimlane view of the different stages in a pipeline.
     </description>
     <packaging>hpi</packaging>
-    <url>https://wiki.jenkins.io/display/JENKINS/Pipeline+Stage+View+Plugin</url>
+    <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
     <properties>
         <npm.loglevel>--silent</npm.loglevel>
     </properties>

@@ -36,7 +36,7 @@
     <version>2.13-SNAPSHOT</version>
     <name>Pipeline: REST API Plugin</name>
     <description>Provides a REST API to access pipeline and pipeline run data</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Pipeline+Stage+View+Plugin</url>
+    <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
     <packaging>hpi</packaging>
 
 
