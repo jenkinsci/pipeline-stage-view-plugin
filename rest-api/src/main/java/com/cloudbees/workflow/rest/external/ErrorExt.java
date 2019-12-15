@@ -58,7 +58,12 @@ public class ErrorExt {
         Throwable throwable = errorAction.getError();
 
         if (throwable != null) {
-            errorExt.setMessage(throwable.getMessage());
+            try {
+                errorExt.setMessage(throwable.getMessage());
+            } catch (NullPointerException npe) {
+                // Workaround for GROOVY-8936
+                errorExt.setMessage("No message: NullPointerException on .getMessage()");
+            }
             errorExt.setType(throwable.getClass().getName());
         } else {  // Some rare cases, for example serialization problems
             errorExt.setMessage("No message: null Throwable on error");
