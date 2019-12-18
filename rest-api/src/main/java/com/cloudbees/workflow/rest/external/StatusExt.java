@@ -41,6 +41,7 @@ public enum StatusExt {
     IN_PROGRESS,
     PAUSED_PENDING_INPUT,
     FAILED,
+    SKIPPED,
     UNSTABLE;  // Custom values
 
     public static StatusExt valueOf(ErrorAction errorAction) {
