@@ -23,7 +23,6 @@
  */
 package com.cloudbees.workflow.util;
 
-import hudson.model.Item;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;

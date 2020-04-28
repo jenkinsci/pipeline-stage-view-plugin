@@ -27,7 +27,6 @@ package com.cloudbees.workflow.flownode;
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
-import com.google.common.base.Predicate;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import hudson.Extension;
@@ -124,7 +123,7 @@ public class FlowNodeUtil {
     /** Find a node following this one, using an optimized approach */
     @CheckForNull
     public static FlowNode getNodeAfter(@Nonnull final FlowNode node) {
-        if (node.isRunning() || node instanceof FlowEndNode) {
+        if (node.isActive() || node instanceof FlowEndNode) {
             return null;
         }
 

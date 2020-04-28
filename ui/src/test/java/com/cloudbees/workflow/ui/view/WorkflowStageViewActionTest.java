@@ -39,8 +39,6 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
-import static org.openqa.selenium.phantomjs.PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY;
-
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */

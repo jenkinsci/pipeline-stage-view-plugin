@@ -40,7 +40,7 @@ public class JSONReadWrite {
     public static final ObjectMapper jsonMapper = new ObjectMapper();
 
     public <T> T fromString(String string, Class<T> to) throws IOException {
-        ObjectReader reader = jsonMapper.reader(to);
+        ObjectReader reader = jsonMapper.readerFor(to);
         return reader.readValue(string);
     }
 
