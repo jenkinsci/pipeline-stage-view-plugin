@@ -40,6 +40,6 @@ public class PluginImpl extends Plugin {
         super.start();
 
         // Register the medium (24x24) icons...
-        IconSet.icons.addIcon(new Icon("icon-workflow-stage icon-md", "24x24/search.gif", Icon.ICON_MEDIUM_STYLE));
+        IconSet.icons.addIcon(new Icon("icon-workflow-stage icon-md", "24x24/search.png", Icon.ICON_MEDIUM_STYLE));
     }
 }
