@@ -14,6 +14,7 @@
   .node-name {
     padding: 5px 10px;
     background-color: @light-header-background-color;
+    background-color: var(--bigtable-header-color);
     border-radius: @cbwf-border-radius;
     cursor: pointer;
   }
@@ -23,7 +24,6 @@
     overflow: auto;
     display: none;
     color:rgba(0,0,0,.67);
-    background:#eff;
 
     box-shadow:inset rgba(0,0,0,.2) 0 1px 2px,inset rgba(0,0,0,.2) 0 0 0 1px, inset rgba(255,255,255,.2) 0 0 0 99em;
 
@@ -33,12 +33,7 @@
       border-radius: 0;
       line-height:20px;
       box-shadow:inset rgba(0,0,0,.1) -1px 0 0;
-      background:repeating-linear-gradient(
-        transparent,
-        transparent 20px,
-        rgba(0,0,0,.05) 20px,
-        rgba(0,0,0,.05) 40px
-      );}
+    }
   }
 
   .node-log-frame {
