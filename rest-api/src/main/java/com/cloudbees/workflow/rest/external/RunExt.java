@@ -40,6 +40,7 @@ import org.jenkinsci.plugins.workflow.support.steps.input.InputStepExecution;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -316,7 +317,9 @@ public class RunExt {
         if (execution != null) {
             ChunkVisitor visitor = new ChunkVisitor(run);
             ForkScanner.visitSimpleChunks(execution.getCurrentHeads(), visitor, new StageChunkFinder());
-            runExt.setStages(new ArrayList<StageNodeExt>(visitor.stages));
+            final List<StageNodeExt> visitorStages = new ArrayList<>(visitor.stages);
+            visitorStages.sort(RunExt::compareStageNodeExt);
+            runExt.setStages(visitorStages);
         }
 
         long currentTimeMillis = System.currentTimeMillis();
@@ -336,6 +339,29 @@ public class RunExt {
         runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis()));
 
         return runExt;
+    }
+
+    private static int compareStageNodeExt(StageNodeExt s1, StageNodeExt s2) {
+        // Natural and fastest compare used first
+        int compare = Long.compare(s1.getStartTimeMillis(), s2.getStartTimeMillis());
+        if (compare != 0) {
+            return compare;
+        }
+
+        // Second best compare based on assumed numerical id following order of node creation in pipeline
+        try {
+            // StageNodeExt#getId() is assumed not null from other uses in code though not guarantied by design
+            compare = Integer.compare(Integer.parseInt(s1.getId()), Integer.parseInt(s2.getId()));
+            if (compare != 0) {
+                return compare;
+            }
+        } catch (NumberFormatException e) {
+            // Safety if StageNodeExt#getId() were to return non numerical string
+        }
+
+        // Slow and arbitrary compare based on name if nothing else
+        // StageNodeExt#getName() can be null, null value is arbitrarily compared as first
+        return Comparator.nullsFirst(String::compareTo).compare(s1.getName(), s2.getName());
     }
 
     public static boolean isPendingInput(WorkflowRun run) {
