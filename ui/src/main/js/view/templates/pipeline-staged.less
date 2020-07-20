@@ -128,6 +128,7 @@
     .table-viewPort {
       display: inline-block;
       border: 1px solid #ccc;
+      border: 1px solid var(--panel-border-color);
       overflow-x: auto;
       overflow-y: hidden;
       box-shadow: rgba(0, 0, 0, .25) 1px 3px 5px;
@@ -325,6 +326,7 @@
 
   .stage-start-time, .stage-wrapper {
     border: solid 1px @light-border-color;
+    border: solid 1px var(--panel-border-color);
     border-radius: @cbwf-border-radius;
   }
 
@@ -388,7 +390,6 @@
         bottom: 15px;
         font-size: 60%;
         text-align: center;
-        .text-muted;
         opacity: 0.6;
       }
     }
