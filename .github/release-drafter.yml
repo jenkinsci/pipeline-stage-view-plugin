@@ -1,2 +1,3 @@
 _extends: .github
-tag-template: pipeline-stage-view-plugin-$NEXT_MINOR_VERSION
+name-template: pipeline-stage-view-plugin-$NEXT_PATCH_VERSION
+tag-template: pipeline-stage-view-$NEXT_MINOR_VERSION
