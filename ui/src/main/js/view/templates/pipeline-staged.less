@@ -91,7 +91,6 @@
       }
       td {
         border: 1px solid rgba(0, 0, 0, .05);
-        text-shadow: #fff 0 1px 1px, #fff 0 1px 2px;
         padding: 0;
         .cell-color {
           min-height: 5.8em;
@@ -129,6 +128,7 @@
     .table-viewPort {
       display: inline-block;
       border: 1px solid #ccc;
+      border: 1px solid var(--panel-border-color);
       overflow-x: auto;
       overflow-y: hidden;
       box-shadow: rgba(0, 0, 0, .25) 1px 3px 5px;
@@ -151,7 +151,7 @@
             margin:2px 0 0;
             background: none;
             color: rgba(0, 0, 0, .25);
-            font-weight: bold;
+            color: var(--text-color);
             overflow:hidden;
 
           }
@@ -216,12 +216,14 @@
           }
           .stage-start-time {
             border: 1px solid #acb;
+            border: 1px solid var(--panel-border-color);
             border-radius: 0;
             box-shadow: rgba(0, 0, 0, .2) 0 1px 3px;
             float: none;
             display: inline-block;
             width: 5em;
             background: #fff;
+            background: var(--background);
             position: relative;
             z-index: 2;
           }
@@ -324,6 +326,7 @@
 
   .stage-start-time, .stage-wrapper {
     border: solid 1px @light-border-color;
+    border: solid 1px var(--panel-border-color);
     border-radius: @cbwf-border-radius;
   }
 
@@ -333,6 +336,7 @@
     }
     .date {
       background-color: #f0f0f0;
+      background-color: var(--pane-header-color);
     }
   }
 
@@ -386,7 +390,6 @@
         bottom: 15px;
         font-size: 60%;
         text-align: center;
-        .text-muted;
         opacity: 0.6;
       }
     }
@@ -406,7 +409,7 @@
     color: inherit;
   }
   .UNSTABLE .jobName .badge {
-      background-color: #E2E203;
+      background-color: #afaf3e;
   }
   .FAILED .jobName .badge {
     background-color: @error-highlight;
@@ -418,7 +421,6 @@
   .stage-cell.FAILED .stage-wrapper {
     color: @error-highlight;
     box-shadow: 0 1px 2px;
-    text-shadow: 0 1px 1px #fff;
     font-weight: bold;
     .status {
       color: @error-highlight;
