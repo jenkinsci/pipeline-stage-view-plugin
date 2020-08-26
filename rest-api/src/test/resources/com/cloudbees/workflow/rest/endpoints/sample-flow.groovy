@@ -20,12 +20,6 @@ node {
             name: 'Enter some text',
             description: 'A text option'
           ],
-          [ 
-            $class: 'PasswordParameterDefinition',
-            defaultValue: "MyPasswd",
-            name: 'Enter a password',
-            description: 'A password option'
-          ],
           [
             $class: 'ChoiceParameterDefinition', choices: 'Choice 1\nChoice 2\nChoice 3', 
             name: 'Take your pick',
@@ -39,6 +33,5 @@ node {
     // verify that input submit/proceed worked properly.
     echo "P1: ${outcome.get('Run test suites?')}"
     echo "P2: ${outcome.get('Enter some text')}"
-    echo "P3: ${outcome.get('Enter a password')}"
     echo "P4: ${outcome.get('Take your pick')}"
 }

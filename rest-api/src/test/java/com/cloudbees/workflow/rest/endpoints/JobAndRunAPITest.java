@@ -541,8 +541,8 @@ public class JobAndRunAPITest {
         assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
         Assert.assertEquals(3, run.getStages().size());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(1).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(1).getStatus());
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(2).getStatus());
     }
 
@@ -574,7 +574,7 @@ public class JobAndRunAPITest {
         assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
         Assert.assertEquals(2, run.getStages().size());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(1).getStatus());
     }
 
