@@ -130,7 +130,6 @@ public class InputStepTest {
 
         addNVP(inputNVPs, "Run test suites?", false);
         addNVP(inputNVPs, "Enter some text", "Hello World");
-        addNVP(inputNVPs, "Enter a password", "guess-again");
         addNVP(inputNVPs, "Take your pick", "Choice 2");
 
         // The input NVPs need to be added to a JSON Object that contains a single
@@ -150,7 +149,6 @@ public class InputStepTest {
         // The test flow just echos the values from the outcome.
         jenkinsRule.assertLogContains("P1: false", run);
         jenkinsRule.assertLogContains("P2: Hello World", run);
-        jenkinsRule.assertLogContains("P3: guess-again", run);
         jenkinsRule.assertLogContains("P4: Choice 2", run);
     }
 
