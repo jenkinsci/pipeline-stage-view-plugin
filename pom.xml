@@ -33,7 +33,7 @@
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
     <artifactId>parent-pom</artifactId>
-    <version>2.15</version>
+    <version>${revision}${changelist}</version>
     <packaging>pom</packaging>
     <name>Pipeline Stage View Plugin: Parent POM</name>
 
@@ -51,11 +51,11 @@
         <connection>scm:git:git://github.com/jenkinsci/pipeline-stage-view-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-stage-view-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
-        <tag>pipeline-stage-view-2.15</tag>
+        <tag>${scmTag}</tag>
     </scm>
 
     <properties>
-        <revision>2.15</revision>
+        <revision>2.16</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.60.3</jenkins.version>
         <java.level>8</java.level>
