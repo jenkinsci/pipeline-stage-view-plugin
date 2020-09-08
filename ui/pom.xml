@@ -43,6 +43,13 @@
         <npm.loglevel>--silent</npm.loglevel>
     </properties>
 
+    <scm>
+       <connection>scm:git:git://github.com/jenkinsci/pipeline-stage-view-plugin.git</connection>
+       <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-stage-view-plugin.git</developerConnection>
+       <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
+       <tag>${scmTag}</tag>
+    </scm>
+ 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

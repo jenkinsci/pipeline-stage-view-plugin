@@ -39,6 +39,12 @@
     <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
     <packaging>hpi</packaging>
 
+    <scm>
+       <connection>scm:git:git://github.com/jenkinsci/pipeline-stage-view-plugin.git</connection>
+       <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-stage-view-plugin.git</developerConnection>
+       <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
+       <tag>${scmTag}</tag>
+    </scm>
 
     <dependencies>
         <dependency>
