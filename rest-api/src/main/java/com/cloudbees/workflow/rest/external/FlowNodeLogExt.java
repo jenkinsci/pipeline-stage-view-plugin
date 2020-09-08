@@ -119,7 +119,14 @@ public class FlowNodeLogExt {
                 if (logLen > 0) {
                     StringWriter writer = new StringWriter();
                     try {
-                        logText.writeHtmlTo(logLen - logExt.getLength(), writer);
+                        long pos = 0;
+                        while (true) {
+                            long pos2 = logText.writeHtmlTo(logLen - logExt.getLength(), writer);
+                            if (pos2 <= pos) {
+                                break;
+                            }
+                            pos = pos2;
+                        }
                         logExt.setText(writer.toString());
                     } catch (IOException e) {
                         LOGGER.log(Level.SEVERE, "Error serializing log for", e);
