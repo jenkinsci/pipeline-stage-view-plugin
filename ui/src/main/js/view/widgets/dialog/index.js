@@ -41,13 +41,6 @@ exports.show = function(title, body, options) {
     var headerEl = $('.header', dialog);
     var bodyEl = $('.body', dialog);
 
-    if (options.width) {
-        dialog.css('width', options.width);
-    } else {
-        var winWidth = $(theWindow).width();
-        var popoverWidth = Math.min(800, (winWidth * 0.7));
-        dialog.css('max-width', popoverWidth);
-    }
     if (options.height) {
         dialog.css('height', options.height);
     } else {
