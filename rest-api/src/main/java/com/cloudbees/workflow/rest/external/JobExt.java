@@ -40,9 +40,14 @@ import java.util.List;
 public class JobExt {
 
     /**
-     * Max number of runs per page. Pagination not yet supported.
+     * Name of the system property to set the max number of runs per page. Pagination not yet supported.
      */
-    public static final int MAX_RUNS_PER_JOB = Integer.getInteger(JobExt.class.getName()+".maxRunsPerJob", 10);
+    public static final String MAX_RUNS_PER_JOB_PROPERTY_NAME = JobExt.class.getName()+".maxRunsPerJob";
+
+    /**
+     * Default value of the max number of runs per page.
+     */
+    public static final int MAX_RUNS_PER_JOB_DEFAULT = 10;
 
     private JobLinks _links;
     private String name;
@@ -126,15 +131,18 @@ public class JobExt {
             }
         }
 
+        int maxRunsPerJob = Integer.getInteger(MAX_RUNS_PER_JOB_PROPERTY_NAME, MAX_RUNS_PER_JOB_DEFAULT);
+
         List<RunExt> runsExt = new ArrayList<RunExt>();
         for (WorkflowRun run : runs) {
+            if (runsExt.size() >= maxRunsPerJob) {
+                // We don't yet support pagination, so no point
+                // returning a huge list of runs.
+                break;
+            }
             RunExt runExt = (fullStages) ? RunExt.create(run) : RunExt.create(run).createWrapper();
             runsExt.add(runExt);
             if (since != null && runExt.getName().equals(since)) {
-                break;
-            } else if (runsExt.size() > MAX_RUNS_PER_JOB) {
-                // We don't yet support pagination, so no point
-                // returning a huge list of runs.
                 break;
             }
         }
