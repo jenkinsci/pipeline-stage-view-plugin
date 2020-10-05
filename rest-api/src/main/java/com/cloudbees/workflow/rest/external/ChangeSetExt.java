@@ -51,8 +51,7 @@ public class ChangeSetExt {
      * By setting System Property com.cloudbees.workflow.rest.external.ChangeSetExt.resolveCommitAuthors to 'false'
      * This is a workaround for JENKINS-35484 where user lookup encounters issues */
     private static boolean resolveCommitAuthors() {
-        String prop = System.getProperty(ChangeSetExt.class.getName()+".resolveCommitAuthors");
-        return (StringUtils.isEmpty(prop)|| Boolean.parseBoolean(prop));
+        return Boolean.getBoolean(ChangeSetExt.class.getName()+".resolveCommitAuthors");
     }
 
     public String getKind() {
