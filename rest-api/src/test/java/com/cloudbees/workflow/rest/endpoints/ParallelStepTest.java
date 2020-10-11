@@ -25,6 +25,7 @@ package com.cloudbees.workflow.rest.endpoints;
 
 import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
+import com.cloudbees.workflow.rest.external.StatusExt;
 import com.cloudbees.workflow.util.JSONReadWrite;
 import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.queue.QueueTaskFuture;
@@ -105,5 +106,67 @@ public class ParallelStepTest {
         Assert.assertEquals(1, stage2Desc.getStageFlowNodes().size());
         Assert.assertEquals("16", stage2Desc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals("Print Message", stage2Desc.getStageFlowNodes().get(0).getName());
+    }
+
+    @Test
+    public void test_stages_order() throws Exception {
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Not A Sequential Job");
+        String jobRunsUrl = job.getUrl() + "wfapi/runs/";
+
+        String script = "node() {" +
+                "  stage('SerialStartStage') {" +
+                "    echo('SerialStartStage');" +
+                "  };" +
+                "  Map<String, Closure> parallelStages = [:];" +
+                "  for (int i = 1; i <= 3; i++) {" +
+                "    String stageName = 'ParallelStage' + i;" +
+                "    parallelStages[stageName] = {" +
+                "      stage(stageName) {" +
+                "        int time = 1 + (i%2);" +
+                "        echo(stageName + ':' + time);" +
+                "        sleep(time);" + // ParallelStage2 will end before 1 and 3, it should not change the order 1, 2, 3 enforced by com.cloudbees.workflow.rest.external.RunExt#compareStageNodeExt in com.cloudbees.workflow.rest.external.RunExt#createNew
+                "      };" +
+                "    };" +
+                "  };" +
+                "  parallel parallelStages;" +
+                "  stage('SerialEndStage') {" +
+                "    echo('SerialEndStage');" +
+                "  };" +
+                "};";
+        job.setDefinition(new CpsFlowDefinition(script, true));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        build.waitForStart();
+
+        // Test while running
+        String jsonResponse = webClient.goTo(jobRunsUrl, "application/json").getWebResponse().getContentAsString();
+        RunExt[] runExts = new JSONReadWrite().fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, runExts.length);
+        RunExt runExt = runExts[0];
+        Assert.assertEquals(StatusExt.IN_PROGRESS, runExt.getStatus());
+        Assert.assertEquals(4, runExt.getStages().size());
+        Assert.assertEquals("SerialStartStage", runExt.getStages().get(0).getName());
+        Assert.assertEquals("ParallelStage1", runExt.getStages().get(1).getName());
+        Assert.assertEquals("ParallelStage2", runExt.getStages().get(2).getName());
+        Assert.assertEquals("ParallelStage3", runExt.getStages().get(3).getName());
+
+        jenkinsRule.assertBuildStatusSuccess(build);
+
+        // Test when completed
+        jsonResponse = webClient.goTo(jobRunsUrl, "application/json").getWebResponse().getContentAsString();
+        runExts = new JSONReadWrite().fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, runExts.length);
+        runExt = runExts[0];
+        Assert.assertEquals(StatusExt.SUCCESS, runExt.getStatus());
+        Assert.assertEquals(5, runExt.getStages().size());
+        Assert.assertEquals("SerialStartStage", runExt.getStages().get(0).getName());
+        Assert.assertEquals("ParallelStage1", runExt.getStages().get(1).getName());
+        Assert.assertEquals("ParallelStage2", runExt.getStages().get(2).getName());
+        Assert.assertEquals("ParallelStage3", runExt.getStages().get(3).getName());
+        Assert.assertEquals("SerialEndStage", runExt.getStages().get(4).getName());
     }
 }
