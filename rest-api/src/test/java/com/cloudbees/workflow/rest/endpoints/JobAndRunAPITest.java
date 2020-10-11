@@ -42,6 +42,7 @@ import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,7 +54,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 
+import static java.lang.System.clearProperty;
 import static java.lang.System.getProperty;
+import static java.lang.System.setProperty;
 import static org.junit.Assume.assumeFalse;
 
 /**
@@ -63,6 +66,12 @@ public class JobAndRunAPITest {
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
+
+    @After
+    public void after() {
+        // Restore property to the default value after tests
+        clearProperty(JobExt.MAX_RUNS_PER_JOB_PROPERTY_NAME);
+    }
 
     @Test
     public void testBlockStage() throws Exception {
@@ -115,6 +124,7 @@ public class JobAndRunAPITest {
         build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
         assertSinceQueryParamOkay(job, webClient);
+        assertMaxRunsPerJobPropertyOkay(job, webClient);
     }
 
     @Test
@@ -149,6 +159,7 @@ public class JobAndRunAPITest {
         build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
         assertSinceQueryParamOkay(job, webClient);
+        assertMaxRunsPerJobPropertyOkay(job, webClient);
     }
 
     @Test
@@ -506,6 +517,32 @@ public class JobAndRunAPITest {
         workflowRuns = getRuns(job, webClient, "wfapi/runs?since=" + URLEncoder.encode("#2", "UTF-8"));
         Assert.assertEquals(1, workflowRuns.length);
         Assert.assertEquals("#2", workflowRuns[0].getName());
+    }
+
+    private void assertMaxRunsPerJobPropertyOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
+        RunExt[] workflowRuns;
+
+        setProperty(JobExt.MAX_RUNS_PER_JOB_PROPERTY_NAME, "2");
+        workflowRuns = getRuns(job, webClient, "wfapi/runs");
+        Assert.assertEquals(2, workflowRuns.length);
+        Assert.assertEquals("#2", workflowRuns[0].getName());
+        Assert.assertEquals("#1", workflowRuns[1].getName());
+
+        setProperty(JobExt.MAX_RUNS_PER_JOB_PROPERTY_NAME, "1");
+        workflowRuns = getRuns(job, webClient, "wfapi/runs");
+        Assert.assertEquals(1, workflowRuns.length);
+        Assert.assertEquals("#2", workflowRuns[0].getName());
+
+        setProperty(JobExt.MAX_RUNS_PER_JOB_PROPERTY_NAME, "0");
+        workflowRuns = getRuns(job, webClient, "wfapi/runs");
+        Assert.assertEquals(0, workflowRuns.length);
+
+        // restore the property to the default value for the rest of the test
+        clearProperty(JobExt.MAX_RUNS_PER_JOB_PROPERTY_NAME);
+        workflowRuns = getRuns(job, webClient, "wfapi/runs");
+        Assert.assertEquals(2, workflowRuns.length);
+        Assert.assertEquals("#2", workflowRuns[0].getName());
+        Assert.assertEquals("#1", workflowRuns[1].getName());
     }
 
     private RunExt[] getRuns(WorkflowJob job, JenkinsRule.WebClient webClient, String url) throws IOException, SAXException {
