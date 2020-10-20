@@ -202,9 +202,9 @@ Popover.prototype.hover = function() {
     var mouseTracker = jqProxy.getMouseTracker();
     var thisPopover = this;
 
-    var inoutDelay = thisPopover.options.inoutDelay;
-    if (inoutDelay === undefined) {
-        inoutDelay = 500;
+    var hideDelay = thisPopover.options.hideDelay;
+    if (hideDelay === undefined) {
+        hideDelay = 500;
     }
 
     // You can use the hover or mouse enter and leave events, but behavior gets interesting
@@ -273,7 +273,7 @@ Popover.prototype.hover = function() {
                         // re-enter the hover area without the hover disappearing.
                         timeoutHandler.setTimeout(function() {
                             removePopoverChecker(false);
-                        }, Math.floor(inoutDelay * 0.8));
+                        }, hideDelay);
                         return;
                     }
 
@@ -294,7 +294,7 @@ Popover.prototype.hover = function() {
                     remove();
                 });
             }
-        }, inoutDelay);
+        }, 250);
     });
 }
 
