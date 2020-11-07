@@ -93,7 +93,7 @@ Popover.prototype.show = function() {
     var thisPopover = this;
 
     // If there's a modal popover already visible, don't show this one.
-    if ($('.cbwf-popover.cbwf-modal').size() > 0) {
+    if ($('.cbwf-popover.cbwf-modal').length > 0) {
         // Don't show.
         return;
     }

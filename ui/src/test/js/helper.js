@@ -219,27 +219,21 @@ exports.testWithJQuery = function (content, testFunc) {
     global.document = document;
     document.body.innerHTML = content
 
-    // jsdom.env({
-    //     html: content,
-    //     done: function (err, window) {
-            require('window-handle').setWindow(window);
+    require('window-handle').setWindow(window);
 
-            var timeoutModule = exports.require('util/timeout');
+    var timeoutModule = exports.require('util/timeout');
 
-            // set the max delay to zero (exec immediately/synchronously) so the
-            // tests don't run into render delay issues
-            timeoutModule.setMaxDelay(0);
+    // set the max delay to zero (exec immediately/synchronously) so the
+    // tests don't run into render delay issues
+    timeoutModule.setMaxDelay(0);
 
-            try {
-                // var jQD = require('jquery-detached');
-                testFunc(require('jquery')(window));
-            } catch (e) {
-                exports.error(e);
-            } finally {
-                timeoutModule.clearAllTimeouts();
-            }
-    //     }
-    // });
+    try {
+        testFunc(require('jquery')(window));
+    } catch (e) {
+        exports.error(e);
+    } finally {
+        timeoutModule.clearAllTimeouts();
+    }
 }
 
 function endsWith(string, value) {

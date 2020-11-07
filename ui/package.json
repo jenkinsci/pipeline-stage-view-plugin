@@ -4,10 +4,8 @@
   "dependencies": {
     "jenkins-js-extp": "0.0.2",
     "jenkins-js-modules": "^1.5.0",
-    "jquery": "^2.1.4",
-    "jquery-detached": "^2.1.4-v4",
+    "jquery": "^3.5.1",
     "moment": "~2.8.3",
-    "rangefix": "^0.2.9",
     "window-handle": "^1.0.0"
   },
   "scripts": {

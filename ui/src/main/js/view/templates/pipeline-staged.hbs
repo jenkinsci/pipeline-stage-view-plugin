@@ -83,20 +83,20 @@
                     <div class="status">aborted</div>
                 {{/ifCond}}
                 {{#ifCond this.status '===' 'SUCCESS'}}
-                    <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Success" />
+                    <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Success"></div>
                 {{/ifCond}}
                 {{#ifCond this.status '===' 'IN_PROGRESS'}}
-                    <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="In Progress" />
+                    <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="In Progress"></div>
                 {{/ifCond}}
                 {{#ifCond this.status '===' 'UNSTABLE'}}
-                    <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Unstable Build" />
+                    <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Unstable Build"></div>
                 {{/ifCond}}
                 {{#ifCond this.status '===' 'PAUSED_PENDING_INPUT'}}
-                    <div cbwf-controller="run-input-required" objectUrl="{{../../_links.nextPendingInputAction.href}}" />
+                    <div cbwf-controller="run-input-required" objectUrl="{{../../_links.nextPendingInputAction.href}}"></div>
                     <div class="status">paused</div>
                 {{/ifCond}}
                 {{#ifCond this.status '===' 'FAILED'}}
-                    <div cbwf-controller="stage-failed-popover" descUrl="{{this._links.self.href}}" objectUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" />
+                    <div cbwf-controller="stage-failed-popover" descUrl="{{this._links.self.href}}" objectUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover"></div>
                     <div class="status">failed</div>
                 {{/ifCond}}
                 {{#if this.percentCompleteEstimate}}

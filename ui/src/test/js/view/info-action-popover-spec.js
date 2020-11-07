@@ -29,8 +29,8 @@ describe("view/info-action-popover-spec", function () {
 //            helper.log(pageBody.html());
 
             expect($('.caption', pageBody).text()).toBe('Failed with the following error(s)');
-            expect($('.errors', pageBody).size()).toBe(0);
-            expect($('.footer', pageBody).size()).toBe(0);
+            expect($('.errors', pageBody).length).toBe(0);
+            expect($('.footer', pageBody).length).toBe(0);
 
             done();
         });

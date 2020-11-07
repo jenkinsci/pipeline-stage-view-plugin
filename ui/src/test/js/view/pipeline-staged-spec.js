@@ -21,7 +21,7 @@ describe("view/pipeline-staged-spec", function () {
 
             view.render.call(helper.mvcContext(viewFarg), modelData, viewFarg);
 
-            //helper.log('[' + viewFarg.html() + ']');
+            // helper.log('[' + viewFarg.html() + ']');
             if (!helper.compareMultilineText(viewFarg.html(), expectedFrag, true)) {
                 expect(viewFarg.html()).toEqual(expectedFrag);
             }
