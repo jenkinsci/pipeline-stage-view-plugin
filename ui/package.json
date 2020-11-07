@@ -4,8 +4,10 @@
   "dependencies": {
     "jenkins-js-extp": "0.0.2",
     "jenkins-js-modules": "^1.5.0",
+    "jquery": "^2.1.4",
     "jquery-detached": "^2.1.4-v4",
     "moment": "~2.8.3",
+    "rangefix": "^0.2.9",
     "window-handle": "^1.0.0"
   },
   "scripts": {
@@ -19,7 +21,7 @@
     "hbsfy": "^2.4.1",
     "jenkins-handlebars-rt": "^1.0.1",
     "jenkins-js-builder": "0.0.40",
-    "jsdom": "^7.2.2",
+    "jsdom": "^10.1.0",
     "minifyify": "^7.2.1",
     "require-uncached": "^1.0.2"
   }

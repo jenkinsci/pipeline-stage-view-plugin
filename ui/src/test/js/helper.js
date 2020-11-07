@@ -213,10 +213,15 @@ exports.mvcRun = function(controllers, applyOnElement) {
 
 exports.testWithJQuery = function (content, testFunc) {
     var jsdom = require('jsdom');
+    const { JSDOM } = jsdom;
+    const { window } = new JSDOM('');
+    const { document } = window;
+    global.document = document;
+    document.body.innerHTML = content
 
-    jsdom.env({
-        html: content,
-        done: function (err, window) {
+    // jsdom.env({
+    //     html: content,
+    //     done: function (err, window) {
             require('window-handle').setWindow(window);
 
             var timeoutModule = exports.require('util/timeout');
@@ -226,15 +231,15 @@ exports.testWithJQuery = function (content, testFunc) {
             timeoutModule.setMaxDelay(0);
 
             try {
-                var jQD = require('jquery-detached');
-                testFunc(jQD.getJQuery());
+                // var jQD = require('jquery-detached');
+                testFunc(require('jquery')(window));
             } catch (e) {
                 exports.error(e);
             } finally {
                 timeoutModule.clearAllTimeouts();
             }
-        }
-    });
+    //     }
+    // });
 }
 
 function endsWith(string, value) {

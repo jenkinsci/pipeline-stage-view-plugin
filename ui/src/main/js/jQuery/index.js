@@ -22,7 +22,6 @@
  * THE SOFTWARE.
  */
 
-var jQD = require('jquery-detached');
 
 /**
  * jQuery wrapper module.  Other modules should access jQuery via this module (i.e. never access the 'jquery'
@@ -30,11 +29,15 @@ var jQD = require('jquery-detached');
  * testing etc.
  */
 
+var windowHandle = require('window-handle');
+
 /**
  * Get the jQuery function (aka dollar).
  * @returns The jQuery function (aka dollar).
  */
-exports.getJQuery = jQD.getJQuery;
+exports.getJQuery = function () {
+    return require('jquery')(windowHandle.getWindow());
+};
 
 /**
  * Get all widgets in the specified element, or full document if inElement is not specified.
