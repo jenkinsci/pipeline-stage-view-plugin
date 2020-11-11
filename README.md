@@ -6,7 +6,7 @@
 
 ## Version history
 
-See [the changelog](CHANGELOG.md)
+See [the changelog](https://plugins.jenkins.io/pipeline-rest-api/#releases)
 
 # Stage View: 
 
