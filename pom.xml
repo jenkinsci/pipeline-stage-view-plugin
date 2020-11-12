@@ -60,6 +60,9 @@
         <jenkins.version>2.60.3</jenkins.version>
         <java.level>8</java.level>
         <workflow.version>2.0</workflow.version>
+        <node.version>8.17.0</node.version>
+        <npm.version>6.14.8</npm.version>
+        <frontend-version>1.10.0</frontend-version>
     </properties>
 
     <repositories>
