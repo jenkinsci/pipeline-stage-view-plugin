@@ -4,10 +4,6 @@
   "dependencies": {
     "jenkins-js-extp": "0.0.2",
     "jenkins-js-modules": "^1.5.0",
-    "jest": "^25.5.4",
-    "jest-handlebars": "^1.0.1",
-    "jest-junit": "^12.0.0",
-    "jest-standard-reporter": "^2.0.0",
     "jquery": "^3.5.1",
     "moment": "~2.8.3",
     "window-handle": "^1.0.0"
@@ -23,6 +19,10 @@
     "hbsfy": "^2.4.1",
     "jenkins-handlebars-rt": "^1.0.1",
     "jenkins-js-builder": "0.0.40",
+    "jest": "^25.5.4",
+    "jest-handlebars": "^1.0.1",
+    "jest-junit": "^12.0.0",
+    "jest-standard-reporter": "^2.0.0",
     "jsdom": "^10.1.0",
     "minifyify": "^7.2.1",
     "require-uncached": "^1.0.2"
