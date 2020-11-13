@@ -3,17 +3,20 @@
 
 "use strict";
 
-var helper = require('../helper');
-var view = helper.require('view/pipeline-staged');
-var templates = helper.require('view/templates');
-
-// turn off date formatting.
-templates.dateFormatting(false);
-
 describe("view/pipeline-staged-spec", function () {
+    var helper;
+    var view;
+    var templates;
+
+    beforeEach(() => {
+        helper = require('../helper');
+        view = helper.require('view/pipeline-staged');
+        templates = helper.require('view/templates');
+        // turn off date formatting.
+        templates.dateFormatting(false);
+    });
 
     it("- test_render", function (done) {
-
         helper.testWithJQuery('<div id="frag" objecturl="/jenkins/job/Job%20ABC/" fragCaption="Stage View"></div>', function ($) {
             var modelData = helper.requireTestRes('model/runs_stage_grouped/getModelData/01_expected_modelData');
             var expectedFrag = helper.requireTestRes('view/pipeline_staged/render/expected.html');

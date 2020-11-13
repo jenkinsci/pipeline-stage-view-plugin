@@ -3,10 +3,14 @@
 
 "use strict";
 
-var helper = require('../helper');
-var model = helper.require('model/runs-stage-grouped');
-
 describe("model/runs-stage-grouped-spec", function () {
+    var helper;
+    var model;
+
+    beforeEach(() => {
+        helper = require('../helper');
+        model = helper.require('model/runs-stage-grouped');
+    })
 
     it("- test_01_getModelData", function (done) {
         helper.testWithJQuery('<div objectUrl="/jenkins/job/xxxJob"></div>', function ($) {
