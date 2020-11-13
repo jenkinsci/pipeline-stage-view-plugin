@@ -29,19 +29,12 @@
  * testing etc.
  */
 
-var windowHandle = require('window-handle');
-var isTestEnv = require('../util/isTestEnv');
-
 /**
  * Get the jQuery function (aka dollar).
  * @returns The jQuery function (aka dollar).
  */
 exports.getJQuery = function () {
-    // if (isTestEnv()) {
-    //     return require('jquery').bind(windowHandle.getWindow());
-    // } else {
-        return require('jquery');
-    // }
+    return require('jquery');
 };
 
 /**
