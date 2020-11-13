@@ -37,11 +37,11 @@ var isTestEnv = require('../util/isTestEnv');
  * @returns The jQuery function (aka dollar).
  */
 exports.getJQuery = function () {
-    if (isTestEnv()) {
-        return require('jquery')(windowHandle.getWindow());
-    } else {
+    // if (isTestEnv()) {
+    //     return require('jquery').bind(windowHandle.getWindow());
+    // } else {
         return require('jquery');
-    }
+    // }
 };
 
 /**

@@ -117,9 +117,7 @@ exports.spyOn = function (module, mocks) {
 }
 
 exports.trim = function(str) {
-    var jqProxy = exports.require('./jQuery');
-    var $ = jqProxy.getJQuery();
-
+    var $ = require('jquery');
     return $.trim(str);
 }
 
@@ -217,7 +215,7 @@ exports.testWithJQuery = function (content, testFunc) {
     const { window } = new JSDOM('');
     const { document } = window;
     global.document = document;
-    document.body.innerHTML = content
+    global.document.body.innerHTML = content
 
     require('window-handle').setWindow(window);
 
@@ -228,7 +226,8 @@ exports.testWithJQuery = function (content, testFunc) {
     timeoutModule.setMaxDelay(0);
 
     try {
-        testFunc(require('jquery')(window));
+        var jqueryRequire = require('jquery');
+        testFunc(jqueryRequire.bind(window))
     } catch (e) {
         exports.error(e);
     } finally {

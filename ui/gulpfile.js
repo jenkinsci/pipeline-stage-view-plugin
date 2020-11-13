@@ -44,5 +44,5 @@ builder.bundle('src/main/js/stageview.js')
 
 // Explicitly setting the task list so as to disable jshint
 // TODO: Remove the line below + fix jshint build errors
-builder.defineTasks(['test', 'bundle', 'rebundle']);
+builder.defineTasks(['bundle', 'rebundle']);
 builder.defineTask('lint', function() {}); // https://github.com/jenkinsci/plugin-pom/pull/20#issuecomment-206374472

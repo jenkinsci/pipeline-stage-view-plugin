@@ -3,10 +3,23 @@
 
 "use strict";
 
-var helper = require('../helper');
-var listener = helper.require('model/job-history-listener');
 
 describe("model/job-history-listener", function () {
+    var helper;
+    var listener;
+
+    var mockApi = jest.genMockFromModule('../../../main/js/model/rest-api');
+
+    beforeEach(() => {
+        helper = require('../helper');
+        jest.mock('../../../main/js/model/rest-api', () => mockApi)
+        listener = require('../../../main/js/model/job-history-listener');
+    })
+
+    afterEach(() => {
+        jest.resetModules();
+        jest.resetAllMocks();
+    })
 
     it("- test_01", function () {
 
@@ -20,21 +33,18 @@ describe("model/job-history-listener", function () {
             jobsToReturnFromRestAPI = [{name: name, id: id, status: status}].concat(jobsToReturnFromRestAPI);
         }
 
-        helper.mock('model/rest-api', {
-            getJobRuns: function (jobUrl, callback, params) {
-                // create a completely different obj graph by serializing and deserializing...
-                var asString = JSON.stringify(jobsToReturnFromRestAPI);
-                var backToObj = JSON.parse(asString);
-                callback(backToObj);
-                lastParams = params;
-            }
-        });
-        helper.mock('model/job-history-listener', {
-            schedulePoll: function (pollJobRuns) {
-                // mocking this so as to disable the timer, allowing us to control it
-                pollJobRunsFunc = pollJobRuns;
-            }
-        });
+        mockApi.getJobRuns.mockImplementation((jobUrl, callback, params) => {
+            var asString = JSON.stringify(jobsToReturnFromRestAPI);
+            var backToObj = JSON.parse(asString);
+            callback(backToObj);
+            lastParams = params;
+        })
+
+
+        listener.schedulePoll = function (pollJobRuns) {
+            // mocking this so as to disable the timer, allowing us to control it
+            pollJobRunsFunc = pollJobRuns;
+        };
 
         expect(pollJobRunsFunc === undefined).toEqual(true);
         expect(listenCallbackCallCount).toEqual(0);
