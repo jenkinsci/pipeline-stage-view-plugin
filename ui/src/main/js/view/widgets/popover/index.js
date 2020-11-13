@@ -39,7 +39,7 @@ exports.hide = function(popover) {
 
     var $ = jqProxy.getJQuery();
 
-    if ($.isArray(popover)) {
+    if (Array.isArray(popover)) {
         // The 'popover' arg is actually an array of popover names
         // that should be hidden.
 
@@ -374,7 +374,7 @@ Popover.prototype.applyPlacement = function() {
 function isPopupVisible(popupNames) {
     var $ = jqProxy.getJQuery();
 
-    if ($.isArray(popupNames)) {
+    if (Array.isArray(popupNames)) {
         var activePopovers = $('.cbwf-popover');
         var popoverVisible = false;
         activePopovers.each(function () {

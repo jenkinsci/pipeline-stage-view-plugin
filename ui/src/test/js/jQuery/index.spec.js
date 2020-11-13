@@ -3,10 +3,19 @@
 
 "use strict";
 
-var helper = require('../helper');
-var jqProxy = helper.require('jQuery');
 
 describe("jQuery/index-spec", function () {
+    var helper;
+    var jqProxy;
+
+    beforeEach(() => {
+        helper = require('../helper');
+        jqProxy = require('../../../main/js/jQuery')
+    })
+
+    afterEach(() => {
+        jest.resetModules();
+    })
 
     it("- test_toObject_attribs_defined", function (done) {
         helper.testWithJQuery('<div id="theEl" object1="object1Val" object2="object2Val"></div>', function ($) {

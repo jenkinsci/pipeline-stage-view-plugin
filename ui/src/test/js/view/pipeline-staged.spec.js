@@ -8,13 +8,21 @@ describe("view/pipeline-staged-spec", function () {
     var view;
     var templates;
 
+    var mockApi = jest.genMockFromModule('../../../main/js/model/rest-api');
+
     beforeEach(() => {
         helper = require('../helper');
-        view = helper.require('view/pipeline-staged');
-        templates = helper.require('view/templates');
+        jest.mock('../../../main/js/model/rest-api', () => mockApi)
+        view = require('../../../main/js/view/pipeline-staged');
+        templates = require('../../../main/js/view/templates');
         // turn off date formatting.
         templates.dateFormatting(false);
     });
+
+    afterEach(() => {
+        jest.resetModules();
+        jest.resetAllMocks();
+    })
 
     it("- test_render", function (done) {
         helper.testWithJQuery('<div id="frag" objecturl="/jenkins/job/Job%20ABC/" fragCaption="Stage View"></div>', function ($) {
@@ -55,13 +63,11 @@ describe("view/pipeline-staged-spec", function () {
         helper.testWithJQuery(controllerHtml, function ($) {
             // Setup mocks
             var runsAPIRes = helper.requireTestRes('model/runs_stage_grouped/getModelData/' + feature);
-            helper.mock('model/rest-api', {
-                getJobRuns: function (url, callback) {
-                    expect(url).toBe(jobUrl);
-                    // return the mock stage description data...
-                    callback(runsAPIRes);
-                }
-            });
+            mockApi.getJobRuns.mockImplementation((url, callback) => {
+                expect(url).toBe(jobUrl);
+                // return the mock stage description data...
+                callback(runsAPIRes);
+            })
 
             // MVC run...
             helper.mvcRun(['pipeline-staged', 'stage-actions-popover', 'stage-logs', 'feature-tbd',

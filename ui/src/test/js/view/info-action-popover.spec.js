@@ -3,12 +3,21 @@
 
 "use strict";
 
-var helper = require('../helper');
-var view = helper.require('view/info-action-popover');
-
 describe("view/info-action-popover-spec", function () {
+    var helper;
+    var view;
 
     var pageFrame = '<html><body><p></p></body></html>';
+
+    beforeEach(() => {
+        helper = require('../helper');
+        view = require('../../../main/js/view/info-action-popover');
+    })
+
+    afterEach(() => {
+        jest.resetModules();
+        jest.resetAllMocks();
+    })
 
     it("- test_caption_only", function (done) {
 
@@ -21,7 +30,7 @@ describe("view/info-action-popover-spec", function () {
                 caption: 'Failed with the following error(s)'
             }, popoverOn);
 
-            var popoverWidget = helper.require('view/widgets/popover');
+            var popoverWidget = require('../../../main/js/view/widgets/popover');
 
             var popover = popoverWidget.newPopover('Info Popover', alertDom, pageBody);
             popover.show();
@@ -54,7 +63,7 @@ describe("view/info-action-popover-spec", function () {
                 footer: "toes"
             }, popoverOn);
 
-            var popoverWidget = helper.require('view/widgets/popover');
+            var popoverWidget = require('../../../main/js/view/widgets/popover');
 
             var popover = popoverWidget.newPopover('Info Popover', alertDom, pageBody);
             popover.show();
