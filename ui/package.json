@@ -10,7 +10,7 @@
   },
   "scripts": {
     "mvnbuild": "gulp bundle",
-    "mvntest": "jest --ci --config=jest.config.json --reporters=jest-standard-reporter --reporters=jest-junit"
+    "mvntest": "jest --ci --config=jest.config.json"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
