@@ -17,7 +17,7 @@ describe("util/url-spec", function () {
     })
 
     it("- test_trimLeadingSlashes", function () {
-        expect(url.trimLeadingSlashes('a')).not.toBe('a');
+        expect(url.trimLeadingSlashes('a')).toBe('a');
         expect(url.trimLeadingSlashes('a/')).toBe('a/');
         expect(url.trimLeadingSlashes('/a/')).toBe('a/');
         expect(url.trimLeadingSlashes('//a/')).toBe('a/');
