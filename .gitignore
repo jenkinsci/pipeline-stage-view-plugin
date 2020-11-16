@@ -12,7 +12,6 @@ out
 node/
 node_modules/
 npm-debug.log
-ui/junit.xml
 
 ui/src/main/webapp/jsmodules
 
