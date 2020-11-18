@@ -49,7 +49,7 @@
        <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
        <tag>${scmTag}</tag>
     </scm>
- 
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -65,11 +65,6 @@
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
             <version>2.12</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.ui</groupId>
-            <artifactId>jquery-detached</artifactId>
-            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.ui</groupId>

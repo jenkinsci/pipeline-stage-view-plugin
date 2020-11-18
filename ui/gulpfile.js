@@ -37,7 +37,6 @@ builder.bundle('src/main/js/stageview_adjunct.js')
     .minify()
     .inDir('target/generated-adjuncts/org/jenkinsci/pipeline');
 builder.bundle('src/main/js/stageview.js')
-    .withExternalModuleMapping('jquery-detached', 'jquery-detached:jquery2')
     .withExternalModuleMapping('handlebars', 'handlebars:handlebars3')
     .withExternalModuleMapping('moment', 'momentjs:momentjs2')
     .asJenkinsModuleResource()
@@ -45,5 +44,5 @@ builder.bundle('src/main/js/stageview.js')
 
 // Explicitly setting the task list so as to disable jshint
 // TODO: Remove the line below + fix jshint build errors
-builder.defineTasks(['test', 'bundle', 'rebundle']);
+builder.defineTasks(['bundle', 'rebundle']);
 builder.defineTask('lint', function() {}); // https://github.com/jenkinsci/plugin-pom/pull/20#issuecomment-206374472

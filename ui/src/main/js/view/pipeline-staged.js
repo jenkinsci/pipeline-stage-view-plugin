@@ -63,7 +63,7 @@ function _render(jobRunsData, onElement, fragCaption) {
         var pipelineStagedDom = templates.apply('pipeline-staged', runGroup);
         addLaneCharts(pipelineStagedDom, runGroup);
         var viewPort = $('div.table-viewPort');
-        if (viewPort && viewPort.size() > 0) { // First rendering does not have an existing element
+        if (viewPort && viewPort.length > 0) { // First rendering does not have an existing element
             var leftScroll = viewPort[0].scrollLeft;  // This way we can jump back to the previous scroll position
             onElement.empty().append(pipelineStagedDom); // With many stages, the DOM change scrolls us back to start if we don't reset scroll.
             viewPort = $('div.table-viewPort')[0]; // Re-fetched because the DOM has changed in above.
@@ -90,12 +90,12 @@ function addLaneCharts(jQueryDom, runGroup) {
     var stackedBarChartAnchorEls = $('.totals .stackedBarChart', jQueryDom);
 
     // Should be the same number of these as there are array elements in stageData
-    if (stackedBarChartAnchorEls.size() !== avgStageTimes.length) {
-        console.log('Unexpected problem.  Template failed to generate a lane header for all stages. ' + stackedBarChartAnchorEls.size() + ' != ' + avgStageTimes.length);
+    if (stackedBarChartAnchorEls.length !== avgStageTimes.length) {
+        console.log('Unexpected problem.  Template failed to generate a lane header for all stages. ' + stackedBarChartAnchorEls.length + ' != ' + avgStageTimes.length);
         return;
     }
 
-    for (var i = 0; i < stackedBarChartAnchorEls.size(); i++) {
+    for (var i = 0; i < stackedBarChartAnchorEls.length; i++) {
         var stackedBarChartAnchorEl = $(stackedBarChartAnchorEls.get(i));
         var stackedBarChart = charts.stackedBarChart(avgStageTimes, i);
 

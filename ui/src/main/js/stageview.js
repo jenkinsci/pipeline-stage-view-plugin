@@ -18,6 +18,7 @@ mvc.register(require('./controller/build-artifacts-popup'));
 mvc.register(require('./controller/run-changesets'));
 mvc.register(require('./controller/remove-sidepanel'));
 
+var isTestEnv = require('./util/isTestEnv');
 // Apply controllers to the whole document.
 var jqProxy = require('./jQuery');
 var $ = jqProxy.getJQuery();
@@ -30,18 +31,6 @@ $(function() {
     }
     mvc.applyControllers();
 });
-
-function isTestEnv() {
-    if (window === undefined) {
-        return true;
-    } else if (window.navigator === undefined) {
-        return true;
-    } else if (window.navigator.userAgent === undefined) {
-        return true;
-    } else if (window.navigator.userAgent.toLowerCase().indexOf("phantomjs") !== -1) {
-        return true;
-    }
-}
 
 var stageView = require('./view/pipeline-staged.js');
 var extpAPI = require('jenkins-js-extp/API');

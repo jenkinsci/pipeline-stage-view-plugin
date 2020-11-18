@@ -1,0 +1,18 @@
+{
+  "transform": {
+    "\\.hbs$": "jest-handlebars",
+    "\\.js$": "babel-jest"
+  },
+  "reporters": [
+    "jest-standard-reporter",
+    [
+      "jest-junit",
+      {
+        "suiteName": "jest tests",
+        "outputDirectory": "<rootDir>/target/surefire-reports/jest",
+        "outputName": "junit-jest-stageview.xml"
+      }
+    ]
+  ],
+  "roots": ["<rootDir>/src"]
+}

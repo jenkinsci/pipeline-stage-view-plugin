@@ -3,7 +3,6 @@
 
 "use strict";
 
-var formatters = require('../helper').require('util/formatters');
 
 var sec = 1000;
 var min = sec * 60;
@@ -12,6 +11,16 @@ var day = hr * 24;
 var yr = day * 365;
 
 describe("util/formatters-spec", function () {
+    var formatters;
+
+    beforeEach(() => {
+        formatters = require('../../../main/js/util/formatters');
+    })
+
+    afterEach(() => {
+        jest.resetModules();
+        jest.resetAllMocks();
+    })
 
     it("- test_memory", function () {
         expect(formatters.memory(1)).toBe('1B');

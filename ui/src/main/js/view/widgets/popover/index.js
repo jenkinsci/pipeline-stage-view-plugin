@@ -39,7 +39,7 @@ exports.hide = function(popover) {
 
     var $ = jqProxy.getJQuery();
 
-    if ($.isArray(popover)) {
+    if (Array.isArray(popover)) {
         // The 'popover' arg is actually an array of popover names
         // that should be hidden.
 
@@ -93,7 +93,7 @@ Popover.prototype.show = function() {
     var thisPopover = this;
 
     // If there's a modal popover already visible, don't show this one.
-    if ($('.cbwf-popover.cbwf-modal').size() > 0) {
+    if ($('.cbwf-popover.cbwf-modal').length > 0) {
         // Don't show.
         return;
     }
@@ -374,7 +374,7 @@ Popover.prototype.applyPlacement = function() {
 function isPopupVisible(popupNames) {
     var $ = jqProxy.getJQuery();
 
-    if ($.isArray(popupNames)) {
+    if (Array.isArray(popupNames)) {
         var activePopovers = $('.cbwf-popover');
         var popoverVisible = false;
         activePopovers.each(function () {

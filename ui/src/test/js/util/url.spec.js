@@ -3,9 +3,19 @@
 
 "use strict";
 
-var url = require('../helper').require('util/url');
-
 describe("util/url-spec", function () {
+    var helper;
+    var url;
+
+    beforeEach(function() {
+        helper = require('../helper');
+        url = require('../../../main/js/util/url');
+    });
+
+    afterEach(function () {
+        jest.resetModules();
+    })
+
     it("- test_trimLeadingSlashes", function () {
         expect(url.trimLeadingSlashes('a')).toBe('a');
         expect(url.trimLeadingSlashes('a/')).toBe('a/');

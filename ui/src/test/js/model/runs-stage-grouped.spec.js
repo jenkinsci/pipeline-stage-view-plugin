@@ -3,25 +3,35 @@
 
 "use strict";
 
-var helper = require('../helper');
-var model = helper.require('model/runs-stage-grouped');
-
 describe("model/runs-stage-grouped-spec", function () {
+    var helper;
+    var model;
+
+    var mockAjax = jest.genMockFromModule('../../../main/js/util/ajax');
+
+    beforeEach(() => {
+        helper = require('../helper');
+        jest.mock('../../../main/js/util/ajax', () => mockAjax);
+        model = require('../../../main/js/model/runs-stage-grouped')
+    })
+
+    afterEach(() => {
+        jest.resetModules();
+        jest.resetAllMocks();
+    })
 
     it("- test_01_getModelData", function (done) {
         helper.testWithJQuery('<div objectUrl="/jenkins/job/xxxJob"></div>', function ($) {
             var targetEl = $('div');
 
-            helper.mock('util/ajax', {
-                execAsyncGET: function (resPathTokens, callback) {
-                    expect(resPathTokens.length).toEqual(3);
-                    expect(resPathTokens[0]).toEqual('/jenkins/job/xxxJob');
-                    expect(resPathTokens[1]).toEqual('wfapi');
-                    expect(resPathTokens[2]).toEqual('runs');
+            mockAjax.execAsyncGET.mockImplementation((resPathTokens, callback) => {
+                expect(resPathTokens.length).toEqual(3);
+                expect(resPathTokens[0]).toEqual('/jenkins/job/xxxJob');
+                expect(resPathTokens[1]).toEqual('wfapi');
+                expect(resPathTokens[2]).toEqual('runs');
 
-                    var restApiJobHistoryData = helper.requireTestRes('model/runs_stage_grouped/getModelData/01_rest_api_jobHistory');
-                    callback(restApiJobHistoryData);
-                }
+                var restApiJobHistoryData = helper.requireTestRes('model/runs_stage_grouped/getModelData/01_rest_api_jobHistory');
+                callback(restApiJobHistoryData);
             });
 
             model.setMaxRunsPerRunGroup(5);
@@ -31,9 +41,9 @@ describe("model/runs-stage-grouped-spec", function () {
                     var expectedModel = helper.requireTestRes('model/runs_stage_grouped/getModelData/01_expected_modelData');
                     //helper.log(modelData);
                     expect(modelData).toEqual(expectedModel);
-                });
 
-            done();
+                    done();
+                });
         });
     });
 
@@ -67,11 +77,9 @@ describe("model/runs-stage-grouped-spec", function () {
         helper.testWithJQuery('<div objectUrl="/jenkins/job/xxxJob"></div>', function ($) {
             var targetEl = $('div');
 
-            helper.mock('util/ajax', {
-                execAsyncGET: function (resPathTokens, callback) {
-                    var restApiJobHistoryData = helper.requireTestRes('model/runs_stage_grouped/getModelData/' + restApiResponseFile);
-                    callback(restApiJobHistoryData);
-                }
+            mockAjax.execAsyncGET.mockImplementation((resPathTokens, callback) => {
+                var restApiJobHistoryData = helper.requireTestRes('model/runs_stage_grouped/getModelData/' + restApiResponseFile);
+                callback(restApiJobHistoryData);
             });
 
             model.getModelData.call(
@@ -83,9 +91,9 @@ describe("model/runs-stage-grouped-spec", function () {
                     var expectedModel = helper.requireTestRes('model/runs_stage_grouped/getModelData/' + expectedModelFile);
                     expect(modelData).toEqual(expectedModel);
                 }
-            });
 
-            done();
+                done();
+            });
         });
     }
 });

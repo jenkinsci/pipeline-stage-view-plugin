@@ -62,7 +62,7 @@ exports.render = function (stageDescription, onElement) {
                     }
                 });
 
-                if (nodeNameBars.size() === 1) {
+                if (nodeNameBars.length === 1) {
                     nodeNameBars.click();
                 }
             }

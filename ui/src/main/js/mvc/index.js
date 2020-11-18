@@ -95,7 +95,7 @@ function MVCContext(controllerName, targetEl) {
     if (!controllerName) {
         throw "No 'controllerName' supplied to MVCContext.";
     }
-    if (!targetEl || targetEl.size() === 0) {
+    if (!targetEl || targetEl.length === 0) {
         throw "No 'targetEl' name supplied to MVCContext.";
     }
 
