@@ -55,6 +55,7 @@ exports.render = function (inputRequiredModel, onElement) {
             hoverBoth: true,
             namespace: 'runInputRequired',
             placement: 'left',
+            hideDelay: 3000,
             onshow: function() {
                 var $ = jqProxy.getJQuery();
                 var pendingActionsTable = $('.pending-input-actions', popoverDom);
