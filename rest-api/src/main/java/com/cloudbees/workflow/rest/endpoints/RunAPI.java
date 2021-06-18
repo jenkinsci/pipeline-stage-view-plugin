@@ -95,13 +95,16 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     @Restricted(DoNotUse.class) // WebMethod
     @ServeJson
     public RunExt doIndex() {
-        return doDescribe();
+        return doDescribe(false);
     }
 
+    /**
+     * @param fullStages Return the stageNodes within each stage
+     */
     @Restricted(NoExternalUse.class) // WebMethod
     @ServeJson
-    public RunExt doDescribe() {
-        return RunExt.create(getRun()).createWrapper();
+    public RunExt doDescribe(@QueryParameter boolean fullStages) {
+        return fullStages ? RunExt.create(getRun()) : RunExt.create(getRun()).createWrapper();
     }
 
     @Restricted(DoNotUse.class) // WebMethod
