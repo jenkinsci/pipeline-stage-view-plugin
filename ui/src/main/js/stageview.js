@@ -17,6 +17,7 @@ mvc.register(require('./controller/run-input-required'));
 mvc.register(require('./controller/build-artifacts-popup'));
 mvc.register(require('./controller/run-changesets'));
 mvc.register(require('./controller/remove-sidepanel'));
+mvc.register(require('./controller/one-run-pipeline'));
 
 var isTestEnv = require('./util/isTestEnv');
 // Apply controllers to the whole document.
@@ -34,7 +35,7 @@ $(function() {
 
 var stageView = require('./view/pipeline-staged.js');
 var extpAPI = require('jenkins-js-extp/API');
-
+var oneRun = require('./view/one-run-pipeline.js')
 // Expose an API that will allow other plugins to contribute to the
 // stage view. We make this exposed API "look" like that of 'jenkins-js-extp/API'
 // so that we can mock an ExtensionPointContainer API on other plugins during dev,
@@ -45,3 +46,4 @@ module.exports = extpAPI;
 // instance. This may eventually be a page level object, containing all
 // extension points on the page.
 module.exports.extensionPointContainer = stageView.extensionPointContainer;
+module.exports.extensionPointContainer = oneRun.extensionPointContainer;

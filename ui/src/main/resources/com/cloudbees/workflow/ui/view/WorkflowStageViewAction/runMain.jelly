@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<!--
+    See workflow-plugin/job/src/main/resources/org/jenkinsci/plugins/workflow/job/WorkflowRun/index.jelly.
+    It loads runMain.jelly for all Action impls bound to a WorkflowRun.
+-->
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:wf="/com/cloudbees/workflow">
+    <j:jelly xmlns:j="jelly:core" xmlns:wf="/com/cloudbees/workflow">
+        <wf:controller name="one-run-pipeline" fragCaption="Stage View" />
+    </j:jelly>
+</j:jelly>

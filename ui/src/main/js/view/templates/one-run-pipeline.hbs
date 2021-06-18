@@ -1,0 +1,135 @@
+<div id="pipeline-box">
+    <h2>{{fragCaption}}</h2>
+    {{#if numStages}}
+    <div class="table-box"><div class="table-viewPort">
+        <table class="jobsTable" style="max-width:{{maxTableEms}}em">
+            <colgroup>
+                <col class="start-group" />
+                {{#each stageData}}
+                    <col class="stage-group" style="max-width:10em;" />
+                {{/each}}
+            </colgroup>
+            <thead>
+            <tr class="header">
+                <th class="stage-start"></th>
+                {{#each stageData}}
+                    <th class="stage-header-name-{{@index}}">{{this.name}}</th>
+                {{/each}}
+            </tr>
+            </thead>
+            <tbody class="tobsTable-body">
+            {{#each runs}}
+                <tr class="job {{this.status}}" data-runId="{{this.id}}">
+                    <td class="stage-start">
+                        <div class="cell-color">
+                            <div class="cell-box">
+                                <div class="jobName"><span class="badge">{{this.name}}</span></div>
+                                <div class="stage-start-box">
+                                    <div class="stage-start-time">
+                                        <div class="date">{{formatDate this.startTimeMillis 'month'}} {{formatDate this.startTimeMillis 'dom'}}</div>
+                                        <div class="time">{{formatDate this.startTimeMillis 'time'}}</div>
+                                    </div>
+                                    {{#if this._links.changesets}}<div class="changeset-box" cbwf-controller="run-changesets" objectUrl="{{this._links.changesets.href}}"></div>
+                                    {{else}}
+                                        <div class="changeset-box no-changes">No Changes</div>
+                                    {{/if}}
+                                    <div class="stage-end-icons extension-dock">
+                                        {{#if this._links.artifacts}}
+                                            <div cbwf-controller="build-artifacts-popup" objectUrl="{{this._links.artifacts.href}}"><a class="link"><i class="glyphicon glyphicon-download" title="Download"></i></a></div>
+                                        {{/if}}
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+
+                                {{#unless this.durationMillis}}
+                                    {{#ifCond this.status '==' 'IN_PROGRESS'}}
+                                        <div class="time-in-queue progress" title="waiting in queue">
+                                            <div class="progress-bar progress-bar-warning progress-bar-striped active" style="width: 100%">{{formatTime this.queueDurationMillis 2}}</div>
+                                        </div>
+                                    {{/ifCond}}
+                                {{/unless}}
+                            </div>
+                        </div>
+                    </td>
+                    {{#each this.stages}}
+                        <td class="stage-cell stage-cell-{{@index}} {{this.status}}" data-stageId="{{this.id}}">
+                            <div class="cell-color">
+                                <div class="stage-wrapper">
+                                    <div class="duration" >
+                                        <span style="font-size: {{emphasise}}em; opacity: {{emphasiseToOpacity emphasise}};">{{formatTime this.durationMillisNoPause 2}}</span>
+                                    </div>
+                                    {{#ifCond this.status '===' 'ABORTED'}}
+                                        <div class="status">aborted</div>
+                                    {{/ifCond}}
+                                    {{#ifCond this.status '===' 'SUCCESS'}}
+                                        <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Success" />
+                                    {{/ifCond}}
+                                    {{#ifCond this.status '===' 'IN_PROGRESS'}}
+                                        <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="In Progress" />
+                                    {{/ifCond}}
+                                    {{#ifCond this.status '===' 'UNSTABLE'}}
+                                        <div cbwf-controller="stage-actions-popover" descUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" caption="Unstable Build" />
+                                    {{/ifCond}}
+                                    {{#ifCond this.status '===' 'PAUSED_PENDING_INPUT'}}
+                                        <div cbwf-controller="run-input-required" objectUrl="{{../../_links.nextPendingInputAction.href}}" />
+                                        <div class="status">paused</div>
+                                    {{/ifCond}}
+                                    {{#ifCond this.status '===' 'FAILED'}}
+                                        <div cbwf-controller="stage-failed-popover" descUrl="{{this._links.self.href}}" objectUrl="{{this._links.self.href}}" notIf="stage-actions-popover,stage-failed-popover" />
+                                        <div class="status">failed</div>
+                                    {{/ifCond}}
+                                    {{#if this.percentCompleteEstimate}}
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-striped" style="width: {{this.percentCompleteEstimate}}%"></div>
+                                        </div>
+                                    {{/if}}
+                                    {{!-- TODO add back node labels once we have block-aware pipeline graph analysis, per JENKINS-33290 --}}
+                                    {{!-- #if this.execNode}}
+                                        <span class="exec-node label label-info" title="executed on '{{this.execNode}}'">{{this.execNode}}</span>
+                                    {{/if --}}
+                                    {{#if this.pauseDurationMillis}}
+                                        <div class="pause-duration">
+                                            <span title="paused for {{formatTime this.pauseDurationMillis 2}}">(paused for {{formatTime this.pauseDurationMillis 2}})</span>
+                                        </div>
+                                    {{/if}}
+                                    <div class="extension-dock"></div>
+                                </div>
+                            </div>
+                        </td>
+                    {{/each}}
+                </tr>
+                {{#if this.durationMillis}}
+                    {{#if this.percentCompleteEstimate}}
+                        <tr class="in-progress-run">
+                            <td class="stage-start hide-cell"></td>
+                            <td class="totalComplete" colspan="{{../../../stageData.length}}">
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45"
+                                         aria-valuemin="0" aria-valuemax="100"
+                                         style="width:{{this.percentCompleteEstimate}}%">
+                                    </div>
+                                    {{#ifCond ../../../numRuns '>' 0}}
+                                        {{#if ../timeRemainingEstimate}}
+                                            <span class="time-remaining">{{formatTime ../timeRemainingEstimate 2}}</span>
+                                        {{else}}
+                                            <span class="time-remaining">almost complete</span>
+                                        {{/if}}
+                                    {{/ifCond}}
+                                </div>
+                            </td>
+                        </tr>
+                    {{/if}}
+                {{/if}}
+            {{/each}}
+            </tbody>
+
+        </table>
+    {{else}}
+        {{#if numRuns}}
+            <div class="alert alert-warning">This Pipeline has run successfully, but does not define any stages. Please use the <code>stage</code> step to define some stages in this Pipeline.</div>
+        {{else}}
+            <div class="alert alert-info">No data available. This Pipeline has not yet run.</div>
+        {{/if}}
+    {{/if}}
+</div>
