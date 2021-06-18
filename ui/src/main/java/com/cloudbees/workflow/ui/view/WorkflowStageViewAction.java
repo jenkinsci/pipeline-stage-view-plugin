@@ -12,6 +12,8 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * {@link WorkflowJob} ui extension point {@link Action}.
@@ -53,5 +55,19 @@ public class WorkflowStageViewAction implements Action {
         public Collection<? extends Action> createFor(WorkflowJob target) {
             return Collections.singleton(new WorkflowStageViewAction(target));
         }
+    }
+
+    public String getTimeZone() {
+        return System.getProperty("user.timezone");
+    }
+
+    // Time zone offset right now in HH:MM format
+    public String getTimeZoneOffset() {
+        TimeZone tz = TimeZone.getTimeZone(getTimeZone());
+        int offsetTotalMin = tz.getOffset(new Date().getTime()) / (1000*60) ;
+        int absOffsetMin = Math.abs(offsetTotalMin);
+        int offsetHours = absOffsetMin/60;
+        int offsetRealMin = absOffsetMin-(offsetHours*60);
+        return ((offsetTotalMin>0) ? '+' : '-') + offsetHours + ":" + offsetRealMin;
     }
 }

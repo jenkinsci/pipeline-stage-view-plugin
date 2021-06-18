@@ -181,14 +181,14 @@ function addStageTotals(runGroup) {
         var run = runGroup.runs[i];
 
         if (run.stages && (run.status === 'IN_PROGRESS' || run.status === 'PAUSED_PENDING_INPUT')) {
-            addCompletionEstimates(run, runGroup.avgDurationMillisNoPause, runGroup.runs.length);
+            addCompletionEstimates(run, runGroup.avgDurationMillisNoPause, endToEndRuns);
             for (var ii = 0; ii < run.stages.length; ii++) {
                 var stage = run.stages[ii];
                 var stageData = getStageData(stage.name, runGroup);
 
                 if (stage.percentCompleteEstimate === undefined) {
                     if (stage.status === 'IN_PROGRESS' || stage.status === 'PAUSED_PENDING_INPUT') {
-                        addCompletionEstimates(stage, stageData.avgDurationMillisNoPause, runGroup.runs.length);
+                        addCompletionEstimates(stage, stageData.avgDurationMillisNoPause, endToEndRuns);
                     }
                 }
             }
@@ -225,7 +225,7 @@ function addEndTimes(jobRunsData) {
         time.setEndTime(run);
         if (run.stages) {
             for (var ii = 0; ii < run.stages.length; ii++) {
-		time.setEndTime(run.stages[ii]);
+                time.setEndTime(run.stages[ii]);
             }
         }
     }
@@ -238,8 +238,8 @@ function addEndTimes(jobRunsData) {
  * (i.e. a run, a runGroup or a stage).
  */
 function addCompletionEstimates(timedObject, avgDurationMillis, averagedOver) {
-    if (averagedOver === 0) {
-        // If no runs have completed yet, then we can't make an estimate, so just mark it at 50%.
+    if (averagedOver === 0 || !(avgDurationMillis > 0)) {
+        // If no runs have completed yet, then we can't make an estimate, so just mark it undefined
         timedObject.percentCompleteEstimate = 50;
     } else {
         timedObject.percentCompleteEstimate = (timedObject.durationMillisNoPause / avgDurationMillis * 100);
