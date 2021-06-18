@@ -15,7 +15,7 @@
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-util": "^3.0.7",
-    "handlebars": "^3.0.3",
+    "handlebars": "^4.7.7",
     "hbsfy": "^2.4.1",
     "jenkins-handlebars-rt": "^1.0.1",
     "jenkins-js-builder": "0.0.40",
