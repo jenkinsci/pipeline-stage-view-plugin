@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.model.Result;
 import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
+import org.jenkinsci.plugins.workflow.graph.FlowEndNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -388,6 +389,9 @@ public class RunExt {
             setStatus(StatusExt.valueOf(execution.getCauseOfFailure()));
         } else if (execution.isComplete()) {
             Result r = run.getResult();
+            if (null == r) {
+                r = ((FlowEndNode) execution.getCurrentHeads().get(0)).getResult();
+            }
             setStatus(StatusExt.valueOf(r));
         } else if (isPendingInput(run)) {
             setStatus(StatusExt.PAUSED_PENDING_INPUT);
