@@ -59,12 +59,10 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>2.24</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>2.12</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.ui</groupId>
@@ -79,25 +77,21 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1.26</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
-            <version>2.14</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-scm-step</artifactId>
-            <version>2.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.31</version>
             <scope>test</scope>
         </dependency>
         <dependency>
