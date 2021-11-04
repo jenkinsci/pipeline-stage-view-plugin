@@ -141,14 +141,9 @@ public class ParallelStepTest {
         build.waitForStart();
 
         // Test while running
-        String jsonResponse = webClient.goTo(jobRunsUrl, "application/json").getWebResponse().getContentAsString();
-        RunExt[] runExts = new JSONReadWrite().fromString(jsonResponse, RunExt[].class);
-
-        Assert.assertEquals(1, runExts.length);
-        RunExt runExt = runExts[0];
+        RunExt runExt = getRunExt(jobRunsUrl);
         Assert.assertEquals(StatusExt.IN_PROGRESS, runExt.getStatus());
-
-        while (runExt.getStages().size()<4) {
+        while (runExt.getStages().size() < 4) {
             runExt = getRunExt(jobRunsUrl);
         }
 
@@ -160,11 +155,7 @@ public class ParallelStepTest {
         jenkinsRule.assertBuildStatusSuccess(build);
 
         // Test when completed
-        jsonResponse = webClient.goTo(jobRunsUrl, "application/json").getWebResponse().getContentAsString();
-        runExts = new JSONReadWrite().fromString(jsonResponse, RunExt[].class);
-
-        Assert.assertEquals(1, runExts.length);
-        runExt = runExts[0];
+        runExt = getRunExt(jobRunsUrl);
         Assert.assertEquals(StatusExt.SUCCESS, runExt.getStatus());
         Assert.assertEquals(5, runExt.getStages().size());
         Assert.assertEquals("SerialStartStage", runExt.getStages().get(0).getName());
