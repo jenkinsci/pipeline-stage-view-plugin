@@ -28,7 +28,8 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.54</version>
+        <version>4.29</version>
+        <relativePath/>
     </parent>
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
@@ -56,8 +57,9 @@
 
     <properties>
         <revision>2.20</revision>
+        <bom>2.204.x</bom>
+        <jenkins.version>2.204.6</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
-        <jenkins.version>2.60.3</jenkins.version>
         <java.level>8</java.level>
         <workflow.version>2.0</workflow.version>
         <node.version>10.17.0</node.version>
@@ -93,4 +95,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-${bom}</artifactId>
+                <version>18</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
