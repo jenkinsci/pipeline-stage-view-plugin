@@ -147,7 +147,11 @@ public class ParallelStepTest {
         Assert.assertEquals(1, runExts.length);
         RunExt runExt = runExts[0];
         Assert.assertEquals(StatusExt.IN_PROGRESS, runExt.getStatus());
-        Assert.assertEquals(4, runExt.getStages().size());
+
+        while (runExt.getStages().size()<4) {
+            runExt = getRunExt(jobRunsUrl);
+        }
+
         Assert.assertEquals("SerialStartStage", runExt.getStages().get(0).getName());
         Assert.assertEquals("ParallelStage1", runExt.getStages().get(1).getName());
         Assert.assertEquals("ParallelStage2", runExt.getStages().get(2).getName());
@@ -168,5 +172,14 @@ public class ParallelStepTest {
         Assert.assertEquals("ParallelStage2", runExt.getStages().get(2).getName());
         Assert.assertEquals("ParallelStage3", runExt.getStages().get(3).getName());
         Assert.assertEquals("SerialEndStage", runExt.getStages().get(4).getName());
+    }
+
+    private RunExt getRunExt(String jobRunsUrl) throws Exception {
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+        String jsonResponse = webClient.goTo(jobRunsUrl, "application/json").getWebResponse().getContentAsString();
+        RunExt[] runExts = new JSONReadWrite().fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, runExts.length);
+        return runExts[0];
     }
 }
