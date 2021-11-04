@@ -25,6 +25,7 @@ package com.cloudbees.workflow.rest.external;
 
 import com.cloudbees.workflow.util.ModelUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.console.AnnotatedLargeText;
 import org.jenkinsci.plugins.workflow.actions.LogAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -99,6 +100,7 @@ public class FlowNodeLogExt {
         this.consoleUrl = consoleUrl;
     }
 
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED", justification = "We're not writing to a file")
     public static FlowNodeLogExt create(FlowNode node) {
         FlowNodeLogExt logExt = new FlowNodeLogExt();
 

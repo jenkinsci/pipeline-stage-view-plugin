@@ -23,28 +23,12 @@
  */
 package com.cloudbees.workflow.rest.external;
 
-import groovy.lang.MissingPropertyException;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.junit.Test;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 public class ErrorExtTest {
-
-    /**
-     * This is a test against an issue which is fixed in Groovy 3.0 (GROOVY-8936) - It might start
-     * failing whenever groovy is updated to a version where this issue is fixed. See
-     * {@link #testErrorExtNoTestNullPointerException()} for a variant of this test against a broken
-     * local class.
-     */
-    @Test
-    public void testErrorExtNoGroovyNullPointerException() {
-        Throwable throwable = new MissingPropertyException(null);
-        ErrorAction errorAction = new ErrorAction(throwable);
-        ErrorExt errorExt = ErrorExt.create(errorAction);
-        assertThat(errorExt.getMessage(),
-                        containsString("No message: NullPointerException"));
-    }
 
     @Test
     public void testErrorExtNoTestNullPointerException() {

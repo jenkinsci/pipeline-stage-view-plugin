@@ -29,7 +29,6 @@
         <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
         <artifactId>parent-pom</artifactId>
         <version>${revision}${changelist}</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>pipeline-rest-api</artifactId>
@@ -105,7 +104,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>1.9.5</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
