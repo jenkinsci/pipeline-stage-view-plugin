@@ -22,14 +22,14 @@
  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  ~ THE SOFTWARE.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.29</version>
-        <relativePath/>
+        <version>4.31</version>
+        <relativePath />
     </parent>
 
     <groupId>org.jenkins-ci.plugins.pipeline-stage-view</groupId>
@@ -57,8 +57,8 @@
 
     <properties>
         <revision>2.20</revision>
-        <bom>2.204.x</bom>
-        <jenkins.version>2.204.6</jenkins.version>
+        <bom>2.235.x</bom>
+        <jenkins.version>2.235.5</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
         <java.level>8</java.level>
         <workflow.version>2.0</workflow.version>
@@ -101,7 +101,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${bom}</artifactId>
-                <version>18</version>
+                <version>918.vae501d2cdc99</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
