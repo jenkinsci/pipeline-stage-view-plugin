@@ -38,8 +38,5 @@ public class PluginImpl extends Plugin {
     @Override
     public void start() throws Exception {
         super.start();
-
-        // Register the medium (24x24) icons...
-        IconSet.icons.addIcon(new Icon("icon-workflow-stage icon-md", "24x24/search.png", Icon.ICON_MEDIUM_STYLE));
     }
 }
