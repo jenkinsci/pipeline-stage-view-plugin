@@ -17,7 +17,11 @@
 
 name: GitHub CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - dependabot/**
+  pull_request:
 
 jobs:
   build:
@@ -34,18 +38,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up cache for ~./m2/repository
-        uses: actions/cache@v2.1.7
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ matrix.os }}-java${{ matrix.java }}-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-${{ matrix.os }}-java${{ matrix.java }}-
-            maven-${{ matrix.os }}-
-
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2.4.0
         with:
+          distribution: adopt
+          cache: 'maven'
           java-version: ${{ matrix.java }}
 
       - name: Build with Maven
