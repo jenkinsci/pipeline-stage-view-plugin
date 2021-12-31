@@ -38,7 +38,7 @@ import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.StatusAndTiming;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.TimingInfo;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -221,7 +221,7 @@ public class FlowNodeExt {
         setParameterDescription(ArgumentsAction.getStepArgumentsAsString(node));
     }
 
-    protected void addBasicNodeData(@Nonnull FlowNode node) {
+    protected void addBasicNodeData(@NonNull FlowNode node) {
         boolean isExecuted = NotExecutedNodeAction.isExecuted(node);
         StatusExt status = null;
         ErrorAction errorAction = null;

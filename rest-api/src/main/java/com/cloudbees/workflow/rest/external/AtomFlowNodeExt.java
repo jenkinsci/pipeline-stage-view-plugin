@@ -31,7 +31,7 @@ import org.jenkinsci.plugins.workflow.actions.LogAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.kohsuke.stapler.Stapler;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.ArrayList;
 import java.util.List;
 

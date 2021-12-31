@@ -31,7 +31,7 @@ import hudson.model.PasswordParameterDefinition;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +47,7 @@ public class InputParameterDefExt {
     private final String description;
     private final Map<String, Object> definition;
 
-    public InputParameterDefExt(@Nonnull ParameterDefinition definition) {
+    public InputParameterDefExt(@NonNull ParameterDefinition definition) {
         this.type = definition.getType();
         this.name = definition.getName();
         this.description = definition.getDescription();
@@ -70,7 +70,7 @@ public class InputParameterDefExt {
         return definition;
     }
 
-    static Map<String, Object> toDefinitionMap(@Nonnull ParameterDefinition definition) {
+    static Map<String, Object> toDefinitionMap(@NonNull ParameterDefinition definition) {
         Map<String, Object> definitionMap = new HashMap<String, Object>();
 
         if (definition instanceof BooleanParameterDefinition) {
