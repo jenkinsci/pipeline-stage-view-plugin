@@ -18,8 +18,8 @@ import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.StatusAndTiming;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.TimingInfo;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +37,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     ArrayList<String> stageNodeIds = new ArrayList<>();
     boolean isLastChunk = true;
 
-    public ChunkVisitor(@Nonnull WorkflowRun run) {
+    public ChunkVisitor(@NonNull WorkflowRun run) {
         this.run = run;
     }
 
@@ -45,7 +45,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         return stages;
     }
 
-    public static AtomFlowNodeExt makeAtomNode(@Nonnull WorkflowRun run, @CheckForNull FlowNode beforeNode, @Nonnull FlowNode node, @CheckForNull FlowNode next) {
+    public static AtomFlowNodeExt makeAtomNode(@NonNull WorkflowRun run, @CheckForNull FlowNode beforeNode, @NonNull FlowNode node, @CheckForNull FlowNode next) {
         if (!(node instanceof AtomNode)) {
             return null;
         }
@@ -72,7 +72,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     @Override
     /** Do the final computations to materialize the stage */
     @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "We can actually get nulls")
-    protected void handleChunkDone(@Nonnull MemoryFlowChunk chunk) {
+    protected void handleChunkDone(@NonNull MemoryFlowChunk chunk) {
         StageNodeExt stageExt = new StageNodeExt();
         TimingInfo times;
         if (firstExecuted != null) {
@@ -107,7 +107,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     @Override
-    protected void resetChunk(@Nonnull MemoryFlowChunk chunk) {
+    protected void resetChunk(@NonNull MemoryFlowChunk chunk) {
         super.resetChunk(chunk);
         firstExecuted = null;
         stageNodeIds.clear();
@@ -116,7 +116,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
 
     @Override
     @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "We can actually get nulls")
-    public void chunkStart(@Nonnull FlowNode startNode, @CheckForNull FlowNode beforeBlock, @Nonnull ForkScanner scanner) {
+    public void chunkStart(@NonNull FlowNode startNode, @CheckForNull FlowNode beforeBlock, @NonNull ForkScanner scanner) {
         if (NotExecutedNodeAction.isExecuted(startNode)) {
             firstExecuted = startNode;
         }
@@ -127,7 +127,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     /** Called when hitting the end of a block (determined by the chunkEndPredicate) */
-    public void chunkEnd(@Nonnull FlowNode endNode, @CheckForNull FlowNode afterBlock, @Nonnull ForkScanner scanner) {
+    public void chunkEnd(@NonNull FlowNode endNode, @CheckForNull FlowNode afterBlock, @NonNull ForkScanner scanner) {
         super.chunkEnd(endNode, afterBlock, scanner);
 
         // Reset the stage internal state to start here
@@ -142,7 +142,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         }
     }
 
-    public void atomNode(@CheckForNull FlowNode before, @Nonnull FlowNode atomNode, @CheckForNull FlowNode after, @Nonnull ForkScanner scan) {
+    public void atomNode(@CheckForNull FlowNode before, @NonNull FlowNode atomNode, @CheckForNull FlowNode after, @NonNull ForkScanner scan) {
         if (NotExecutedNodeAction.isExecuted(atomNode)) {
             firstExecuted = atomNode;
         }
@@ -159,7 +159,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
     }
 
     @Override
-    public void parallelEnd(@Nonnull FlowNode parallelStartNode, @Nonnull FlowNode parallelEndNode, @Nonnull ForkScanner scanner) {
+    public void parallelEnd(@NonNull FlowNode parallelStartNode, @NonNull FlowNode parallelEndNode, @NonNull ForkScanner scanner) {
         if (isLastChunk) {
             // Filthy hack, but for incomplete parallels, we use this event to reset the chunk boundaries
             // This works around issues due to branches being visited in order DECLARED, not TIME-ordered

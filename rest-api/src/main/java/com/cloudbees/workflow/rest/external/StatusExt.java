@@ -29,7 +29,7 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 
 import hudson.model.Result;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>

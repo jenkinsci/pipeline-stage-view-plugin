@@ -26,7 +26,7 @@ package com.cloudbees.workflow.rest;
 import hudson.model.Action;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -44,9 +44,9 @@ public abstract class AbstractWorkflowRunActionHandler extends AbstractAPIAction
         return target;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Collection<? extends Action> createFor(@Nonnull WorkflowRun target) {
+    public Collection<? extends Action> createFor(@NonNull WorkflowRun target) {
         try {
             AbstractWorkflowRunActionHandler instance = getClass().newInstance();
             instance.target = target;

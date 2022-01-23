@@ -26,7 +26,7 @@ package com.cloudbees.workflow.rest;
 import hudson.model.Action;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -44,9 +44,9 @@ public abstract class AbstractFlowNodeActionHandler extends AbstractAPIActionHan
         return target;
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    public Collection<? extends Action> createFor(@Nonnull FlowNode target) {
+    public Collection<? extends Action> createFor(@NonNull FlowNode target) {
         try {
             AbstractFlowNodeActionHandler instance = getClass().newInstance();
             instance.target = target;

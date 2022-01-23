@@ -48,8 +48,8 @@ import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,7 +96,7 @@ public class FlowNodeUtil {
     }
 
     @CheckForNull
-    public static RunExt getCachedRun(@Nonnull WorkflowRun run) {
+    public static RunExt getCachedRun(@NonNull WorkflowRun run) {
         RunExt cachedRun = CacheExtension.all().get(0).getRunCache().getIfPresent(run.getExternalizableId());
         if (cachedRun != null) {
             // Sanity check the cache see JENKINS-43556
@@ -122,7 +122,7 @@ public class FlowNodeUtil {
 
     /** Find a node following this one, using an optimized approach */
     @CheckForNull
-    public static FlowNode getNodeAfter(@Nonnull final FlowNode node) {
+    public static FlowNode getNodeAfter(@NonNull final FlowNode node) {
         if (node.isActive() || node instanceof FlowEndNode) {
             return null;
         }
@@ -202,7 +202,7 @@ public class FlowNodeUtil {
     /** List the stage nodes for a FlowExecution -- needed for back-compat.
      *  Note: far more efficient than existing implementation because it uses the cache of run info.
      */
-    @Nonnull
+    @NonNull
     public static List<FlowNode> getStageNodes(@CheckForNull FlowExecution execution) throws RuntimeException {
         WorkflowRun run = getWorkflowRunForExecution(execution);
         if (run == null) {
@@ -228,7 +228,7 @@ public class FlowNodeUtil {
     /** Needed for back-compat, returns nodes inside a stage
      *  Note: far more efficient than existing implementation because it uses the cache of run info.
      */
-    @Nonnull
+    @NonNull
     public static List<FlowNode> getStageNodes(@CheckForNull FlowNode stageNode) {
         if (stageNode == null) { return Collections.emptyList(); }
         FlowExecution exec = stageNode.getExecution();
