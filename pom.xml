@@ -57,11 +57,10 @@
 
     <properties>
         <revision>2.22</revision>
-        <bom>2.235.x</bom>
-        <jenkins.version>2.235.5</jenkins.version>
+        <bom>2.289.x</bom>
+        <jenkins.version>2.289.1</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
         <java.level>8</java.level>
-        <workflow.version>2.0</workflow.version>
         <node.version>10.17.0</node.version>
         <npm.version>6.14.8</npm.version>
         <frontend-version>1.10.0</frontend-version>
@@ -101,14 +100,9 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${bom}</artifactId>
-                <version>918.vae501d2cdc99</version>
+                <version>1145.va_a_c3b_33935d7</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-annotations</artifactId>
-                <version>4.5.3</version>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>
