@@ -29,11 +29,10 @@ import com.cloudbees.workflow.rest.hal.Link;
 import com.cloudbees.workflow.rest.hal.Links;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.model.Result;
-import hudson.model.Run;
+import jenkins.model.StandardArtifactManager;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.graph.FlowEndNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.pipelinegraphanalysis.StageChunkFinder;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputAction;
@@ -50,8 +49,6 @@ import java.util.concurrent.TimeoutException;
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class RunExt {
-
-    private static int MAX_ARTIFACTS_COUNT = Integer.getInteger(RunExt.class.getName()+".maxArtifactsCount", 100);
 
     private RunLinks _links;
     private String id;
@@ -249,8 +246,14 @@ public class RunExt {
                 runExt.get_links().setPendingInputActions(Link.newLink(RunAPI.getPendingInputActionsUrl(run)));
                 runExt.get_links().setNextPendingInputAction(Link.newLink(RunAPI.getNextPendingInputActionUrl(run)));
             }
-            List<Run<WorkflowJob, WorkflowRun>.Artifact> artifacts = run.getArtifactsUpTo(MAX_ARTIFACTS_COUNT);
-            if (artifacts != null && !artifacts.isEmpty()) {
+            boolean mightHaveArtifacts;
+            if (run.getArtifactManager() instanceof StandardArtifactManager) {
+                mightHaveArtifacts = run.getHasArtifacts();
+            } else {
+                // May be expensive to check; assume that it might.
+                mightHaveArtifacts = true;
+            }
+            if (mightHaveArtifacts) {
                 runExt.get_links().setArtifacts(Link.newLink(RunAPI.getArtifactsUrl(run)));
             }
         }
