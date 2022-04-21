@@ -559,13 +559,16 @@ public class JobAndRunAPITest {
         // Succeeds but custom-marked as unstable
         WorkflowJob passUnstable = jenkinsRule.jenkins.createProject(WorkflowJob.class, "SafelyUnstable");
         passUnstable.setDefinition(new CpsFlowDefinition("" +
-                "stage 'first'\n" +
+                "stage('first') {\n" +
                 "echo 'works'\n" +
-                "stage 'second'\n" +
+                "}\n" +
+                "stage('second') {\n" +
                 "currentBuild.result = 'UNSTABLE'\n" +
                 "echo 'ran things'\n" +
-                "stage 'end'\n" +
-                "echo 'done'",
+                "}\n" +
+                "stage('end') {\n" +
+                "echo 'done'" +
+                "}\n",
                 true));
         QueueTaskFuture<WorkflowRun> build = passUnstable.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.UNSTABLE, build.get());
@@ -578,9 +581,9 @@ public class JobAndRunAPITest {
         assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
         Assert.assertEquals(3, run.getStages().size());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(1).getStatus());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(2).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(1).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(2).getStatus());
     }
 
     @Test
@@ -589,15 +592,17 @@ public class JobAndRunAPITest {
         // Error generated, but caught and custom-marked as unstable
         WorkflowJob failUnstable = jenkinsRule.jenkins.createProject(WorkflowJob.class, "DangerouslyUnstable");
         failUnstable.setDefinition(new CpsFlowDefinition("" +
-                "stage 'safe'\n" +
+                "stage('safe') {\n" +
                 "echo 'okay'\n" +
-                "stage 'warning'\n" +
+                "}\n" +
+                "stage('warning') {\n" +
                 "try { \n" +
                 "    error('danger will robinson') \n" +
                 "} \n" +
                 "catch (Exception e) {\n" +
                 "    currentBuild.result = 'UNSTABLE'    \n" +
                 "    echo 'eaten error!' \n" +
+                "}\n" +
                 "}", true));
 
         QueueTaskFuture<WorkflowRun> build = failUnstable.scheduleBuild2(0);
@@ -611,8 +616,8 @@ public class JobAndRunAPITest {
         assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.UNSTABLE, run.getStatus());
         Assert.assertEquals(2, run.getStages().size());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(0).getStatus());
-        Assert.assertEquals(StatusExt.UNSTABLE, run.getStages().get(1).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(1).getStatus());
     }
 
     @Test
