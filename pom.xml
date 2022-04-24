@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.37</version>
+        <version>4.40</version>
         <relativePath />
     </parent>
 
@@ -48,20 +48,19 @@
         </license>
     </licenses>
 
-    <scm>
-        <connection>scm:git:git://github.com/jenkinsci/pipeline-stage-view-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/pipeline-stage-view-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
+    <scm child.scm.connection.inherit.append.path="false" child.scm.developerConnection.inherit.append.path="false" child.scm.url.inherit.append.path="false">
+        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+        <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+        <url>https://github.com/${gitHubRepo}</url>
         <tag>${scmTag}</tag>
     </scm>
 
     <properties>
         <revision>2.24</revision>
-        <bom>2.235.x</bom>
-        <jenkins.version>2.235.5</jenkins.version>
+        <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
+        <bom>2.289.x</bom>
+        <jenkins.version>2.289.1</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
-        <java.level>8</java.level>
-        <workflow.version>2.0</workflow.version>
         <node.version>10.17.0</node.version>
         <npm.version>6.14.8</npm.version>
         <frontend-version>1.10.0</frontend-version>
@@ -101,14 +100,9 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${bom}</artifactId>
-                <version>918.vae501d2cdc99</version>
+                <version>1289.v5c4b_1c43511b_</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-annotations</artifactId>
-                <version>4.5.3</version>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>
