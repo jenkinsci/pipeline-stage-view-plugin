@@ -23,7 +23,7 @@
     "jest-handlebars": "^1.0.1",
     "jest-junit": "^12.0.0",
     "jest-standard-reporter": "^2.0.0",
-    "jsdom": "^10.1.0",
+    "jsdom": "^16.5.0",
     "minifyify": "^7.2.1",
     "require-uncached": "^1.0.2"
   }
