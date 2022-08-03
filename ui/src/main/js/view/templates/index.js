@@ -28,6 +28,10 @@ var jqProxy = require('../../jQuery');
 var formatters = require('../../util/formatters');
 var moment = require('moment');
 
+// Fix date formatting - set moment locale to UTC to match normal display
+// Needs to get the Jenkins locale here, probably from jelly
+// Moment._locale
+
 /**
  * Templating support.
  */
@@ -85,6 +89,10 @@ registerHBSHelper('formatDate', function (date, toFormat) {
     if (!dateFormattingOn) {
         // Just return as is...
         return date;
+    }
+
+    if (myTimeZoneOffset) { // Do time zone conversion using parseData *sigh.*
+        //moment.locale(myTimeZone);
     }
 
     var aliasFormat = formatAliases[toFormat];
