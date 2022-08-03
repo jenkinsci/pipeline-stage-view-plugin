@@ -40,6 +40,7 @@
     <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
     <properties>
         <npm.loglevel>--silent</npm.loglevel>
+        <jenkins.version>2.319.3</jenkins.version>
     </properties>
 
     <scm>
@@ -64,9 +65,14 @@
             <artifactId>workflow-job</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.ui</groupId>
-            <artifactId>handlebars</artifactId>
-            <version>3.0.8</version>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>bootstrap5-api</artifactId>
+            <version>5.1.3-7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>handlebars4-api</artifactId>
+            <version>4.7.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.ui</groupId>
