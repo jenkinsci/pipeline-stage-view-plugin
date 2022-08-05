@@ -9,6 +9,7 @@
             Optional fragment caption, passed through to the controller.
         </st:attribute>
     </st:documentation>
+    <script>var timeZone = '${it.timeZone}';</script>
     <div class="cbwf-stage-view">
         <div cbwf-controller="${name}" objectUrl="${rootURL}/${it.target.url}" fragCaption="${fragCaption}" />
         <st:adjunct includes="org.jenkinsci.pipeline.stageview_adjunct"/>
