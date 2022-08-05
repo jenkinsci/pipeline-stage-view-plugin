@@ -56,7 +56,7 @@ var formatAliases = {
     dom: 'DD',
     time: 'HH:mm',
     ISO_8601: 'YYYY-MM-DDTHH:mm:ss',
-    long: this.ISO_8601
+    long: 'YYYY-MM-DDTHH:mm:ss'
 };
 
 function registerHBSHelper(name, helper) {
@@ -136,10 +136,12 @@ registerHBSHelper('ifCond', function (v1, operator, v2, options) {
 });
 
 function getTemplate(templateName) {
+    console.log('Retrieving template: '+ templateName);
     var templateInstance = templateCache[templateName];
     if (!templateInstance) {
         throw 'No template by the name "' + templateName + '".  Check ui/src/main/js/view/templates/index.js and make sure the template is registered in the templateCache.';
     }
+    console.log('Found template '+templateName+' of type '+(typeof templateInstance));
     return  templateInstance;
 }
 
