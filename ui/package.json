@@ -8,7 +8,7 @@
     "window-handle": "^1.0.0"
   },
   "scripts": {
-    "dev": "parcel watch build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/js",
+    "mvnbuild-dev": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/js --no-optimize",
     "mvnbuild": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/js",
     "build": "npm run mvnbuild",
     "mvntest": "jest --ci --config=jest.config.json"

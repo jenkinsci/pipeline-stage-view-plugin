@@ -21,3 +21,4 @@ demo/snapshot-plugins/
 .settings
 .classpath
 .parcel-cache
+.cache
