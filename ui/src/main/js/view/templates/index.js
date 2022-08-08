@@ -61,6 +61,7 @@ var formatAliases = {
 
 function registerHBSHelper(name, helper) {
     handlebars.registerHelper(name, helper);
+    console.log(handlebars.VERSION);
 }
 
 registerHBSHelper('breaklines', function(text) {
@@ -137,6 +138,7 @@ registerHBSHelper('ifCond', function (v1, operator, v2, options) {
 
 function getTemplate(templateName) {
     var templateInstance = templateCache[templateName];
+    console.log(templateName, templateInstance);
     if (!templateInstance) {
         throw 'No template by the name "' + templateName + '".  Check ui/src/main/js/view/templates/index.js and make sure the template is registered in the templateCache.';
     }
