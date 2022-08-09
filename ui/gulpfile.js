@@ -37,7 +37,7 @@ builder.bundle('src/main/js/stageview_adjunct.js')
     .minify()
     .inDir('target/generated-adjuncts/org/jenkinsci/pipeline');
 builder.bundle('src/main/js/stageview.js')
-    // .withExternalModuleMapping('handlebars', 'handlebars:handlebars3')
+    .withExternalModuleMapping('handlebars', 'handlebars:handlebars3')
     .withExternalModuleMapping('moment', 'momentjs:momentjs2')
     .asJenkinsModuleResource()
     .export();
