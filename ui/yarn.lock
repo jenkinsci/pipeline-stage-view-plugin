@@ -3328,10 +3328,10 @@ jasmine@^2.3.0:
     glob "^7.0.6"
     jasmine-core "~2.99.0"
 
-jenkins-handlebars-rt@1.0.11:
-  version "1.0.11"
-  resolved "http://localhost:4873/jenkins-handlebars-rt/-/jenkins-handlebars-rt-1.0.11.tgz#04d670c0b2282ff2dfd4520979cf4e565285413f"
-  integrity sha512-xIRKjyW67tMez+Qq3eFjiCcn03MFoesZlScaFNFXsoysFl7iU4L3vrq9LblULk7vpcuCGQnA7joVvu288B3Q2A==
+jenkins-handlebars-rt@1.1.1:
+  version "1.1.1"
+  resolved "http://localhost:4873/jenkins-handlebars-rt/-/jenkins-handlebars-rt-1.1.1.tgz#042ba370068ae1bb77db88fb2fee8ab4c7131685"
+  integrity sha512-ooAsgbwvjwIk4HWdHTQYyuvp94TOthYQRbVq8xu4C6JKZGF7K1Is72T1k5XxruxBSEQOUyizi9Hk6L9VZ+QizQ==
   dependencies:
     handlebars "^4.7.7"
     jenkins-js-modules "1.5.4"
