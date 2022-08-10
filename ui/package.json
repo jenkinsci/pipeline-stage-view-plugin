@@ -17,7 +17,7 @@
     "gulp-util": "^3.0.7",
     "handlebars": "^4.7.7",
     "hbsfy": "^2.4.1",
-    "jenkins-handlebars-rt": "1.0.8",
+    "jenkins-handlebars-rt": "1.0.11",
     "jenkins-js-builder": "0.0.40",
     "jest": "^25.5.4",
     "jest-handlebars": "^1.0.1",
