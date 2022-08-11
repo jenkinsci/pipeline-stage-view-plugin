@@ -12,6 +12,8 @@ out
 node/
 node_modules/
 npm-debug.log
+.parcel-cache
+yarn-error.log
 
 ui/src/main/webapp/jsmodules
 

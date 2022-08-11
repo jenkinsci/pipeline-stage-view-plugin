@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "jenkins-handlebars-rt": "^1.0.1"
+  }
+}

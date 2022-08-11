@@ -9,7 +9,9 @@
             Optional fragment caption, passed through to the controller.
         </st:attribute>
     </st:documentation>
-    <div class="cbwf-stage-view">
+    <div class="cbwf-stage-view">xxxS
         <div cbwf-controller="${name}" objectUrl="${rootURL}/${it.target.url}" fragCaption="${fragCaption}" />
+        <script type="text/javascript" src="${resURL}/plugin/pipeline-stage-view/js/stageview.js"/>
+   
     </div>
 </j:jelly>
