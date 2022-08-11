@@ -26,7 +26,7 @@
 
 <j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:wf="/com/cloudbees/workflow">
     <l:layout norefresh="true">
-        <l:main-panel>jelly
+        <l:main-panel>
             <wf:controller name="pipeline-staged" fragCaption="${it.target.name} - Stage View" />
             <wf:controller name="remove-sidepanel" />
         </l:main-panel>
