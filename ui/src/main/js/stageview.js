@@ -23,7 +23,6 @@ var isTestEnv = require('./util/isTestEnv');
 var jqProxy = require('./jQuery');
 var $ = jqProxy.getJQuery();
 $(function() {
-    console.log('xxx');
     if (isTestEnv()) {
         // In a test env, we do not want async rendering delays... just makes the
         // tests more complicated. Doing this for now and we'll see

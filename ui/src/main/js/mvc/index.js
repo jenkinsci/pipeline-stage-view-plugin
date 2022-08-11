@@ -37,8 +37,6 @@ var controllers = {};
 exports.register = function (controller) {
     var controllerName = controller.getName();
 
-    console.log('Registering controller: '+ controllerName + ' of type '+(typeof controller));
-    
     if (exports.isRegistered(controllerName)) {
         throw "A controller named '" + controllerName + "' is already registered.";
     }
