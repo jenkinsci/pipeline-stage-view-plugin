@@ -13,6 +13,7 @@
     "mvntest": "jest --ci --config=jest.config.json"
   },
   "devDependencies": {
+    "@parcel/transformer-less": "^2.7.0",
     "handlebars": "^4.7.7",
     "hbsfy": "^2.4.1",
     "jest": "^28.1.3",
