@@ -3,7 +3,7 @@
  *
  * All rights reserved.
  */
-
+import "../less/stageview.less";
 var mvc = require('./mvc');
 
 // Register all controllers...

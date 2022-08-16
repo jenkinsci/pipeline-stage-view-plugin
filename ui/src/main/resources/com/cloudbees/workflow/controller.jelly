@@ -13,5 +13,6 @@
         <div cbwf-controller="${name}" objectUrl="${rootURL}/${it.target.url}" fragCaption="${fragCaption}" />
         <st:adjunct includes="io.jenkins.plugins.handlebars4"/>
         <script type="text/javascript" src="${resURL}/plugin/pipeline-stage-view/js/stageview.js"/>
+        <link rel="stylesheet" href="${resURL}/plugin/pipeline-stage-view/js/stageview.css"/>
     </div>
 </j:jelly>
