@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-var gutil = require('gulp-util');
+var log = require('fancy-log');
 var fs = require('fs');
 var requireUncached = require("require-uncached");
 
@@ -70,26 +70,26 @@ exports.requireTestRes = function (resource) {
 }
 
 /**
- * Log a message to the console using Gulp logger.
+ * Log a message to the console using Fancy logger.
  * @param message The message to log.
  */
 exports.log = function (message) {
     if (typeof message === 'object') {
-        gutil.log(JSON.stringify(message, undefined, 4));
+        log(JSON.stringify(message, undefined, 4));
     } else {
-        gutil.log(message);
+        log(message);
     }
 }
 
 /**
- * Log an error to the console using Gulp logger.
+ * Log an error to the console using fancy logger.
  * <p/>
  * Colorizes the log.
  * @param message The error message to log.
  */
 exports.error = function (message) {
-    gutil.log(gutil.colors.red(message));
-    gutil.log(gutil.colors.red(new Error().stack));
+    log.error(message);
+    log.error(new Error().stack);
 }
 
 /**
