@@ -9,8 +9,8 @@
     "window-handle": "^1.0.0"
   },
   "scripts": {
-    "mvnbuild-dev": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules --no-optimize --no-content-hash",
-    "mvnbuild": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules",
+    "mvnbuild-dev": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules --no-optimize --no-content-hash --no-scope-hoist && parcel build --public-url ./ ./src/main/js/stageview_adjunct.js --dist-dir ./target/generated-adjuncts/org/jenkinsci/pipeline --no-optimize --no-content-hash --no-scope-hoist",
+    "mvnbuild": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules && parcel build --public-url ./ ./src/main/js/stageview_adjunct.js --dist-dir ./target/generated-adjuncts/org/jenkinsci/pipeline",
     "build": "npm run mvnbuild",
     "mvntest": "jest --ci --config=jest.config.json"
   },
