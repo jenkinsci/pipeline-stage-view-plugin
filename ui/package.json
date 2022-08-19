@@ -3,13 +3,14 @@
   "version": "0.0.1",
   "dependencies": {
     "jenkins-js-extp": "0.0.2",
+    "@jenkins-cd/js-modules": "^0.0.10",
     "jquery": "^3.5.1",
     "moment": "~2.29.2",
     "window-handle": "^1.0.0"
   },
   "scripts": {
-    "mvnbuild-dev": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/js --no-optimize --no-content-hash",
-    "mvnbuild": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/js",
+    "mvnbuild-dev": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules --no-optimize --no-content-hash",
+    "mvnbuild": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules",
     "build": "npm run mvnbuild",
     "mvntest": "jest --ci --config=jest.config.json"
   },

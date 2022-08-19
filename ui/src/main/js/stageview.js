@@ -45,3 +45,4 @@ module.exports = extpAPI;
 // instance. This may eventually be a page level object, containing all
 // extension points on the page.
 module.exports.extensionPointContainer = stageView.extensionPointContainer;
+require('@jenkins-cd/js-modules').exportModule('pipeline-stage-view', 'stageview', module);
