@@ -2,8 +2,8 @@
   "name": "pipeline-stage-view",
   "version": "0.0.1",
   "dependencies": {
-    "jenkins-js-extp": "0.0.2",
     "@jenkins-cd/js-modules": "^0.0.10",
+    "jenkins-js-extp": "0.0.2",
     "jquery": "^3.5.1",
     "moment": "~2.29.4",
     "window-handle": "^1.0.0"
@@ -15,6 +15,7 @@
     "mvntest": "jest --ci --config=jest.config.json"
   },
   "devDependencies": {
+    "@parcel/source-map": "^2.1.0",
     "@parcel/transformer-less": "^2.7.0",
     "fancy-log": "2.0.0",
     "handlebars": "^4.7.7",
