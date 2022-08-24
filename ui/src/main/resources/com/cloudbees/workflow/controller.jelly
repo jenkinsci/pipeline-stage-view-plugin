@@ -12,5 +12,6 @@
     <div class="cbwf-stage-view">
         <div cbwf-controller="${name}" objectUrl="${rootURL}/${it.target.url}" fragCaption="${fragCaption}" />
         <st:adjunct includes="org.jenkinsci.pipeline.stageview_adjunct"/>
+        <link rel="stylesheet" href="${resURL}/plugin/pipeline-stage-view/jsmodules/stageview.css"/>
     </div>
 </j:jelly>

@@ -1,4 +1,4 @@
-buildPlugin(useContainerAgent: true, configurations: [
+buildPlugin(useContainerAgent: false, configurations: [
   [ platform: "linux", jdk: "8" ],
   [ platform: "windows", jdk: "8" ],
   [ platform: "linux", jdk: "11" ]

@@ -7,7 +7,7 @@
 // Need to use js-modules to load the stage view from the pipeline-stage-view
 // webapp dir (jsmodules). Adjuncts suck!!
 
-var jsModules = require('jenkins-js-modules');
+var jsModules = require('@jenkins-cd/js-modules');
 jsModules.addScript(
     'plugin/pipeline-stage-view/jsmodules/stageview.js',
     'jenkins-js-module:pipeline-stage-view:stageview:js'

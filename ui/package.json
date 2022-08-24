@@ -2,29 +2,31 @@
   "name": "pipeline-stage-view",
   "version": "0.0.1",
   "dependencies": {
+    "@jenkins-cd/js-modules": "^0.0.10",
     "jenkins-js-extp": "0.0.2",
-    "jenkins-js-modules": "^1.5.0",
     "jquery": "^3.5.1",
     "moment": "~2.29.4",
     "window-handle": "^1.0.0"
   },
   "scripts": {
-    "mvnbuild": "gulp bundle",
+    "mvnbuild-dev": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules --no-optimize --no-content-hash --no-scope-hoist && parcel build --public-url ./ ./src/main/js/stageview_adjunct.js --dist-dir ./target/generated-adjuncts/org/jenkinsci/pipeline --no-optimize --no-content-hash --no-scope-hoist",
+    "mvnbuild": "parcel build --public-url ./ ./src/main/js/stageview.js --dist-dir ./src/main/webapp/jsmodules && parcel build --public-url ./ ./src/main/js/stageview_adjunct.js --dist-dir ./target/generated-adjuncts/org/jenkinsci/pipeline",
+    "build": "npm run mvnbuild",
     "mvntest": "jest --ci --config=jest.config.json"
   },
   "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-util": "^3.0.7",
-    "handlebars": "^3.0.3",
-    "hbsfy": "^2.4.1",
-    "jenkins-handlebars-rt": "^1.0.1",
-    "jenkins-js-builder": "0.0.40",
-    "jest": "^25.5.4",
+    "@parcel/source-map": "^2.1.0",
+    "@parcel/transformer-less": "^2.7.0",
+    "fancy-log": "2.0.0",
+    "handlebars": "^4.7.7",
+    "jest": "^26.6.3",
     "jest-handlebars": "^1.0.1",
     "jest-junit": "^12.0.0",
     "jest-standard-reporter": "^2.0.0",
     "jsdom": "^16.5.0",
     "minifyify": "^7.2.1",
+    "parcel": "^2.7.0",
+    "parcel-transformer-hbs": "^1.0.4",
     "require-uncached": "^1.0.2"
   }
 }
