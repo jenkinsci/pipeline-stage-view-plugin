@@ -54,4 +54,8 @@ public class WorkflowStageViewAction implements Action {
             return Collections.singleton(new WorkflowStageViewAction(target));
         }
     }
+
+    public String getTimeZone() {
+        return System.getProperty("user.timezone");
+    }
 }

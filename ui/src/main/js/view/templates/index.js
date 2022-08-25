@@ -26,7 +26,7 @@ var mvc = require('../../mvc');
 var handlebars = require('handlebars');
 var jqProxy = require('../../jQuery');
 var formatters = require('../../util/formatters');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 /**
  * Templating support.
@@ -87,11 +87,18 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         return date;
     }
 
+    let momentDate
+    if (timeZone) {
+        momentDate = moment(date).tz(timeZone)
+    } else {
+        momentDate = moment(date)
+    }
+
     var aliasFormat = formatAliases[toFormat];
     if (aliasFormat) {
-        return moment(date).format(aliasFormat);
+        return momentDate.format(aliasFormat);
     } else {
-        return moment(date).format(toFormat);
+        return momentDate.format(toFormat);
     }
 });
 
