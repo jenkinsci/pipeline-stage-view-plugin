@@ -53,7 +53,8 @@ public enum StatusExt {
 
     public static StatusExt valueOf(Throwable t) {
         if (t instanceof FlowInterruptedException) {
-            return StatusExt.ABORTED;
+            FlowInterruptedException exception = (FlowInterruptedException) t;
+            return exception.isActualInterruption() ? StatusExt.ABORTED : StatusExt.FAILED;
         } else {
             return StatusExt.FAILED;
         }
