@@ -26,6 +26,7 @@ package com.cloudbees.workflow.rest.external;
 import com.cloudbees.workflow.rest.endpoints.RunAPI;
 import com.cloudbees.workflow.util.ModelUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import hudson.Util;
 import hudson.model.ParameterDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputAction;
@@ -117,7 +118,7 @@ public class PendingInputActionsExt {
         String runUrl = ModelUtil.getFullItemUrl(run.getUrl());
         inputActionExt.setInputs(getInputParams(inputId, run));
         inputActionExt.setProceedUrl(RunAPI.getInputStepSubmitUrl(run, inputId));
-        inputActionExt.setAbortUrl(runUrl + "input/" + inputId + "/abort");
+        inputActionExt.setAbortUrl(runUrl + "input/" + Util.rawEncode(inputId) + "/abort");
         inputActionExt.setRedirectApprovalUrl(runUrl + "input/");
 
         return inputActionExt;
