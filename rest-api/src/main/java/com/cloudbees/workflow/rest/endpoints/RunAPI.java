@@ -45,6 +45,10 @@ import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -85,7 +89,11 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
     }
 
     public static String getInputStepSubmitUrl(WorkflowRun run, String inputId) {
-        return getUrl(run) + "inputSubmit?inputId=" + inputId;
+        try {
+            return getUrl(run) + "inputSubmit?inputId=" + URLEncoder.encode(inputId, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError("UTF-8 is a mandated charset, yet the JVM does not provide support for it", e);
+        }
     }
 
     public static String getArtifactUrl(WorkflowRun run, Run<WorkflowJob, WorkflowRun>.Artifact artifact) {
