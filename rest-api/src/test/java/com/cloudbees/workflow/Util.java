@@ -29,7 +29,6 @@ import com.gargoylesoftware.htmlunit.Page;
 import hudson.model.Result;
 import hudson.util.RunList;
 import jenkins.model.Jenkins;
-import org.apache.commons.httpclient.NameValuePair;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Assert;
@@ -41,7 +40,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.AbstractMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
@@ -65,8 +66,8 @@ public class Util {
             conn.setRequestMethod("POST");
 
             // Set the crumb header, otherwise the POST may be rejected.
-            NameValuePair crumbHeader = getCrumbHeaderNVP(jenkins);
-            conn.setRequestProperty(crumbHeader.getName(), crumbHeader.getValue());
+            Map.Entry<String, String> crumbHeader = getCrumbHeaderNVP(jenkins);
+            conn.setRequestProperty(crumbHeader.getKey(), crumbHeader.getValue());
 
             if (contentType != null) {
                 conn.setRequestProperty("Content-Type", contentType);
@@ -156,8 +157,8 @@ public class Util {
         return jsonReadWrite.fromString(jsonResponse, to);
     }
 
-    private static NameValuePair getCrumbHeaderNVP(Jenkins jenkins) {
-        return new NameValuePair(jenkins.getCrumbIssuer().getDescriptor().getCrumbRequestField(),
+    private static Map.Entry<String, String> getCrumbHeaderNVP(Jenkins jenkins) {
+        return new AbstractMap.SimpleEntry<>(jenkins.getCrumbIssuer().getDescriptor().getCrumbRequestField(),
                         jenkins.getCrumbIssuer().getCrumb( null ));
     }
 }
