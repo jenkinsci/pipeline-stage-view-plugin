@@ -111,6 +111,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>pipeline-build-step</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
