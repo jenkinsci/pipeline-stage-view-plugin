@@ -35,7 +35,7 @@
     <version>${revision}${changelist}</version>
     <name>Pipeline: REST API Plugin</name>
     <description>Provides a REST API to access pipeline and pipeline run data</description>
-    <url>https://github.com/jenkinsci/pipeline-stage-view-plugin</url>
+    <url>https://github.com/jenkinsci/pipeline-stage-view-plugin/blob/master/rest-api/README.md</url>
     <packaging>hpi</packaging>
 
     <scm>
