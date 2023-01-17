@@ -78,7 +78,7 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         return date;
     }
 
-    var options = { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' }
+    var options = { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
     if (timeZone) {
         options.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
@@ -90,7 +90,17 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         userLocale = navigator.language
     }
 
-    return new Date().toLocaleDateString(userLocale, options)
+    var theDate = new Date(date);
+    if (toFormat == 'month') {
+        return theDate.toLocaleDateString(userLocale, {month: 'short'});
+    }
+    if (toFormat == 'dom') {
+        return theDate.toLocaleDateString(userLocale, {day: '2-digit'});
+    }
+    if (toFormat == 'time') {
+        return theDate.toLocaleTimeString(userLocale, {hour: '2-digit',minute: '2-digit', hour12: false });
+    }
+    return theDate.toLocaleDateString(userLocale, options)
 });
 
 /**
