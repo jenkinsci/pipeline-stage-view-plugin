@@ -26,7 +26,6 @@ var mvc = require('../../mvc');
 var handlebars = require('handlebars');
 var jqProxy = require('../../jQuery');
 var formatters = require('../../util/formatters');
-var moment = require('moment-timezone');
 
 /**
  * Templating support.
@@ -50,14 +49,6 @@ var templateCache = {
 // Initialise handlebars with helpers
 
 var dateFormattingOn = true;
-var formatAliases = {
-    short: 'HH:mm (MMM DD)',
-    month: 'MMM',
-    dom: 'DD',
-    time: 'HH:mm',
-    ISO_8601: 'YYYY-MM-DDTHH:mm:ss',
-    long: 'YYYY-MM-DDTHH:mm:ss'
-};
 
 function registerHBSHelper(name, helper) {
     handlebars.registerHelper(name, helper);
@@ -87,19 +78,29 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         return date;
     }
 
-    let momentDate
+    var options = { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
     if (timeZone) {
-        momentDate = moment(date).tz(timeZone)
-    } else {
-        momentDate = moment(date)
+        options.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     }
 
-    var aliasFormat = formatAliases[toFormat];
-    if (aliasFormat) {
-        return momentDate.format(aliasFormat);
+    let userLocale
+    if (navigator.languages && navigator.languages.length) {
+        userLocale = navigator.languages[0]
     } else {
-        return momentDate.format(toFormat);
+        userLocale = navigator.language
     }
+
+    var theDate = new Date(date);
+    if (toFormat == 'month') {
+        return theDate.toLocaleDateString(userLocale, {month: 'short'});
+    }
+    if (toFormat == 'dom') {
+        return theDate.toLocaleDateString(userLocale, {day: '2-digit'});
+    }
+    if (toFormat == 'time') {
+        return theDate.toLocaleTimeString(userLocale, {hour: '2-digit',minute: '2-digit', hour12: false });
+    }
+    return theDate.toLocaleDateString(userLocale, options)
 });
 
 /**
