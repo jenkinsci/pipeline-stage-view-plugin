@@ -52,7 +52,8 @@ public class ErrorExt {
         this.type = type;
     }
 
-    @SuppressFBWarnings(value="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification="Serialization can cause forbidden null")
+    @SuppressFBWarnings(value={"RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE","DCN_NULLPOINTER_EXCEPTION"},
+        justification="Serialization can cause forbidden null, GROOVY-8936 fixed only in groovy 4.x")
     public static ErrorExt create(@NonNull ErrorAction errorAction) {
         ErrorExt errorExt = new ErrorExt();
         Throwable throwable = errorAction.getError();
