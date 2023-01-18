@@ -50,7 +50,7 @@ public class ParallelStepTest {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
         String script = "node {" +
-                "  stage ('Stage 1');" +
+                "  stage ('Stage 1') {" +
                 "  parallel( " +
                 "       a: { " +
                 "           echo('echo a'); " + // ID=10
@@ -58,9 +58,9 @@ public class ParallelStepTest {
                 "       b: { " +
                 "           echo('echo b'); " + // ID=12
                 "       } " +
-                "  );" +
-                "  stage ('Stage 2');" +
-                "  echo('done..');" +
+                "  )};" +
+                "  stage ('Stage 2') {" +
+                "  echo('done..')}" +
                 "}";
 
         // System.out.println(script);
@@ -86,25 +86,25 @@ public class ParallelStepTest {
         Assert.assertEquals("Stage 1", workflowRuns[0].getStages().get(0).getName());
         Assert.assertEquals("Stage 2", workflowRuns[0].getStages().get(1).getName());
 
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", workflowRuns[0].getStages().get(0).get_links().self.href);
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/15/wfapi/describe", workflowRuns[0].getStages().get(1).get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", workflowRuns[0].getStages().get(0).get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/19/wfapi/describe", workflowRuns[0].getStages().get(1).get_links().self.href);
 
-        Page stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/5/wfapi/describe", "application/json");
+        Page stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/6/wfapi/describe", "application/json");
         jsonResponse = stageDescription.getWebResponse().getContentAsString();
 
         StageNodeExt stage1Desc = jsonReadWrite.fromString(jsonResponse, StageNodeExt.class);
         Assert.assertEquals(2, stage1Desc.getStageFlowNodes().size());
-        Assert.assertEquals("10", stage1Desc.getStageFlowNodes().get(0).getId());
+        Assert.assertEquals("11", stage1Desc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals("Print Message", stage1Desc.getStageFlowNodes().get(0).getName());
-        Assert.assertEquals("12", stage1Desc.getStageFlowNodes().get(1).getId());
+        Assert.assertEquals("13", stage1Desc.getStageFlowNodes().get(1).getId());
         Assert.assertEquals("Print Message", stage1Desc.getStageFlowNodes().get(1).getName());
 
-        stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/15/wfapi/describe", "application/json");
+        stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/19/wfapi/describe", "application/json");
         jsonResponse = stageDescription.getWebResponse().getContentAsString();
 
         StageNodeExt stage2Desc = jsonReadWrite.fromString(jsonResponse, StageNodeExt.class);
         Assert.assertEquals(1, stage2Desc.getStageFlowNodes().size());
-        Assert.assertEquals("16", stage2Desc.getStageFlowNodes().get(0).getId());
+        Assert.assertEquals("20", stage2Desc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals("Print Message", stage2Desc.getStageFlowNodes().get(0).getName());
     }
 

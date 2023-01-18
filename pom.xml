@@ -58,8 +58,7 @@
     <properties>
         <revision>2.30</revision>
         <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
-        <bom>2.289.x</bom>
-        <jenkins.version>2.361</jenkins.version>
+        <jenkins.version>2.361.4</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
         <node.version>18.7.0</node.version>
         <npm.version>8.15.0</npm.version>
@@ -99,8 +98,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-${bom}</artifactId>
-                <version>1500.ve4d05cd32975</version>
+                <artifactId>bom-2.361.x</artifactId>
+                <version>1607.va_c1576527071</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -113,6 +112,11 @@
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>1.33</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jenkins-ci.plugins</groupId>
+                <artifactId>pipeline-stage-step</artifactId>
+                <version>303.v50e56cdd58d9</version> <!-- TODO https://github.com/jenkinsci/pipeline-stage-step-plugin/pull/94 -->
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,10 +1,10 @@
 package view.run_input_required
 
 node {
-    stage 'S1'
-    
+  def outcome
+  stage('S1') {
     // Define an input step and capture the outcome from it.
-    def outcome = input id: 'Run-test-suites',
+    outcome = input id: 'Run-test-suites',
           message: 'Workflow Configuration',
           ok: 'Okay',
           parameters: [
@@ -26,12 +26,12 @@ node {
             description: 'A select box option'
           ]
     ]  
-
-    stage 'S2'
-    
+  }
+  stage('S2') {
     // Echo the outcome values so they can be checked fro in the test. This will help
     // verify that input submit/proceed worked properly.
     echo "P1: ${outcome.get('Run test suites?')}"
     echo "P2: ${outcome.get('Enter some text')}"
     echo "P4: ${outcome.get('Take your pick')}"
+  }
 }
