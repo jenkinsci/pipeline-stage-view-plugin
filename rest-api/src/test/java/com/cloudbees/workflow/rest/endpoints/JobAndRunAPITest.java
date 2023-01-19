@@ -208,11 +208,11 @@ public class JobAndRunAPITest {
                 "echo 'hello guys'\n" +
                 "stage 'one'\n" +
                 "node {\n" +
-                "    sh 'sleep 5'\n" +
+                "    echo 'one'\n" +
                 "}\n" +
                 "stage 'two'\n" +
                 "node {\n" +
-                "    sh 'sleep 5'\n" +
+                "    echo 'two'\n" +
                 "}\n" +
                 "stage 'three'\n" +
                 "echo 'we are going to crash....'\n" +
