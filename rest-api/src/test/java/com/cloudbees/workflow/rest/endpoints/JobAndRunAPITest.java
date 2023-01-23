@@ -133,14 +133,14 @@ public class JobAndRunAPITest {
 
         job.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
-                "   stage ('Build'); " +
-                "   echo ('Building'); " +
-                "   stage ('Test'); " +
-                "   echo ('Testing'); " +
-                "   stage ('Deploy'); " +
+                "   stage ('Build') { " +
+                "   echo ('Building')}; " +
+                "   stage ('Test') {" +
+                "   echo ('Testing')}; " +
+                "   stage ('Deploy') { " +
                 "     writeFile file: 'file.txt', text:'content'; " +
                 "     archive(includes: 'file.txt'); " +
-                "   echo ('Deploying'); " +
+                "   echo ('Deploying')}; " +
                 "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
@@ -167,9 +167,9 @@ public class JobAndRunAPITest {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "EmptyStageJob");
 
         job.setDefinition(new CpsFlowDefinition("" +
-                "stage 'empty'\n" +
-                "stage 'nope' \n" +
-                "echo \"I'm passing\"\n", true));
+                "stage('empty') {}\n" +
+                "stage('nope') {\n" +
+                "echo \"I'm passing\"}\n", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.SUCCESS, build.get());
@@ -206,17 +206,17 @@ public class JobAndRunAPITest {
 
         job.setDefinition(new CpsFlowDefinition("" +
                 "echo 'hello guys'\n" +
-                "stage 'one'\n" +
+                "stage('one') {\n" +
                 "node {\n" +
                 "    sh 'sleep 5'\n" +
-                "}\n" +
-                "stage 'two'\n" +
+                "}}\n" +
+                "stage('two') {\n" +
                 "node {\n" +
                 "    sh 'sleep 5'\n" +
-                "}\n" +
-                "stage 'three'\n" +
+                "}}\n" +
+                "stage('three') {\n" +
                 "echo 'we are going to crash....'\n" +
-                "throw new Exception(\"crash!!!\")\n",
+                "throw new Exception(\"crash!!!\")}\n",
                 true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
@@ -253,16 +253,16 @@ public class JobAndRunAPITest {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Failing Job");
 
         job.setDefinition(new CpsFlowDefinition("" +
-                "stage \"pass\"\n" +
+                "stage(\"pass\") {\n" +
                 "echo \"I'm passing\"\n" +
-                "\n" +
-                "stage \"catch-an-error\"\n" +
+                "}\n" +
+                "stage(\"catch-an-error\") {\n" +
                 "catchError {\n" +
                 "   error \"You won't see me?\"\n" +
                 "}\n" +
-                "\n" +
-                "stage \"and now keep passing\"\n" +
-                "echo \"still passing\"", true));
+                "}\n" +
+                "stage(\"and now keep passing\") {\n" +
+                "echo \"still passing\"}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
@@ -290,7 +290,7 @@ public class JobAndRunAPITest {
 
         Assert.assertEquals(StatusExt.SUCCESS, stages.get(0).getStatus());
         Assert.assertEquals(StatusExt.SUCCESS, stages.get(1).getStatus());
-        Assert.assertEquals(StatusExt.FAILED, stages.get(2).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, stages.get(2).getStatus());
 
         StageNodeExt finalStage = stages.get(2);
         AtomFlowNodeExt finalNode = finalStage.getStageFlowNodes().get(finalStage.getStageFlowNodes().size()-1);
@@ -316,7 +316,7 @@ public class JobAndRunAPITest {
         String jsonResponse = runsPage.getWebResponse().getContentAsString();
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         RunExt runData = jsonReadWrite.fromString(jsonResponse, RunExt.class);
-        assertRunInfoOkay(job, runData, 5, 7, 9);
+        assertRunInfoOkay(job, runData, 6, 11, 16);
     }
 
     private void assertBasicJobInfoOkay(WorkflowJob job, JenkinsRule.WebClient webClient) throws IOException, SAXException {
@@ -349,7 +349,7 @@ public class JobAndRunAPITest {
         RunExt runExt = workflowRuns[0];
 
         assertRunPassesSanity(job.getLastBuild(), runExt, false);
-        assertRunInfoOkay(job, runExt, 5, 7, 9);
+        assertRunInfoOkay(job, runExt, 6, 11, 16);
     }
 
     private void assertRunPassesSanity(WorkflowRun myRun, RunExt runExt, boolean testStageChildren) {
@@ -382,7 +382,7 @@ public class JobAndRunAPITest {
         JSONReadWrite jsonReadWrite = new JSONReadWrite();
         RunExt workflowRun = jsonReadWrite.fromString(jsonResponse, RunExt.class);
 
-        assertRunInfoOkay(job, workflowRun, 5, 7, 9);
+        assertRunInfoOkay(job, workflowRun, 6, 11, 16);
     }
 
     private void assertStageInfoOkay(StageNodeExt stageNodeExt, boolean mustHaveChildNodes) {
@@ -626,12 +626,12 @@ public class JobAndRunAPITest {
         // Verify that caught errors do not cause a stage to be flagged as erroring, as complex as a the game of thrones
         WorkflowJob oneStageCatch = jenkinsRule.jenkins.createProject(WorkflowJob.class, "One_Stage_Catch");
         oneStageCatch.setDefinition(new CpsFlowDefinition("" + // Tyrion in King's Landing
-                "stage 'Game of Thrones'\n" +
+                "stage('Game of Thrones') {\n" +
                 "try {\n" +
                 "    error('Trusted Grand Maester Pycelle')\n" +
                 "} catch (Exception e) {\n" +
                 "    echo 'It was a trap - Tyriowned!'\n" +
-                "}",
+                "}}",
                 true));
         QueueTaskFuture<WorkflowRun> build = oneStageCatch.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
@@ -653,14 +653,14 @@ public class JobAndRunAPITest {
         // Multiple stages where first error is caught, there's an ErrorAction on first stage but it can be safely ignored
         WorkflowJob multiStageCatch = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Multi_Stage_catch");
         multiStageCatch.setDefinition(new CpsFlowDefinition("" + //The One True King, Stannis
-                "stage 'Battle of the Blackwater'\n" +
+                "stage('Battle of the Blackwater') {\n" +
                 "try {\n" +
                 "    error('Failed to watch out for Tywin and his army')\n" +
                 "} catch (Exception e) {\n" +
                 "    echo 'Ran away to Dragonstone'\n" +
-                "}\n" +
-                "stage 'Flee to the North'\n" +
-                "echo 'Helped defeat the Wildlings'",
+                "}}\n" +
+                "stage('Flee to the North') {\n" +
+                "echo 'Helped defeat the Wildlings'}",
                 true));
         QueueTaskFuture<WorkflowRun> build = multiStageCatch.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
@@ -684,13 +684,13 @@ public class JobAndRunAPITest {
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "One_Stage_Catch");
 
         job.setDefinition(new CpsFlowDefinition("" +
-                "stage 'Catch and fail'\n" +
+                "stage('Catch and fail') {\n" +
                 "try {\n" +
                 "    error('All the things are broken')\n" +
                 "} catch (Exception ex) {\n" +
                 "    echo 'Stage failed'\n" +
                 "    currentBuild.result = 'FAILURE'\n" +
-                "}",
+                "}}",
                 true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
@@ -708,6 +708,6 @@ public class JobAndRunAPITest {
         assertRunPassesSanity(build.get(), run, true);
         Assert.assertEquals(StatusExt.FAILED, run.getStatus());
         Assert.assertEquals(1, run.getStages().size());
-        Assert.assertEquals(StatusExt.FAILED, run.getStages().get(0).getStatus());
+        Assert.assertEquals(StatusExt.SUCCESS, run.getStages().get(0).getStatus());
     }
 }

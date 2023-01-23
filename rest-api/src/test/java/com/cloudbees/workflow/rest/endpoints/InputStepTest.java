@@ -44,11 +44,16 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.InputStream;
 import java.net.URLEncoder;
+import org.junit.ClassRule;
+import org.jvnet.hudson.test.BuildWatcher;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
 public class InputStepTest {
+
+    @ClassRule
+    public static BuildWatcher buildWatcher = new BuildWatcher();
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
@@ -59,11 +64,11 @@ public class InputStepTest {
 
         job.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
-                "   stage ('Build'); " +
+                "   stage ('Build') { " +
                 "   echo ('step1'); " +
                 "   sleep (1); " +
                 "   input(message: 'Is the build okay?') " +
-                "   error ('break'); " +
+                "   error ('break')} " +
                 "}", true));
 
         // schedule the workflow and then wait for it to enter
@@ -160,8 +165,6 @@ public class InputStepTest {
     }
 
     // TODO: Add tests that interact more with the UI.
-    // We can do this once the Jenkins Core test-harness dep is new enough to bring in the new/unforked HtmlUnit.
-    // The forked version of HtmlUnit in older Jenkins can't test this coz it's using jQuery etc.
     // We have some tests in JavaScript code.
 
 }

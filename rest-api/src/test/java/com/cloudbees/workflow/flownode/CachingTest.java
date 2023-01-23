@@ -49,7 +49,6 @@ public class CachingTest {
         // Create one job
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "BlinkinJob");
         job.setDefinition(new CpsFlowDefinition("" +
-                "stage 'first' \n" +
                 "echo 'done' ",
                 true));
         WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));
@@ -60,7 +59,6 @@ public class CachingTest {
         // Control: this one won't be touched
         WorkflowJob job2 = jenkinsRule.jenkins.createProject(WorkflowJob.class, "StableJob");
         job2.setDefinition(new CpsFlowDefinition("" +
-                "stage 'second' \n" +
                 "echo 'done' ",
                 true));
         WorkflowRun build2 = jenkinsRule.assertBuildStatusSuccess(job2.scheduleBuild2(0));
@@ -81,7 +79,6 @@ public class CachingTest {
         // Create one job
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "BlinkinJob");
         job.setDefinition(new CpsFlowDefinition("" +
-                "stage 'first' \n" +
                 "echo 'done'",
                 true));
         WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));
@@ -93,7 +90,6 @@ public class CachingTest {
         // Control: this one won't be touched
         WorkflowJob job2 = jenkinsRule.jenkins.createProject(WorkflowJob.class, "StableJob");
         job2.setDefinition(new CpsFlowDefinition("" +
-                "stage 'second' \n" +
                 "echo 'done'",
                 true));
         WorkflowRun build2 = jenkinsRule.assertBuildStatusSuccess(job2.scheduleBuild2(0));
@@ -116,7 +112,6 @@ public class CachingTest {
         // Create one job
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "BlinkinJob");
         job.setDefinition(new CpsFlowDefinition("" +
-                "stage 'first' \n" +
                 "echo 'done'",
                 true));
         WorkflowRun build = jenkinsRule.assertBuildStatusSuccess(job.scheduleBuild2(0));

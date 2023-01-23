@@ -66,12 +66,12 @@ public class FlowNodeAPITest {
 
         job.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
-                "   stage ('Build'); " +
-                "   echo ('Building'); " +
-                "   stage ('Test'); " +
-                "   echo ('Testing'); " +
-                "   stage ('Deploy'); " +
-                "   echo ('Deploying'); " +
+                "   stage ('Build') { " +
+                "   echo ('Building')}; " +
+                "   stage ('Test') { " +
+                "   echo ('Testing')}; " +
+                "   stage ('Deploy') { " +
+                "   echo ('Deploying')}; " +
                 "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
@@ -100,25 +100,25 @@ public class FlowNodeAPITest {
         String jsonResponse;
         List<StageNodeExt> stages = workflowRuns[0].getStages();
         Assert.assertEquals(3, stages.size());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", stages.get(0).get_links().self.href);
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/7/wfapi/describe", stages.get(1).get_links().self.href);
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/9/wfapi/describe", stages.get(2).get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stages.get(0).get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/11/wfapi/describe", stages.get(1).get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/16/wfapi/describe", stages.get(2).get_links().self.href);
 
-        Page stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/5/wfapi/describe", "application/json");
+        Page stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/6/wfapi/describe", "application/json");
         jsonResponse = stageDescription.getWebResponse().getContentAsString();
 
 //        System.out.println(jsonResponse);
         StageNodeExt stageDesc = jsonReadWrite.fromString(jsonResponse, StageNodeExt.class);
 
-        Assert.assertEquals("5", stageDesc.getId());
+        Assert.assertEquals("6", stageDesc.getId());
         Assert.assertEquals("Build", stageDesc.getName());
         Assert.assertEquals(StatusExt.SUCCESS, stageDesc.getStatus());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", stageDesc.get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.get_links().self.href);
         Assert.assertEquals(1, stageDesc.getStageFlowNodes().size());
-        Assert.assertEquals("6", stageDesc.getStageFlowNodes().get(0).getId());
+        Assert.assertEquals("7", stageDesc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals("Print Message", stageDesc.getStageFlowNodes().get(0).getName());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
-        Assert.assertEquals("[5]", stageDesc.getStageFlowNodes().get(0).getParentNodes().toString());
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/7/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
+        Assert.assertEquals("[6]", stageDesc.getStageFlowNodes().get(0).getParentNodes().toString());
         Assert.assertEquals(StatusExt.SUCCESS, stageDesc.getStageFlowNodes().get(0).getStatus());
 
         for (StageNodeExt st : stages) {
@@ -136,16 +136,16 @@ public class FlowNodeAPITest {
 
         FlowNodeExt.FlowNodeLinks links = stageDesc.getStageFlowNodes().get(0).get_links();
         String logUrl = links.getLog().href;
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/log", logUrl);
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/log", links.getConsole().href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/7/wfapi/log", logUrl);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/7/log", links.getConsole().href);
 
         Page nodeLog = webClient.goTo(Util.removeRootUrl(logUrl), "application/json");
         jsonResponse = nodeLog.getWebResponse().getContentAsString();
         FlowNodeLogExt logExt = jsonReadWrite.fromString(jsonResponse, FlowNodeLogExt.class);
 
-        Assert.assertEquals("6", logExt.getNodeId());
+        Assert.assertEquals("7", logExt.getNodeId());
         Assert.assertEquals(StatusExt.SUCCESS, logExt.getNodeStatus());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/log", logExt.getConsoleUrl());
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/7/log", logExt.getConsoleUrl());
         Assert.assertNotNull(logExt.getText());
         Assert.assertThat(logExt.getText(), containsString("Building"));
     }
@@ -157,12 +157,12 @@ public class FlowNodeAPITest {
 
         job.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
-                "   stage ('Build'); " +
-                "   error ('my specific failure message'); " +
-                "   stage ('Test'); " +
-                "   error ('echo Testing'); " +
-                "   stage ('Deploy'); " +
-                "   error ('echo Deploying'); " +
+                "   stage ('Build') { " +
+                "   error ('my specific failure message')}; " +
+                "   stage ('Test') { " +
+                "   error ('echo Testing')}; " +
+                "   stage ('Deploy') { " +
+                "   error ('echo Deploying')}; " +
                 "}", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
@@ -184,23 +184,23 @@ public class FlowNodeAPITest {
 
         List<StageNodeExt> stages = workflowRuns[0].getStages();
         Assert.assertEquals(1, stages.size());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", stages.get(0).get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stages.get(0).get_links().self.href);
 
-        Page stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/5/wfapi/describe", "application/json");
+        Page stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/6/wfapi/describe", "application/json");
         jsonResponse = stageDescription.getWebResponse().getContentAsString();
 
 //        System.out.println(jsonResponse);
         StageNodeExt stageDesc = jsonReadWrite.fromString(jsonResponse, StageNodeExt.class);
 
-        Assert.assertEquals("5", stageDesc.getId());
+        Assert.assertEquals("6", stageDesc.getId());
         Assert.assertEquals("Build", stageDesc.getName());
         Assert.assertEquals(StatusExt.FAILED, stageDesc.getStatus());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", stageDesc.get_links().self.href);
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.get_links().self.href);
         Assert.assertEquals(1, stageDesc.getStageFlowNodes().size());
-        Assert.assertEquals("6", stageDesc.getStageFlowNodes().get(0).getId());
+        Assert.assertEquals("7", stageDesc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals(jenkinsRule.jenkins.getDescriptorByType(ErrorStep.DescriptorImpl.class).getDisplayName(), stageDesc.getStageFlowNodes().get(0).getName());
-        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
-        Assert.assertEquals("[5]", stageDesc.getStageFlowNodes().get(0).getParentNodes().toString());
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/7/wfapi/describe", stageDesc.getStageFlowNodes().get(0).get_links().self.href);
+        Assert.assertEquals("[6]", stageDesc.getStageFlowNodes().get(0).getParentNodes().toString());
 
         Assert.assertEquals(StatusExt.FAILED, stageDesc.getStageFlowNodes().get(0).getStatus()); // If flow continued, we succeeded
         Assert.assertEquals("my specific failure message", stageDesc.getStageFlowNodes().get(0).getError().getMessage());
