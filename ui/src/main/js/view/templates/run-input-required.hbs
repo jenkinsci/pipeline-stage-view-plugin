@@ -22,7 +22,7 @@
             {{#ifCond type '===' 'TextParameterDefinition'}}
                 <div class="form-group">
                     <label for="{{id}}-input-{{@index}}">{{name}}</label>
-                    <input name="{{name}}" type="text" class="form-control" id="{{id}}-input-{{@index}}" value="{{definition.defaultVal}}">
+                    <textarea name="{{name}}" type="text" class="form-control" id="{{id}}-input-{{@index}}">{{definition.defaultVal}}</textarea>
                     {{#if description}}<p class="help-block">{{description}}</p>{{/if}}
                 </div>
             {{/ifCond}}
