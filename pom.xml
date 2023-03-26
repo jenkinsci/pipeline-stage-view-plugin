@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.54</version>
+        <version>4.57</version>
         <relativePath />
     </parent>
 
@@ -56,7 +56,7 @@
     </scm>
 
     <properties>
-        <revision>2.31</revision>
+        <revision>2.32</revision>
         <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
         <bom>2.361.x</bom>
         <jenkins.version>2.361.4</jenkins.version>
