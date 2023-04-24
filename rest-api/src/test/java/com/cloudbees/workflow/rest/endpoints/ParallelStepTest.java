@@ -109,7 +109,7 @@ public class ParallelStepTest {
     }
 
     @Test
-    public void test_stages_order() throws Exception {
+    public void test_stages_order_parallel_completed() throws Exception {
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
 
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Not A Sequential Job");
@@ -147,11 +147,6 @@ public class ParallelStepTest {
             runExt = getRunExt(jobRunsUrl);
         }
 
-        Assert.assertEquals("SerialStartStage", runExt.getStages().get(0).getName());
-        Assert.assertEquals("ParallelStage1", runExt.getStages().get(1).getName());
-        Assert.assertEquals("ParallelStage2", runExt.getStages().get(2).getName());
-        Assert.assertEquals("ParallelStage3", runExt.getStages().get(3).getName());
-
         jenkinsRule.assertBuildStatusSuccess(build);
 
         // Test when completed
@@ -165,6 +160,59 @@ public class ParallelStepTest {
         Assert.assertEquals("SerialEndStage", runExt.getStages().get(4).getName());
     }
 
+    @Test
+    public void test_stages_order_nested_sequential_completed() throws Exception {
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Not A Sequential Job");
+        String jobRunsUrl = job.getUrl() + "wfapi/runs/";
+
+        String script = "def branches = [" +
+            "    'branch1': branch(1)," +
+            "    'branch2': branch(2)" +
+            "];" +
+            "def branch(int index) {" +
+            "    return {" +
+            "        def delta = (1-((env.BUILD_NUMBER.toInteger()+index)%2))*2;" + // if build number is even the stages of one branch sleep less 2s less, if build number is odd the stages of the other branch sleep 2s less
+            "        stage('branch' + index + '-stage1') {" +
+            "            sleep(5+delta);" +
+            "        };" +
+            "        stage('branch' + index + '-stage2') {" +
+            "            sleep(5+delta);" +
+            "        };" +
+            "    };" +
+            "};" +
+            "node(){" +
+            "    parallel branches;" +
+            "};";
+
+        job.setDefinition(new CpsFlowDefinition(script, true));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatusSuccess(build);
+
+        // Test when completed
+        RunExt runExt1 = getRunExt(jobRunsUrl);
+        Assert.assertEquals(StatusExt.SUCCESS, runExt1.getStatus());
+        Assert.assertEquals(4, runExt1.getStages().size());
+        Assert.assertEquals("branch1-stage1", runExt1.getStages().get(0).getName());
+        Assert.assertEquals("branch1-stage2", runExt1.getStages().get(1).getName());
+        Assert.assertEquals("branch2-stage1", runExt1.getStages().get(2).getName());
+        Assert.assertEquals("branch2-stage2", runExt1.getStages().get(3).getName());
+
+        build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatusSuccess(build);
+        RunExt[] runExts = getRunExts(jobRunsUrl);
+        Assert.assertEquals(2, runExts.length);
+        runExt1 = runExts[0];
+        RunExt runExt2 = runExts[1];
+        Assert.assertEquals(StatusExt.SUCCESS, runExts[1].getStatus());
+        Assert.assertEquals(4, runExt1.getStages().size());
+        Assert.assertEquals(runExt1.getStages().size(), runExt2.getStages().size());
+        Assert.assertEquals(runExt1.getStages().get(0).getName(), runExt2.getStages().get(0).getName());
+        Assert.assertEquals(runExt1.getStages().get(1).getName(), runExt2.getStages().get(1).getName());
+        Assert.assertEquals(runExt1.getStages().get(2).getName(), runExt2.getStages().get(2).getName());
+        Assert.assertEquals(runExt1.getStages().get(3).getName(), runExt2.getStages().get(3).getName());
+    }
+
     private RunExt getRunExt(String jobRunsUrl) throws Exception {
         JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
         String jsonResponse = webClient.goTo(jobRunsUrl, "application/json").getWebResponse().getContentAsString();
@@ -172,5 +220,11 @@ public class ParallelStepTest {
 
         Assert.assertEquals(1, runExts.length);
         return runExts[0];
+    }
+
+    private RunExt[] getRunExts(String jobRunsUrl) throws Exception {
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+        String jsonResponse = webClient.goTo(jobRunsUrl, "application/json").getWebResponse().getContentAsString();
+        return new JSONReadWrite().fromString(jsonResponse, RunExt[].class);
     }
 }
