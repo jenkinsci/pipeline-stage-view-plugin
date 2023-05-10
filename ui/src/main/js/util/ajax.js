@@ -39,10 +39,12 @@ exports.execAsyncGET = function (resPathTokens, success, params) {
 };
 
 exports.jenkinsAjaxGET = function (path, success) {
-    new Ajax.Request(path, {
-        method : 'get',
-        cache: false, // Force caching off for IE (and anything else)
-        onSuccess: success
+    fetch(path, {
+        cache: 'no-cache', // Force caching off for IE (and anything else)
+    }).then((rsp) => {
+        if (rsp.ok) {
+            success();
+        }
     });
 };
 
@@ -52,30 +54,46 @@ exports.jenkinsAjaxPOST = function () {
         var data = arguments[1];
         var success = arguments[2];
         if (typeof data !== 'string') {
-            data = Object.toJSON(data);
+            // TODO simplify when Prototype.js is removed
+            data = Object.toJSON ? Object.toJSON(data) : JSON.stringify(data);
         }
-        new Ajax.Request(path, {
-            contentType: "application/json",
-            encoding: "UTF-8",
-            postBody: data,
-            onSuccess: success
+        fetch(path, {
+            method: 'post',
+            headers: crumb.wrap({
+                'Content-Type': 'application/json; charset=UTF-8'
+            }),
+            body: data,
+        }).then((rsp) => {
+            if (rsp.ok) {
+                success();
+            }
         });
     } else {
         var success = arguments[1];
-        new Ajax.Request(path, {
-            contentType: "application/json",
-            method : 'post',
-            onSuccess: success
+        fetch(path, {
+            method: 'post',
+            headers: crumb.wrap({
+                'Content-Type': 'application/json'
+            }),
+        }).then((rsp) => {
+            if (rsp.ok) {
+                success();
+            }
         });
     }
 };
 
 
 exports.jenkinsAjaxPOSTURLEncoded = function (path, parameters, success) {
-    new Ajax.Request(path, {
-        method : 'post',
-        contentType: "application/x-www-form-urlencoded",
-        parameters: parameters,
-        onSuccess: success
+    fetch(path, {
+        method: 'post',
+        headers: crumb.wrap({
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }),
+        body: new URLSearchParams(parameters),
+    }).then((rsp) => {
+        if (rsp.ok) {
+            success();
+        }
     });
 }
