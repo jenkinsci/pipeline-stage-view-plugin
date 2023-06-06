@@ -31,7 +31,7 @@ import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.rest.external.StageNodeExt;
 import com.cloudbees.workflow.rest.external.StatusExt;
 import com.cloudbees.workflow.util.JSONReadWrite;
-import com.gargoylesoftware.htmlunit.Page;
+import org.htmlunit.Page;
 
 import hudson.model.Result;
 import hudson.model.queue.QueueTaskFuture;
