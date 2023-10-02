@@ -22,7 +22,7 @@
  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  ~ THE SOFTWARE.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -58,8 +58,8 @@
     <properties>
         <revision>2.34</revision>
         <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
-        <bom>2.401.x</bom>
-        <jenkins.version>2.401.3</jenkins.version>
+        <bom>2.361.x</bom>
+        <jenkins.version>2.361.4</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
         <node.version>18.7.0</node.version>
         <npm.version>8.15.0</npm.version>
@@ -100,7 +100,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${bom}</artifactId>
-                <version>2329.v078520e55c19</version>
+                <version>2102.v854b_fec19c92</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
