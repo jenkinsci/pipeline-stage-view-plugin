@@ -58,8 +58,8 @@
     <properties>
         <revision>2.34</revision>
         <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
-        <bom>2.361.x</bom>
-        <jenkins.version>2.361.4</jenkins.version>
+        <bom>2.401.x</bom>
+        <jenkins.version>2.401.3</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
         <node.version>18.7.0</node.version>
         <npm.version>8.15.0</npm.version>
@@ -100,7 +100,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${bom}</artifactId>
-                <version>2102.v854b_fec19c92</version>
+                <version>2329.v078520e55c19</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
