@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.73</version>
+        <version>4.74</version>
         <relativePath />
     </parent>
 
@@ -63,7 +63,7 @@
         <changelist>-SNAPSHOT</changelist>
         <node.version>18.7.0</node.version>
         <npm.version>8.15.0</npm.version>
-        <frontend-version>1.13.4</frontend-version>
+        <frontend-version>1.14.0</frontend-version>
     </properties>
 
     <repositories>
