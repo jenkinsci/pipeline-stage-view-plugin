@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.57</version>
+        <version>4.74</version>
         <relativePath />
     </parent>
 
@@ -56,14 +56,14 @@
     </scm>
 
     <properties>
-        <revision>2.33</revision>
+        <revision>2.34</revision>
         <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
         <bom>2.361.x</bom>
         <jenkins.version>2.361.4</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
         <node.version>18.7.0</node.version>
         <npm.version>8.15.0</npm.version>
-        <frontend-version>1.12.1</frontend-version>
+        <frontend-version>1.14.0</frontend-version>
     </properties>
 
     <repositories>
@@ -100,14 +100,14 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${bom}</artifactId>
-                <version>1945.v13a_1306588ff</version>
+                <version>2102.v854b_fec19c92</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
-                <version>20230227</version>
+                <version>20230618</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>

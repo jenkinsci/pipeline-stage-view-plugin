@@ -9,7 +9,8 @@
             Optional fragment caption, passed through to the controller.
         </st:attribute>
     </st:documentation>
-    <script>var timeZone = '${it.timeZone}';</script>
+    <div id='timeparam' data-time='${it.timeZone}'/>
+    <st:adjunct includes="com.cloudbees.workflow.controllerScript"/>
     <div class="cbwf-stage-view">
         <div cbwf-controller="${name}" objectUrl="${rootURL}/${it.target.url}" fragCaption="${fragCaption}" />
         <st:adjunct includes="org.jenkinsci.pipeline.stageview_adjunct"/>
