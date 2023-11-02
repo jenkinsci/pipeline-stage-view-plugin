@@ -30,6 +30,8 @@ import org.jenkinsci.plugins.workflow.actions.LabelAction;
 import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.graph.AtomNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.graph.StepNode;
+import org.jenkinsci.plugins.workflow.support.steps.StageStep;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +60,17 @@ public class StageNodeExt extends FlowNodeExt {
     }
 
     public static boolean isStageNode(FlowNode node) {
-        return (node.getAction(LabelAction.class) != null && node.getAction(ThreadNameAction.class) == null);
+        if (!(node.getAction(LabelAction.class) != null && node.getAction(ThreadNameAction.class) == null)) {
+            return false;
+        }
+        if (!(node instanceof StepNode)) {
+            return true;
+        }
+        StepNode stepNode = (StepNode) node;
+        if (stepNode.getDescriptor() == null) {
+            return false;
+        }
+        return (stepNode.getDescriptor() instanceof StageStep.DescriptorImpl);
     }
 
     /** Return full list of child node IDs */

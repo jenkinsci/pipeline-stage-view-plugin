@@ -208,7 +208,9 @@ public class FlowNodeAPITest {
         validateChildNodeDescribeAPIs(stageDesc, webClient);
     }
 
-    /** Exercise the describe APIs for a stage node */
+    /**
+     * Exercise the describe APIs for a stage node
+     */
     private void validateChildNodeDescribeAPIs(StageNodeExt stage, JenkinsRule.WebClient client) throws IOException, SAXException {
         JSONReadWrite jrw = new JSONReadWrite();
         if (stage.getStageFlowNodes() == null) {
@@ -238,5 +240,68 @@ public class FlowNodeAPITest {
             }
         }
 
+    }
+
+    // Fix Jenkins-69420
+    @Test
+    public void test_build_step() throws Exception {
+        WorkflowJob taskJob = jenkinsRule.jenkins.createProject(WorkflowJob.class, "task Job");
+        taskJob.setDefinition(new CpsFlowDefinition("" +
+                "node {" +
+                "  stage('Test'); " +
+                "  echo ('Testing');" +
+                "}", true));
+        WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
+        String jobRunsUrl = job.getUrl() + "wfapi/runs/";
+
+        job.setDefinition(new CpsFlowDefinition("" +
+                "node {" +
+                "   stage ('Deploy'); " +
+                "   build ('task Job'); " +
+                "}", true));
+
+        QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
+        jenkinsRule.assertBuildStatusSuccess(build);
+
+        JenkinsRule.WebClient webClient = jenkinsRule.createWebClient();
+
+        Page runsPage = webClient.goTo(jobRunsUrl, "application/json");
+        String jsonResponse = runsPage.getWebResponse().getContentAsString();
+
+        JSONReadWrite jsonReadWrite = new JSONReadWrite();
+        RunExt[] workflowRuns = jsonReadWrite.fromString(jsonResponse, RunExt[].class);
+
+        Assert.assertEquals(1, workflowRuns.length);
+        Assert.assertEquals("#1", workflowRuns[0].getName());
+        Assert.assertEquals(StatusExt.SUCCESS, workflowRuns[0].getStatus());
+
+        // Test the endpoints
+        assert_step_describe_ok(webClient, jsonReadWrite, workflowRuns);
+    }
+
+    private void assert_step_describe_ok(JenkinsRule.WebClient webClient, JSONReadWrite jsonReadWrite, RunExt[] workflowRuns) throws IOException, SAXException {
+        String jsonResponse;
+        List<StageNodeExt> stages = workflowRuns[0].getStages();
+        Assert.assertEquals(1, stages.size());
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/5/wfapi/describe", stages.get(0).get_links().self.href);
+
+        Page stageDescription = webClient.goTo("job/Noddy%20Job/1/execution/node/6/wfapi/describe", "application/json");
+        jsonResponse = stageDescription.getWebResponse().getContentAsString();
+
+        // Fix Jenkins-69420
+        Assert.assertNotEquals(null, jsonResponse);
+        AtomFlowNodeExt stageDesc = jsonReadWrite.fromString(jsonResponse, AtomFlowNodeExt.class);
+
+
+        Assert.assertEquals("6", stageDesc.getId());
+        Assert.assertEquals(StatusExt.SUCCESS, stageDesc.getStatus());
+        Assert.assertEquals("5", stageDesc.getParentNodes().get(0));
+        Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.get_links().self.href);
+        Assert.assertEquals("Building task Job", stageDesc.getName());
+
+
+        for (StageNodeExt st : stages) {
+            validateChildNodeDescribeAPIs(st, webClient);
+        }
     }
 }
