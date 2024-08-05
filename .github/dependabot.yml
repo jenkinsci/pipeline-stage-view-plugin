@@ -9,6 +9,6 @@ updates:
     schedule:
       interval: "monthly"
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/ui"
     schedule:
       interval: "monthly"
