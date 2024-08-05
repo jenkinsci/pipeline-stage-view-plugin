@@ -63,7 +63,6 @@
         <changelist>-SNAPSHOT</changelist>
         <node.version>18.7.0</node.version>
         <npm.version>8.15.0</npm.version>
-        <frontend-version>1.14.2</frontend-version>
     </properties>
 
     <repositories>
