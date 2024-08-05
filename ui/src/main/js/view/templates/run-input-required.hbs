@@ -9,28 +9,28 @@
                     <label>
                         <input name="{{name}}" type="checkbox" {{#if definition.defaultVal}}checked="checked"{{/if}}>{{name}}
                     </label>
-                    {{#if description}}<p class="help-block">{{{description}}}</p>{{/if}}
+                    {{#if formattedDescription}}<p class="help-block">{{formattedDescription}}</p>{{/if}}
                 </div>
             {{/ifCond}}
             {{#ifCond type '===' 'StringParameterDefinition'}}
                 <div class="form-group">
                     <label for="{{id}}-input-{{@index}}">{{name}}</label>
                     <input name="{{name}}" type="text" class="form-control" id="{{id}}-input-{{@index}}" value="{{definition.defaultVal}}">
-                    {{#if description}}<p class="help-block">{{{description}}}</p>{{/if}}
+                    {{#if formattedDescription}}<p class="help-block">{{formattedDescription}}</p>{{/if}}
                 </div>
             {{/ifCond}}
             {{#ifCond type '===' 'TextParameterDefinition'}}
                 <div class="form-group">
                     <label for="{{id}}-input-{{@index}}">{{name}}</label>
                     <textarea name="{{name}}" type="text" class="form-control" id="{{id}}-input-{{@index}}">{{definition.defaultVal}}</textarea>
-                    {{#if description}}<p class="help-block">{{{description}}}</p>{{/if}}
+                    {{#if formattedDescription}}<p class="help-block">{{formattedDescription}}</p>{{/if}}
                 </div>
             {{/ifCond}}
             {{#ifCond type '===' 'PasswordParameterDefinition'}}
                 <div class="form-group">
                     <label for="{{id}}-input-{{@index}}">{{name}}</label>
                     <input name="{{name}}" type="password" class="form-control" id="{{id}}-input-{{@index}}" value="{{definition.defaultVal}}" placeholder="Password">
-                    {{#if description}}<p class="help-block">{{{description}}}</p>{{/if}}
+                    {{#if formattedDescription}}<p class="help-block">{{formattedDescription}}</p>{{/if}}
                 </div>
             {{/ifCond}}
             {{#ifCond type '===' 'ChoiceParameterDefinition'}}
@@ -46,7 +46,7 @@
                             {{/ifCond}}
                         {{/each}}
                     </select>
-                    {{#if description}}<p class="help-block">{{{description}}}</p>{{/if}}
+                    {{#if formattedDescription}}<p class="help-block">{{formattedDescription}}</p>{{/if}}
                 </div>
             {{/ifCond}}
             {{/each}}
