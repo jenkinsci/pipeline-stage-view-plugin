@@ -23,6 +23,8 @@
  */
 package com.cloudbees.workflow.rest.hal;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 
 /**
  * Abstract HAL <a href="https://tools.ietf.org/html/draft-kelly-json-hal-06#section-4.1.1">_links</a>
@@ -38,6 +40,7 @@ public abstract class Links {
     /**
      * <a href="https://tools.ietf.org/html/draft-kelly-json-hal-06#section-8.1">self</a> HAL link.
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "Only used internally anyway.")
     public Link self;
 
     public Links initSelf(String rel) {
