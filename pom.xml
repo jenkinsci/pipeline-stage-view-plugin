@@ -59,7 +59,7 @@
         <revision>2.35</revision>
         <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
         <bom>2.361.x</bom>
-        <jenkins.version>2.361.4</jenkins.version>
+        <jenkins.version>2.462.1</jenkins.version>
         <changelist>-SNAPSHOT</changelist>
         <node.version>18.7.0</node.version>
         <npm.version>8.15.0</npm.version>
