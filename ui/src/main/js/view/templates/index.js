@@ -100,7 +100,6 @@ registerHBSHelper('formatDate', function (date, toFormat) {
     if (toFormat == 'time') {
         return theDate.toLocaleTimeString(userLocale, {hour: '2-digit',minute: '2-digit', hour12: false });
     }
-    // New case for 'year'
     if (toFormat == 'year') {
         return theDate.toLocaleDateString(userLocale, {year: 'numeric'});
     }
