@@ -102,12 +102,17 @@ public class JobExt {
     }
 
     private static int countRuns(WorkflowJob job) {
+        int maxRunsPerJob = Integer.getInteger(MAX_RUNS_PER_JOB_PROPERTY_NAME, MAX_RUNS_PER_JOB_DEFAULT);
+
         int count = 0;
 
-        // RunList.size() is deprecated, so iterating to count them.
+        // RunList.size() is deprecated *for a good reason*, so iterating to count them.
         RunList<WorkflowRun> runs = job.getBuilds();
         for (WorkflowRun run : runs) {
             count++;
+            if (count >= maxRunsPerJob) {
+                break;
+            }
         }
 
         return count;
