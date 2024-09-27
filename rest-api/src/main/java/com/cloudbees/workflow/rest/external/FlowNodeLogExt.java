@@ -132,13 +132,14 @@ public class FlowNodeLogExt {
 
                 if (logLen > 0) {
                     try {
+                        StringWriter write = new StringWriter();
+                        long endLog;
                         if (text) {
-                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            logText.writeRawLogTo(logLen - logExt.getLength(), byteArrayOutputStream);
-                            logExt.setText(byteArrayOutputStream.toString(StandardCharsets.UTF_8));
+                            endLog = logText.writeLogTo(logLen - logExt.getLength(), write);
                         } else {
-                            StringWriter write = new StringWriter();
-                            logText.writeHtmlTo(logLen - logExt.getLength(), write);
+                            endLog = logText.writeHtmlTo(logLen - logExt.getLength(), write);
+                        }
+                        if(endLog == logExt.getLength() ){
                             logExt.setText(write.toString());
                         }
 
