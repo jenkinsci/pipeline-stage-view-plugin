@@ -30,8 +30,10 @@ import hudson.console.AnnotatedLargeText;
 import org.jenkinsci.plugins.workflow.actions.LogAction;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,7 +42,7 @@ import java.util.logging.Logger;
  */
 public class FlowNodeLogExt {
 
-    private static long MAX_RETURN_CHARS = Integer.getInteger(FlowNodeLogExt.class.getName()+".maxReturnChars", 10 * 1024);
+    private static long MAX_RETURN_CHARS = Integer.getInteger(FlowNodeLogExt.class.getName() + ".maxReturnChars", 10 * 1024);
 
     private static final Logger LOGGER = Logger.getLogger(FlowNodeLogExt.class.getName());
 
@@ -49,6 +51,7 @@ public class FlowNodeLogExt {
     private long length = 0L;
     private boolean hasMore = false;
     private String text;
+
     private String consoleUrl; // Not a rest endpoint so not including in _links
 
     public String getNodeId() {
@@ -101,7 +104,16 @@ public class FlowNodeLogExt {
     }
 
     @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED", justification = "We're not writing to a file")
-    public static FlowNodeLogExt create(FlowNode node) {
+    public static FlowNodeLogExt createText(FlowNode node) {
+        return create(true, node);
+    }
+
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED", justification = "We're not writing to a file")
+    public static FlowNodeLogExt createHtmlText(FlowNode node) {
+        return create(false, node);
+    }
+
+    private static FlowNodeLogExt create(Boolean text, FlowNode node) {
         FlowNodeLogExt logExt = new FlowNodeLogExt();
 
         logExt.setNodeId(node.getId());
@@ -119,10 +131,17 @@ public class FlowNodeLogExt {
                 logExt.setHasMore((logLen > MAX_RETURN_CHARS));
 
                 if (logLen > 0) {
-                    StringWriter writer = new StringWriter();
                     try {
-                        logText.writeHtmlTo(logLen - logExt.getLength(), writer);
-                        logExt.setText(writer.toString());
+                        if (text) {
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            logText.writeRawLogTo(logLen - logExt.getLength(), byteArrayOutputStream);
+                            logExt.setText(byteArrayOutputStream.toString(StandardCharsets.UTF_8));
+                        } else {
+                            StringWriter write = new StringWriter();
+                            logText.writeHtmlTo(logLen - logExt.getLength(), write);
+                            logExt.setText(write.toString());
+                        }
+
                     } catch (IOException e) {
                         LOGGER.log(Level.SEVERE, "Error serializing log for", e);
                     }

@@ -30,6 +30,7 @@ import com.cloudbees.workflow.util.ModelUtil;
 import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
 
@@ -59,7 +60,8 @@ public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
     }
 
     @ServeJson
-    public Object doLog() {
-        return Log.get(getNode());
+    public Object doLog(@QueryParameter boolean text) {
+        System.out.println("doLog:text:"+text);
+        return text?Log.getText(getNode()):Log.getHtmlText(getNode());
     }
 }

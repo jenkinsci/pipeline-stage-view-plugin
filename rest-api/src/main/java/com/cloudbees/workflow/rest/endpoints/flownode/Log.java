@@ -37,7 +37,11 @@ public class Log {
         return FlowNodeAPI.getUrl(node) + "/log";
     }
 
-    public static FlowNodeLogExt get(FlowNode node) {
-        return FlowNodeLogExt.create(node);
+    public static FlowNodeLogExt getText(FlowNode node) {
+        return FlowNodeLogExt.createText(node);
+    }
+
+    public static FlowNodeLogExt getHtmlText(FlowNode node) {
+        return FlowNodeLogExt.createHtmlText(node);
     }
 }
