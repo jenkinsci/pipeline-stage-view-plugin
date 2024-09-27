@@ -61,7 +61,6 @@ public class FlowNodeAPI extends AbstractFlowNodeActionHandler {
 
     @ServeJson
     public Object doLog(@QueryParameter boolean text) {
-        System.out.println("doLog:text:"+text);
         return text?Log.getText(getNode()):Log.getHtmlText(getNode());
     }
 }
