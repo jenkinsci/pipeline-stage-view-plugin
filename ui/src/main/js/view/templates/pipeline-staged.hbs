@@ -47,6 +47,7 @@
               <div class="stage-start-box">
                 <div class="stage-start-time">
                   <div class="date">{{formatDate this.startTimeMillis 'month'}} {{formatDate this.startTimeMillis 'dom'}}</div>
+                  <div class="year">{{formatDate this.startTimeMillis 'year'}}</div>
                   <div class="time">{{formatDate this.startTimeMillis 'time'}}</div>
                 </div>
                 {{#if this._links.changesets}}<div class="changeset-box" cbwf-controller="run-changesets" objectUrl="{{this._links.changesets.href}}"></div>
