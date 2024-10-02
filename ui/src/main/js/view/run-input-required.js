@@ -96,9 +96,8 @@ exports.render = function (inputRequiredModel, onElement) {
 
                     // Perform the POST. Needs to be encoded into a "json" parameter with an
                     // array object named "parameter" :)
-                    // TODO simplify when Prototype.js is removed
                     var parameters = {
-                        json: Object.toJSON ? Object.toJSON({ parameter: inputNVPs }) : JSON.stringify({ parameter: inputNVPs })
+                        json: JSON.stringify({ parameter: inputNVPs })
                     };
                     ajax.jenkinsAjaxPOSTURLEncoded(proceedUrl, parameters, function() {
                         popover.hide();

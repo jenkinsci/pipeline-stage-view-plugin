@@ -26,10 +26,6 @@ var log = require('fancy-log');
 var fs = require('fs');
 var requireUncached = require("require-uncached");
 
-Object.toJSON = function(object) {
-    return JSON.stringify(object);
-}
-
 /**
  * require one of the pipeline source modules.
  * <p/>
