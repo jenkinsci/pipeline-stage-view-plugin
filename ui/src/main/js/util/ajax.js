@@ -54,8 +54,7 @@ exports.jenkinsAjaxPOST = function () {
         var data = arguments[1];
         var success = arguments[2];
         if (typeof data !== 'string') {
-            // TODO simplify when Prototype.js is removed
-            data = Object.toJSON ? Object.toJSON(data) : JSON.stringify(data);
+            data = JSON.stringify(data);
         }
         fetch(path, {
             method: 'post',
