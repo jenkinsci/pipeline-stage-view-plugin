@@ -261,18 +261,40 @@ function RunGroupGenerator(maxRuns) {
     this.runs = [];
 }
 RunGroupGenerator.prototype.addRun = function(run) {
-    // Make sure the stage name ordering matches
-    for (var i = 0; i < run.stages.length; i++) {
-        var stage = run.stages[i];
-        if (this.stageData.length > i) {
-            if (stage.name !== this.stageData[i].name) {
-                // Stages have been changed - reordered or
-                // new ones inserted.  Can't add to this group.
-                return false;
+    if (run.stages.length < this.stageData.length) {
+        return false;
+    }
+
+    // Stage ordering is not a good indicator when run is in progress because of parallel executions
+    // * Not Completed: just check that no stages is added (that current run stages are included)
+    // * Completed: check stages ordering
+    if(run.status === 'IN_PROGRESS' || run.status === 'PAUSED_PENDING_INPUT') {
+
+        // Look for intersect but fail early if a newer stage is found
+        var stageNamesMap = {};
+        for (var i = 0; i < this.stageData.length; i++) {
+          stageNamesMap[this.stageData[i].name] = true;
+        }
+        for (var i = 0; i < run.stages.length; i++) {
+          if (!run.stages[i].name in stageNamesMap) {
+            return false;
+          }
+        }
+
+    } else {
+        // Make sure the stage name ordering matches
+        for (var i = 0; i < run.stages.length; i++) {
+            var stage = run.stages[i];
+            if (this.stageData.length > i) {
+                if (stage.name !== this.stageData[i].name) {
+                    // Stages have been changed - reordered or
+                    // new ones inserted.  Can't add to this group.
+                    return false;
+                }
+            } else {
+                // Add the stage name to the list for the group
+                this.stageData.push({name: stage.name});
             }
-        } else {
-            // Add the stage name to the list for the group
-            this.stageData.push({name: stage.name});
         }
     }
 
