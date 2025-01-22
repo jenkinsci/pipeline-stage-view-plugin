@@ -2,10 +2,10 @@ package com.cloudbees.workflow.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.kohsuke.stapler.HttpResponse;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 
 /**
@@ -23,7 +23,7 @@ public class JsonResponse implements HttpResponse {
     }
 
     @Override
-    public void generateResponse(StaplerRequest req, StaplerResponse rsp, Object node) throws IOException, ServletException {
+    public void generateResponse(StaplerRequest2 req, StaplerResponse2 rsp, Object node) throws IOException, ServletException {
         rsp.setContentType("application/json; charset=UTF-8");
         mapper.writeValue(rsp.getOutputStream(),pojo);
     }

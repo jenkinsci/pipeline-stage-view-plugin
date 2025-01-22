@@ -28,6 +28,7 @@ import com.cloudbees.workflow.util.JSONReadWrite;
 import org.htmlunit.Page;
 import hudson.model.Result;
 import hudson.util.RunList;
+import jakarta.servlet.ServletRequest;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -159,6 +160,6 @@ public class Util {
 
     private static Map.Entry<String, String> getCrumbHeaderNVP(Jenkins jenkins) {
         return new AbstractMap.SimpleEntry<>(jenkins.getCrumbIssuer().getDescriptor().getCrumbRequestField(),
-                        jenkins.getCrumbIssuer().getCrumb( null ));
+                        jenkins.getCrumbIssuer().getCrumb((ServletRequest) null));
     }
 }

@@ -25,7 +25,7 @@ package com.cloudbees.workflow.util;
 
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.IOException;
 
@@ -54,7 +54,7 @@ public class ModelUtil {
     }
 
     public static String getRootUrl() {
-        StaplerRequest currentRequest = Stapler.getCurrentRequest();
+        StaplerRequest2 currentRequest = Stapler.getCurrentRequest2();
         return (currentRequest != null) ? currentRequest.getContextPath() : "/";
     }
 }
