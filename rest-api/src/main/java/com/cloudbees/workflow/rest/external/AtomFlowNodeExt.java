@@ -69,7 +69,7 @@ public class AtomFlowNodeExt extends FlowNodeExt {
         AtomFlowNodeExt basic = new AtomFlowNodeExt();
         // It would be super awesome if we didn't need to make a throwaway object
         basic.addBasicNodeData(node, execNodeName, duration, startTimeMillis, status, error);
-        if (basic.getStatus() != StatusExt.NOT_EXECUTED && Stapler.getCurrentRequest() != null) {
+        if (basic.getStatus() != StatusExt.NOT_EXECUTED && Stapler.getCurrentRequest2() != null) {
             LogAction la = node.getAction(LogAction.class);
             if (la != null) {
                 basic.get_links().setLog(Link.newLink(Log.getUrl(node)));
