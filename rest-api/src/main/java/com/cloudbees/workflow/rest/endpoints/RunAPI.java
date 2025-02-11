@@ -214,7 +214,7 @@ public class RunAPI extends AbstractWorkflowRunActionHandler {
 
             try {
                 // Pass the request off to the InputStepExecution, allowing it to process input data.
-                execution.doProceed(Stapler.getCurrentRequest());
+                execution.doProceed(Stapler.getCurrentRequest2());
             } catch (Exception e) {
                 throw new ServletException("Error processing Input Submit request.", e);
             }
