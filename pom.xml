@@ -56,7 +56,7 @@
     </scm>
 
     <properties>
-        <revision>2.36</revision>
+        <revision>2.37</revision>
         <gitHubRepo>jenkinsci/pipeline-stage-view-plugin</gitHubRepo>
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
         <jenkins.baseline>2.479</jenkins.baseline>
