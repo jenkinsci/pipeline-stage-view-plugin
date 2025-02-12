@@ -1,3 +1,18 @@
 _extends: .github
-name-template: pipeline-stage-view-plugin-$NEXT_PATCH_VERSION
-tag-template: pipeline-stage-view-$NEXT_MINOR_VERSION
+name-template: pipeline-stage-view-plugin-$RESOLVED_VERSION
+tag-template: pipeline-stage-view-$RESOLVED_VERSION
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking'
+  minor:
+    labels:
+      - 'minor'
+      - 'dependencies'
+  patch:
+    labels:
+      - 'bugfix'
+      - 'patch'
+  default: minor
