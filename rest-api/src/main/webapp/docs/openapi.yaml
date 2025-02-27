@@ -1,0 +1,371 @@
+openapi: 3.0.0
+info:
+  title: Jenkins Pipeline REST API
+  description: API for accessing Jenkins Pipeline data
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/jenkins
+
+paths:
+  /job/{job-name}/wfapi:
+    get:
+      summary: Get Pipeline job description
+      parameters:
+        - name: job-name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _links:
+                    type: object
+                    properties:
+                      self:
+                        type: object
+                        properties:
+                          href:
+                            type: string
+                      runs:
+                        type: object
+                        properties:
+                          href:
+                            type: string
+                  name:
+                    type: string
+                  runCount:
+                    type: integer
+
+  /job/{job-name}/wfapi/runs:
+    get:
+      summary: Get Pipeline job run history
+      parameters:
+        - name: job-name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of Pipeline job runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _links:
+                      type: object
+                      properties:
+                        self:
+                          type: object
+                          properties:
+                            href:
+                              type: string
+                        artifacts:
+                          type: object
+                          properties:
+                            href:
+                              type: string
+                        pendingInputActions:
+                          type: object
+                          properties:
+                            href:
+                              type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    status:
+                      type: string
+                    startTimeMillis:
+                      type: integer
+                    endTimeMillis:
+                      type: integer
+                    durationMillis:
+                      type: integer
+                    stages:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          _links:
+                            type: object
+                            properties:
+                              self:
+                                type: object
+                                properties:
+                                  href:
+                                    type: string
+                          id:
+                            type: string
+                          name:
+                            type: string
+                          status:
+                            type: string
+                          startTimeMillis:
+                            type: integer
+                          durationMillis:
+                            type: integer
+
+  /job/{job-name}/{run-id}/wfapi/describe:
+    get:
+      summary: Get a single workflow run
+      parameters:
+        - name: job-name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: run-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Workflow run details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _links:
+                    type: object
+                    properties:
+                      self:
+                        type: object
+                        properties:
+                          href:
+                            type: string
+                      pendingInputActions:
+                        type: object
+                        properties:
+                          href:
+                            type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  status:
+                    type: string
+                  startTimeMillis:
+                    type: integer
+                  endTimeMillis:
+                    type: integer
+                  durationMillis:
+                    type: integer
+                  stages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _links:
+                          type: object
+                          properties:
+                            self:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        status:
+                          type: string
+                        startTimeMillis:
+                          type: integer
+                        durationMillis:
+                          type: integer
+  /job/{job-name}/{run-id}/wfapi/pendingInputActions:
+    get:
+      summary: Get pending input action details for a Pipeline run
+      parameters:
+        - name: job-name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: run-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of pending input actions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    message:
+                      type: string
+                    proceedUrl:
+                      type: string
+                    abortUrl:
+                      type: string
+  /job/{job-name}/{run-id}/wfapi/artifacts:
+    get:
+      summary: Get build artifacts
+      parameters:
+        - name: job-name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: run-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of artifacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    path:
+                      type: string
+                    url:
+                      type: string
+                    size:
+                      type: integer
+
+  /job/{job-name}/{run-id}/execution/node/{node-id}/wfapi/describe:
+    get:
+      summary: Get a description of a Pipeline node
+      parameters:
+        - name: job-name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: run-id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: node-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Pipeline node details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _links:
+                    type: object
+                    properties:
+                      self:
+                        type: object
+                        properties:
+                          href:
+                            type: string
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  status:
+                    type: string
+                  startTimeMillis:
+                    type: integer
+                  durationMillis:
+                    type: integer
+                  stageFlowNodes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _links:
+                          type: object
+                          properties:
+                            self:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                            log:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        status:
+                          type: string
+                        startTimeMillis:
+                          type: integer
+                        durationMillis:
+                          type: integer
+                        parentNodes:
+                          type: array
+                          items:
+                            type: string
+
+  /job/{job-name}/{run-id}/execution/node/{node-id}/wfapi/log:
+    get:
+      summary: Get the log for a Pipeline node
+      parameters:
+        - name: job-name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: run-id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: node-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Pipeline node log details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodeId:
+                    type: string
+                  nodeStatus:
+                    type: string
+                  length:
+                    type: integer
+                  hasMore:
+                    type: boolean
+                  text:
+                    type: string
+                  consoleUrl:
+                    type: string
