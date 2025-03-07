@@ -149,7 +149,7 @@ function addStageTotals(runGroup) {
                     var stageData = getStageData(stage.name, runGroup);
 
                     if (!stageData) {
-                        stageData = {name: stage.name};
+                        stageData = { name: stage.name };
                         runGroup.stageData.push(stageData);
                     }
 
@@ -225,7 +225,7 @@ function addEndTimes(jobRunsData) {
         time.setEndTime(run);
         if (run.stages) {
             for (var ii = 0; ii < run.stages.length; ii++) {
-		time.setEndTime(run.stages[ii]);
+                time.setEndTime(run.stages[ii]);
             }
         }
     }
@@ -260,28 +260,24 @@ function RunGroupGenerator(maxRuns) {
     this.stageData = [];
     this.runs = [];
 }
-RunGroupGenerator.prototype.addRun = function(run) {
+RunGroupGenerator.prototype.addRun = function (run) {
     // Make sure the stage name ordering matches
     for (var i = 0; i < run.stages.length; i++) {
         var stage = run.stages[i];
         if (this.stageData.length > i) {
-            if (stage.name !== this.stageData[i].name) {
-                // Stages have been changed - reordered or
-                // new ones inserted.  Can't add to this group.
-                return false;
-            }
+            continue;
         } else {
             // Add the stage name to the list for the group
-            this.stageData.push({name: stage.name});
+            this.stageData.push({ name: stage.name });
         }
     }
 
     this.runs.push(run);
     return true;
 }
-RunGroupGenerator.prototype.addPendingStages = function() {
+RunGroupGenerator.prototype.addPendingStages = function () {
     for (var i = 0; i < this.runs.length; i++) {
-        var run  = this.runs[i];
+        var run = this.runs[i];
         // fill out the stages in the run if the stages are not all started yet
         if (run.stages.length < this.stageData.length) {
             for (var ii = run.stages.length; ii < this.stageData.length; ii++) {
@@ -297,7 +293,7 @@ RunGroupGenerator.prototype.addPendingStages = function() {
         }
     }
 }
-RunGroupGenerator.prototype.getModelData = function() {
+RunGroupGenerator.prototype.getModelData = function () {
     if (this.modelData) {
         return this.modelData;
     }
