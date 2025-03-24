@@ -104,12 +104,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- TODO until in BOM -->
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>pipeline-input-step</artifactId>
-                <version>513.v7eb_fe7e2c0fc</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
