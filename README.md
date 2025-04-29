@@ -110,3 +110,23 @@ expected to take, based on historical averages.
         note: this may have a very large performance impact with complex
         builds.
 
+-   At runtime or startup, you may disable showing the Stage View within the
+    main job page with the property
+     `org.jenkinsci.pipeline.stageview.disabledOnMainJobPage`
+
+    -   This may help with performance issues by avoiding to load stage details
+        whenever the job page is loaded. The Stage View can still be accessed
+        from the left menu, through the _Full Stage View_ link.
+
+    -   In the script console this setting may be changed at runtime
+        (with immediate impact):
+
+        ``` syntaxhighlighter-pre
+        System.setProperty("org.jenkinsci.pipeline.stageview.disabledOnMainJobPage","true");
+        ```
+
+    -   To turn it back on:
+
+        ``` syntaxhighlighter-pre
+        System.clearProperty("org.jenkinsci.pipeline.stageview.disabledOnMainJobPage");
+        ```
