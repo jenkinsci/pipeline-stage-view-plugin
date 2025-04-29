@@ -78,11 +78,10 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         return date;
     }
 
-    var theDate = new Date(date);
-    var now = new Date();
-    var diff = now - theDate; // Difference in milliseconds
-    var oneDay = 24 * 60 * 60 * 1000; // milliseconds in one day
-    var oneYear = 365 * oneDay; // milliseconds in one year
+    var options = { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+    if (timeZone) {
+        options.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
 
     let userLocale
     if (navigator.languages && navigator.languages.length) {
@@ -91,45 +90,17 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         userLocale = navigator.language
     }
 
-    var options = {};
-
-    // Determine which components to display based on the age of the job
-    var showYear = diff >= oneYear;
-    var showDate = diff >= oneDay;
-    var showTime = true; // Always show time if requested
-
-    if (toFormat === 'month') {
-        if (showDate) {
-            options.month = 'short';
-        } else {
-            return ''; // Do not display month
-        }
-    } else if (toFormat === 'dom') {
-        if (showDate) {
-            options.day = '2-digit';
-        } else {
-            return ''; // Do not display day
-        }
-    } else if (toFormat === 'year') {
-        if (showYear) {
-            options.year = 'numeric';
-        } else {
-            return ''; // Do not display year
-        }
-    } else if (toFormat === 'time') {
-        if (showTime) {
-            options.hour = '2-digit';
-            options.minute = '2-digit';
-            options.hour12 = false;
-        } else {
-            return ''; // This case won't occur since we always show time
-        }
-    } else {
-        // Default case: return full date if needed
-        return theDate.toLocaleString(userLocale);
+    var theDate = new Date(date);
+    if (toFormat == 'month') {
+        return theDate.toLocaleDateString(userLocale, {month: 'short'});
     }
-
-    return theDate.toLocaleString(userLocale, options);
+    if (toFormat == 'dom') {
+        return theDate.toLocaleDateString(userLocale, {day: '2-digit'});
+    }
+    if (toFormat == 'time') {
+        return theDate.toLocaleTimeString(userLocale, {hour: '2-digit',minute: '2-digit', hour12: false });
+    }
+    return theDate.toLocaleDateString(userLocale, options)
 });
 
 /**
@@ -177,7 +148,7 @@ function getTemplate(templateName) {
     if (!templateInstance) {
         throw 'No template by the name "' + templateName + '".  Check ui/src/main/js/view/templates/index.js and make sure the template is registered in the templateCache.';
     }
-
+    
     // handles precompiled and compiled templates
     return templateInstance.default || templateInstance;
 }
