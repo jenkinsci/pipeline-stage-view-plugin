@@ -35,6 +35,11 @@ exports.render = function (logLazyLoadModel, onElement) {
     }
 
     onElement.click(function() {
+        // Stop if the user clicked to select some text.
+        if (window.getSelection().toString() != "") {
+            return;
+        }
+        
         logLazyLoadModel.getObject(function (lazyLoad) {
             var nodeLogDom = templates.apply('node-log', lazyLoad);
             var $ = jqProxy.getJQuery();
