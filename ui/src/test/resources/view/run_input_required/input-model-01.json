@@ -6,7 +6,7 @@
     {
       "type": "BooleanParameterDefinition",
       "name": "Run test suites?",
-      "description": "A checkbox option",
+      "description": "A checkbox option<br />Some other line<b>bold text</b>",
       "definition": {
         "defaultVal": true
       }
