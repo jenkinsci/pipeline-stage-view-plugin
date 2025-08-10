@@ -78,11 +78,6 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         return date;
     }
 
-    var options = { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
-    if (timeZone) {
-        options.timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    }
-
     let userLocale
     if (navigator.languages && navigator.languages.length) {
         userLocale = navigator.languages[0]
@@ -90,17 +85,26 @@ registerHBSHelper('formatDate', function (date, toFormat) {
         userLocale = navigator.language
     }
 
+    let userTz;
+    if (typeof window !== "undefined" && window.timeZone) {
+        // from controller.jelly -> ControllerScript.js
+        userTz = window.timeZone;
+    } else {
+        userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
     var theDate = new Date(date);
     if (toFormat == 'month') {
-        return theDate.toLocaleDateString(userLocale, {month: 'short'});
+        return theDate.toLocaleDateString(userLocale, {month: 'short', timeZone: userTz});
     }
     if (toFormat == 'dom') {
-        return theDate.toLocaleDateString(userLocale, {day: '2-digit'});
+        return theDate.toLocaleDateString(userLocale, {day: '2-digit', timeZone: userTz});
     }
     if (toFormat == 'time') {
-        return theDate.toLocaleTimeString(userLocale, {hour: '2-digit',minute: '2-digit', hour12: false });
+        return theDate.toLocaleTimeString(userLocale, {hour: '2-digit', minute: '2-digit', hour12: false , timeZone: userTz});
     }
-    return theDate.toLocaleDateString(userLocale, options)
+
+    return theDate.toLocaleDateString(userLocale, {month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false , timeZone: userTz});
 });
 
 /**

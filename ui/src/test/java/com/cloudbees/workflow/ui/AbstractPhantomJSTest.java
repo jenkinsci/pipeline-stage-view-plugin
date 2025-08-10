@@ -57,7 +57,6 @@ public abstract class AbstractPhantomJSTest {
 
     @BeforeClass
     public static void configure() throws IOException {
-        sCaps.setJavascriptEnabled(true);
         sCaps.setCapability("takesScreenshot", false);
         sCaps.setBrowserName("phantomjs");
 
