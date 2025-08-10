@@ -36,22 +36,16 @@ import org.htmlunit.html.HtmlPage;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.cloudbees.workflow.ui.AbstractWebDriverTest;
 
 import hudson.model.TimeZoneProperty;
 import hudson.model.User;
@@ -59,46 +53,10 @@ import hudson.model.User;
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
-public class WorkflowStageViewActionTest {
+public class WorkflowStageViewActionTest extends AbstractWebDriverTest {
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
-
-    private WebDriver driver;
-
-    @Before
-    public void setUp() {
-        // Only run if ChromeDriver is available
-        try {
-            Class.forName("org.openqa.selenium.chrome.ChromeDriver");
-        } catch (ClassNotFoundException e) {
-            Assume.assumeTrue("ChromeDriver not available, skipping Selenium timezone test.", false);
-        }
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage");
-        driver = new ChromeDriver(options);
-
-        try {
-            driver.get("data:text/html, <form id='f' onsubmit='document.body.textContent=\"ok\"; return false;'>"
-                    + "<button id='b' type='submit'>Go</button></form>");
-            driver.findElement(By.id("b")).click();
-            try {
-                new WebDriverWait(driver, Duration.ofSeconds(2))
-                        .until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "ok"));
-            } catch (TimeoutException te) {
-                Assume.assumeTrue("Chrome crashed or JS submit broken: " + te, false);
-            }
-        } catch (Exception e) {
-            Assume.assumeTrue("Skipping test because Chrome crashed: " + e, false);
-        }
-    }
-
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
 
     @Test
     public void test() throws Exception {

@@ -23,43 +23,46 @@
  */
 package com.cloudbees.workflow.ui.view;
 
-import com.cloudbees.workflow.ui.AbstractPhantomJSTest;
-import hudson.model.queue.QueueTaskFuture;
+import java.time.Duration;
+import java.util.List;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.util.List;
+import com.cloudbees.workflow.ui.AbstractWebDriverTest;
+
+import hudson.model.queue.QueueTaskFuture;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
-public class BuildArtifactsTest extends AbstractPhantomJSTest {
+public class BuildArtifactsTest extends AbstractWebDriverTest {
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
 
-    @Ignore("remove phantomjs: https://trello.com/c/JpUg8S5z/159-get-rid-of-phantomjs-webdriver")
     @Test
     public void test() throws Exception {
         WebDriver webdriver = getWebDriver();
 
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
-        job.setDefinition(new CpsFlowDefinition("" +
-                "node {" +
-                "   stage ('Archiving'); " +
-                "   sh('mkdir targs && echo hello > targs/hello1.txt && echo hello > targs/hello2.txt'); " +
-                "   archive(includes: 'targs/*.txt'); " +
-                "}", true));
+        job.setDefinition(new CpsFlowDefinition(
+                "node {"
+                        + "   stage ('Archiving'); "
+                        + "   sh('mkdir targs && echo hello > targs/hello1.txt && echo hello > targs/hello2.txt'); "
+                        + "   archiveArtifacts 'targs/*.txt'"
+                        + "}",
+                true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatusSuccess(build);
@@ -68,26 +71,32 @@ public class BuildArtifactsTest extends AbstractPhantomJSTest {
         webdriver.get(jobUrl);
 
         // Look for the build artifacts popup button...
-        WebElement buildArtifactsPopupBtn = webdriver.findElement(By.cssSelector(".build-artifacts-popup"));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement buildArtifactsPopupBtn = wait.until(driver1 -> {
+            return driver1.findElement(By.cssSelector(".build-artifacts-popup"));
+        });
         Assert.assertNotNull(buildArtifactsPopupBtn);
 
         // Move over the button to load the popover...
         moveMouseToElement(webdriver, buildArtifactsPopupBtn);
 
         // Look for and test the popover content...
-        List<WebElement> buildArtifactsPopover = waitForElementsAdded(webdriver, ".cbwf-build-artifacts");
-        Assert.assertEquals(1, buildArtifactsPopover.size());
+        wait.until(driver1 -> {
+            return driver1.findElement(By.cssSelector(".cbwf-build-artifacts"));
+        });
 
-        WebElement popover = buildArtifactsPopover.get(0);
-        List<WebElement> artifacts = waitForElementsAdded(popover, ".artifact");
+        List<WebElement> artifacts = wait.until(driver1 -> {
+            List<WebElement> ars = driver1.findElements(By.cssSelector(".artifact"));
+            return ars == null || ars.size() < 2 ? null : ars;
+        });
+
         Assert.assertEquals(2, artifacts.size());
-
-        // TODO: Something strange here with selenium.
-        // Can't seem to get the text of that element even though it is there if you sout the whole page.
-        // isDisplayed on those anchor elements returns false for some reason, even though the parent elements
-        // are "displayed".
-        // Assert.assertEquals("hello1.txt", artifacts.get(0).findElement(By.cssSelector(".name")).getText());
-        // Assert.assertEquals("hello2.txt", artifacts.get(1).findElement(By.cssSelector(".name")).getText());
+        Assert.assertEquals(
+                "hello1.txt",
+                artifacts.get(0).findElement(By.cssSelector(".name")).getText());
+        Assert.assertEquals(
+                "hello2.txt",
+                artifacts.get(1).findElement(By.cssSelector(".name")).getText());
 
         // Make sure it goes away once we move off the popover...
         moveMouseOffElement(webdriver);
