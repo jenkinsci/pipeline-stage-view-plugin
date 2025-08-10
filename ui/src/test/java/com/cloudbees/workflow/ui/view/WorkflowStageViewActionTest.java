@@ -70,12 +70,18 @@ public class WorkflowStageViewActionTest {
         try {
             Class.forName("org.openqa.selenium.chrome.ChromeDriver");
         } catch (ClassNotFoundException e) {
-            System.out.println("ChromeDriver not available, skipping Selenium timezone test.");
-            Assume.assumeTrue(false);
+            Assume.assumeTrue("ChromeDriver not available, skipping Selenium timezone test.", false);
         }
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         driver = new ChromeDriver(options);
+
+        try {
+            driver.get("about:blank");
+            driver.findElement(By.tagName("body"));
+        } catch (Exception e) {
+            Assume.assumeTrue("Skipping test because Chrome crashed: " + e, false);
+        }
     }
 
     @After
