@@ -45,10 +45,12 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import hudson.model.TimeZoneProperty;
@@ -73,12 +75,19 @@ public class WorkflowStageViewActionTest {
             Assume.assumeTrue("ChromeDriver not available, skipping Selenium timezone test.", false);
         }
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
+        options.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage");
         driver = new ChromeDriver(options);
 
         try {
-            driver.get("data:text/html,<button id='t'>t</button>");
-            driver.findElement(By.id("t")).click();
+            driver.get("data:text/html, <form id='f' onsubmit='document.body.textContent=\"ok\"; return false;'>"
+                    + "<button id='b' type='submit'>Go</button></form>");
+            driver.findElement(By.id("b")).click();
+            try {
+                new WebDriverWait(driver, Duration.ofSeconds(2))
+                        .until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "ok"));
+            } catch (TimeoutException te) {
+                Assume.assumeTrue("Chrome crashed or JS submit broken: " + te, false);
+            }
         } catch (Exception e) {
             Assume.assumeTrue("Skipping test because Chrome crashed: " + e, false);
         }
