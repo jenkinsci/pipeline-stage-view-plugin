@@ -77,8 +77,8 @@ public class WorkflowStageViewActionTest {
         driver = new ChromeDriver(options);
 
         try {
-            driver.get("about:blank");
-            driver.findElement(By.tagName("body"));
+            driver.get("data:text/html,<button id='t'>t</button>");
+            driver.findElement(By.id("t")).click();
         } catch (Exception e) {
             Assume.assumeTrue("Skipping test because Chrome crashed: " + e, false);
         }
