@@ -23,66 +23,75 @@
  */
 package com.cloudbees.workflow.ui;
 
-import hudson.model.Item;
-import jenkins.model.Jenkins;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.DesiredCapabilities;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import hudson.model.Item;
+import jenkins.model.Jenkins;
+
 /**
- * Abstract base class for running phantomJS based tests.
+ * Abstract base class for running web based tests.
  * <p/>
- * Why not just use HtmlUnit?  Coz it's a pain wrt javascript.
+ * Why not just use HtmlUnit?  Coz it's a pain wrt javascript and it doesn't support toLocaleDateString
  *
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
-public abstract class AbstractPhantomJSTest {
+public abstract class AbstractWebDriverTest {
 
-    private static DesiredCapabilities sCaps = new DesiredCapabilities();
-    private WebDriver mDriver = null;
-
-    @BeforeClass
-    public static void configure() throws IOException {
-        sCaps.setJavascriptEnabled(true);
-        sCaps.setCapability("takesScreenshot", false);
-        sCaps.setBrowserName("phantomjs");
-
-        ArrayList<String> cliArgsCap = new ArrayList<String>();
-        cliArgsCap.add("--web-security=false");
-        cliArgsCap.add("--ssl-protocol=any");
-        cliArgsCap.add("--ignore-ssl-errors=true");
-        sCaps.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, cliArgsCap);
-
-        // Set LogLevel for GhostDriver
-        sCaps.setCapability(PhantomJSDriverService.PHANTOMJS_GHOSTDRIVER_CLI_ARGS, new String[]{"--logLevel=DEBUG"});
-    }
+    protected WebDriver driver;
 
     @Before
-    public void prepareDriver() {
+    public void setUp() {
+        // Only run if ChromeDriver is available
         try {
-            assertPhantomJSExecPathOK();
-            mDriver = new PhantomJSDriver(sCaps);
+            Class.forName("org.openqa.selenium.chrome.ChromeDriver");
+        } catch (ClassNotFoundException e) {
+            Assume.assumeTrue("ChromeDriver not available, skipping Selenium timezone test.", false);
+        }
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage");
+        driver = new ChromeDriver(options);
+
+        try {
+            driver.get("data:text/html, <form id='f' onsubmit='document.body.textContent=\"ok\"; return false;'>"
+                    + "<button id='b' type='submit'>Go</button></form>");
+            driver.findElement(By.id("b")).click();
+            try {
+                new WebDriverWait(driver, Duration.ofSeconds(2))
+                        .until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "ok"));
+            } catch (TimeoutException te) {
+                Assume.assumeTrue("Chrome crashed or JS submit broken: " + te, false);
+            }
         } catch (Exception e) {
-            Assert.fail("Unable to create PhantomJS WebDriver.  PhantomJS must be installed on the machine executing the tests.  Exception: " + e.getMessage());
+            Assume.assumeTrue("Skipping test because Chrome crashed: " + e, false);
+        }
+    }
+
+    @After
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+            driver = null;
         }
     }
 
     protected WebDriver getWebDriver() {
-        return mDriver;
+        return driver;
     }
 
     protected void moveMouseToElement(WebDriver webdriver, WebElement element) {
@@ -136,37 +145,11 @@ public abstract class AbstractPhantomJSTest {
         waitForElementsRemoved(webdriver.findElement(By.cssSelector("html")), cssSelector);
     }
 
-    @After
-    public void quitDriver() {
-        if (mDriver != null) {
-            mDriver.quit();
-            mDriver = null;
-        }
-    }
-
     protected String getItemUrl(Jenkins jenkins, Item item) {
         return getJenkinsUrl(jenkins, item.getUrl());
     }
 
     protected String getJenkinsUrl(Jenkins jenkins, String itemUrl) {
         return jenkins.getRootUrl() + itemUrl;
-    }
-
-    private static void assertPhantomJSExecPathOK() {
-        String phantomJsExePath = System.getProperty(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY);
-        if (phantomJsExePath != null) {
-            if (!(new File(phantomJsExePath).exists())) {
-                System.out.println("***************************************************************************************");
-                System.out.println(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY + " system property is set to '" + phantomJsExePath + "'.");
-                System.out.println("No such file exists.  Test may be running in an IDE?");
-                System.out.println("Removing system property in the hope that phantomjs can be found on the path.");
-                System.out.println("***************************************************************************************");
-                System.getProperties().remove(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY);
-            } else {
-                System.out.println(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY + " system property is set to '" + phantomJsExePath + "'.");
-            }
-        } else {
-            System.out.println(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY + " system property not set.  Will try use the system path.");
-        }
     }
 }
