@@ -27,7 +27,7 @@ import com.cloudbees.workflow.util.ModelUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.RepositoryBrowser;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
 import java.io.IOException;
