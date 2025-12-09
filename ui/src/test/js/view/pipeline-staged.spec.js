@@ -88,4 +88,108 @@ describe("view/pipeline-staged-spec", function () {
             done();
         });
     }
+
+    it("- test_timezone_usage", function () {
+        // Save and set window.timeZone
+        const oldTimeZone = global.window && window.timeZone;
+        global.window = global.window || {};
+
+        const templates = require('../../../main/js/view/templates');
+        templates.dateFormatting(true);
+
+        // 2020-01-01T23:00:00Z in millis
+        const utcMillis = Date.UTC(2020, 0, 1, 23, 0, 0, 0);
+
+        const handlebars = require('handlebars');
+        const tplTime = handlebars.compile('{{formatDate date "time"}}');
+        const tplMonth = handlebars.compile('{{formatDate date "month"}}');
+        const tplDom = handlebars.compile('{{formatDate date "dom"}}');
+        const tplDate = handlebars.compile('{{formatDate date}}');
+
+        // America/Los_Angeles (UTC-8) => 15:00 Jan 1
+        window.timeZone = "America/Los_Angeles";
+        let outputTimeLA = tplTime({ date: utcMillis });
+        let outputMonthLA = tplMonth({ date: utcMillis });
+        let outputDomLA = tplDom({ date: utcMillis });
+        let outputDateLA = tplDate({ date: utcMillis });
+        expect(outputTimeLA).toMatch(/15:00/);
+        expect(outputMonthLA).toMatch(/Jan/);
+        expect(outputDomLA).toMatch(/01/);
+        expect(outputDateLA).toMatch(/Jan.*01.*15:00/);
+
+        // Asia/Tokyo (UTC+9) => 08:00 Jan 2
+        window.timeZone = "Asia/Tokyo";
+        let outputTimeTokyo = tplTime({ date: utcMillis });
+        let outputMonthTokyo = tplMonth({ date: utcMillis });
+        let outputDomTokyo = tplDom({ date: utcMillis });
+        let outputDateTokyo = tplDate({ date: utcMillis });
+        expect(outputTimeTokyo).toMatch(/08:00/);
+        expect(outputMonthTokyo).toMatch(/Jan/);
+        expect(outputDomTokyo).toMatch(/02/);
+        expect(outputDateTokyo).toMatch(/Jan.*02.*08:00/);
+
+        // Check that the rendered dates and times are different for different timezones
+        expect(outputTimeLA).not.toEqual(outputTimeTokyo);
+        expect(outputDomLA).not.toEqual(outputDomTokyo);
+        expect(outputDateLA).not.toEqual(outputDateTokyo);
+
+        // Restore
+        if (oldTimeZone === undefined) {
+            delete window.timeZone;
+        } else {
+            window.timeZone = oldTimeZone;
+        }
+        templates.dateFormatting(false);
+    });
+
+    it("- test_browser_timezone_fallback", function () {
+        // Save and clear window.timeZone
+        const oldTimeZone = global.window && window.timeZone;
+        global.window = global.window || {};
+        delete window.timeZone;
+
+        const templates = require('../../../main/js/view/templates');
+        templates.dateFormatting(true);
+
+        // 2020-01-01T23:00:00Z in millis
+        const utcMillis = Date.UTC(2020, 0, 1, 23, 0, 0, 0);
+
+        // Mock browser timezone to Asia/Tokyo for this test
+        const realIntl = global.Intl;
+        global.Intl = {
+            DateTimeFormat: function() {
+                return {
+                    resolvedOptions: function() {
+                        return { timeZone: "Asia/Tokyo" };
+                    }
+                }
+            }
+        };
+
+        const handlebars = require('handlebars');
+        const tplTime = handlebars.compile('{{formatDate date "time"}}');
+        const tplMonth = handlebars.compile('{{formatDate date "month"}}');
+        const tplDom = handlebars.compile('{{formatDate date "dom"}}');
+        const tplDate = handlebars.compile('{{formatDate date}}');
+
+        let outputTime = tplTime({ date: utcMillis });
+        let outputMonth = tplMonth({ date: utcMillis });
+        let outputDom = tplDom({ date: utcMillis });
+        let outputDate = tplDate({ date: utcMillis });
+
+        // Should match Asia/Tokyo: 08:00 Jan 2
+        expect(outputTime).toMatch(/08:00/);
+        expect(outputMonth).toMatch(/Jan/);
+        expect(outputDom).toMatch(/02/);
+        expect(outputDate).toMatch(/Jan.*02.*08:00/);
+
+        // Restore
+        if (oldTimeZone === undefined) {
+            delete window.timeZone;
+        } else {
+            window.timeZone = oldTimeZone;
+        }
+        templates.dateFormatting(false);
+        global.Intl = realIntl;
+    });
 });
