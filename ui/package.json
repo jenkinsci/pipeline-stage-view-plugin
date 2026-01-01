@@ -5,7 +5,7 @@
     "@jenkins-cd/js-modules": "^0.0.10",
     "jenkins-js-extp": "0.0.2",
     "jquery": "^3.7.1",
-    "moment-timezone": "0.5.35",
+    "moment-timezone": "0.6.0",
     "window-handle": "^1.0.0"
   },
   "scripts": {
