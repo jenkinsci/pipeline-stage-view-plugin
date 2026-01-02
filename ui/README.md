@@ -154,11 +154,11 @@ So far we've ben writing two types of tests for the UI components:
 
 1. JavaScript based unit tests for testing the JavaScript components.  These tests are more lightweight and should run more quickly (no Jenkins instance, no browser env).
 Please see the [JavaScript Testing][js_testing] docs.
-1. More coarse grained Java based function tests using a combination of [`JenkinsRule`][JenkinsRule] and [PhantomJS] (headless browser)
-e.g. [`WorkflowJobActionTest`][WorkflowJobActionTest].  Extend [`AbstractPhantomJSTest`][AbstractPhantomJSTest] for these types of test.
-[`JenkinsRule`][JenkinsRule] allows us to create pipelines in a Jenkins instance embedded in the test, while [PhantomJS] allows us to
+1. More coarse grained Java based function tests using a combination of [`JenkinsRule`][JenkinsRule] and [WebDriver] (headless browser)
+e.g. [`WorkflowJobActionTest`][WorkflowJobActionTest].  Extend [`AbstractWebDriverTest`][AbstractWebDriverTest] for these types of test.
+[`JenkinsRule`][JenkinsRule] allows us to create pipelines in a Jenkins instance embedded in the test, while [WebDriver] allows us to
 request the relevant pages to be tested from that Jenkins instance.
-    * Note you must have PhantomJS [installed on your local machine](http://phantomjs.org/download.html).  We might look at using [phantomjs-maven-plugin](https://github.com/klieber/phantomjs-maven-plugin).
+    * Note you must have Chrome [installed on your local machine](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md).
     * Note you can also use the [`WebClient`][WebClient] to mimic web interactions, but you might find it to be a headache with respect
     to it being overly picky about JavaScript (raising variable resolution failures etc not seen on any real browser).
 
@@ -173,10 +173,10 @@ request the relevant pages to be tested from that Jenkins instance.
 [nodejs]: http://nodejs.org/
 [CommonJS]: http://wiki.commonjs.org/wiki/CommonJS
 [JenkinsRule]: http://javadoc.jenkins-ci.org/org/jvnet/hudson/test/JenkinsRule.html
-[PhantomJS]: http://phantomjs.org/
+[WebDriver]: https://www.selenium.dev/documentation/webdriver
 [WebClient]: http://javadoc.jenkins-ci.org/org/jvnet/hudson/test/JenkinsRule.WebClient.html
 [WorkflowJobActionTest]: src/test/java/com/cloudbees/workflow/ui/view/WorkflowJobActionTest.java
-[AbstractPhantomJSTest]: src/test/java/com/cloudbees/workflow/ui/AbstractPhantomJSTest.java
+[AbstractWebDriverTest]: src/test/java/com/cloudbees/workflow/ui/AbstractPhantomJSTest.java
 [LESS]: http://lesscss.org/
 [workflow_less]: src/main/less/workflow.less
 [variables_less]: src/main/less/variables.less
