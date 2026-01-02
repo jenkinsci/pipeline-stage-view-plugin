@@ -65,12 +65,49 @@ describe("model/runs-stage-grouped-spec", function () {
         model.setMaxRunsPerRunGroup(2);
         // 02_expected_modelData should have 2 runGroups, with 1 run in the
         // first and 2 run in the second because there was a stage rename in the second run
-        test_runGroupGeneration('03_rest_api_runs', '03_expected_modelData', done);
+        test_runGroupGeneration('03_rest_api_runs', '03_expected_modelData_fixed', done);
     });
 
     it("- test_05_getModelData_stages_undefined", function (done) {
         // no stage info but the ran successfully. should have an empty stage[] on the run.
         test_runGroupGeneration('05_rest_api_runs', '05_expected_modelData', done);
+    });
+
+    it("- test_09_getModelData_failed_runs_excluded_from_stage_times", function (done) {
+        // Test that stage times are only calculated from successful runs
+        helper.testWithJQuery('<div objectUrl="/jenkins/job/xxxJob"></div>', function ($) {
+            var targetEl = $('div');
+
+            mockAjax.execAsyncGET.mockImplementation((resPathTokens, callback) => {
+                var restApiJobHistoryData = helper.requireTestRes('model/runs_stage_grouped/getModelData/09_rest_api_mixed_statuses');
+                callback(restApiJobHistoryData);
+            });
+
+            model.getModelData.call(
+                helper.mvcContext(targetEl),
+                function (modelData) {
+                    // We have 3 runs: #1 SUCCESS, #2 FAILED, #3 SUCCESS
+                    // Build stage: 2s (run 1) + 3s (run 3) = 5s total / 2 runs = 2.5s avg
+                    // Test stage: 5s (run 1) + 5s (run 3) = 10s total / 2 runs = 5s avg
+                    // The failed run (#2) should not be included in calculations
+                    
+                    var runGroup = modelData.runGroups[0];
+                    var buildStageData = runGroup.stageData[0];
+                    var testStageData = runGroup.stageData[1];
+                    
+                    expect(buildStageData.name).toEqual("Build");
+                    expect(buildStageData.runs).toEqual(2); // Only successful runs
+                    expect(buildStageData.durationMillis).toEqual(5000); // 2000 + 3000
+                    expect(buildStageData.avgDurationMillis).toEqual(2500); // 5000 / 2
+                    
+                    expect(testStageData.name).toEqual("Test");
+                    expect(testStageData.runs).toEqual(2); // Only successful runs
+                    expect(testStageData.durationMillis).toEqual(10000); // 5000 + 5000
+                    expect(testStageData.avgDurationMillis).toEqual(5000); // 10000 / 2
+                    
+                    done();
+                });
+        });
     });
 
     function test_runGroupGeneration(restApiResponseFile, expectedModelFile, done, devMode) {
