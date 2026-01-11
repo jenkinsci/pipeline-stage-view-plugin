@@ -27,6 +27,6 @@
     "minifyify": "^7.2.1",
     "parcel": "^2.12.0",
     "parcel-transformer-hbs": "^1.0.4",
-    "require-uncached": "^1.0.2"
+    "require-uncached": "^2.0.0"
   }
 }
