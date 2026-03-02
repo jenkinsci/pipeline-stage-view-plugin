@@ -23,43 +23,39 @@
  */
 package com.cloudbees.workflow.ui.view;
 
-import com.cloudbees.workflow.ui.AbstractPhantomJSTest;
+import com.cloudbees.workflow.ui.AbstractWebDriverTest;
 import hudson.model.Result;
 import hudson.model.queue.QueueTaskFuture;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
  * @author <a href="mailto:tom.fennelly@gmail.com">tom.fennelly@gmail.com</a>
  */
-public class FailedJobTest extends AbstractPhantomJSTest {
+public class FailedJobTest extends AbstractWebDriverTest {
 
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
 
-    @Ignore("remove phantomjs: https://trello.com/c/JpUg8S5z/159-get-rid-of-phantomjs-webdriver")
     @Test
     public void test() throws Exception {
         WebDriver webdriver = getWebDriver();
 
         WorkflowJob job = jenkinsRule.jenkins.createProject(WorkflowJob.class, "Noddy Job");
 
-        job.setDefinition(new CpsFlowDefinition("" +
-                "node {" +
-                "   stage ('Build'); " +
-                "   sh ('blah'); " +
-                "}", true));
+        job.setDefinition(new CpsFlowDefinition("node { stage ('Build'); sh ('blah'); }", true));
 
         QueueTaskFuture<WorkflowRun> build = job.scheduleBuild2(0);
         jenkinsRule.assertBuildStatus(Result.FAILURE, build.get());
@@ -68,7 +64,11 @@ public class FailedJobTest extends AbstractPhantomJSTest {
         webdriver.get(jobUrl);
 
         // Make sure the stage cell was marked as failed...
-        List<WebElement> failedStageCells = webdriver.findElements(By.cssSelector(".stage-cell.FAILED .stage-wrapper"));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        List<WebElement> failedStageCells = wait.until(driver1 -> {
+            List<WebElement> elements = driver1.findElements(By.cssSelector(".stage-cell.FAILED .stage-wrapper"));
+            return elements.isEmpty() ? null : elements;
+        });
         Assert.assertEquals(1, failedStageCells.size());
 
         // Make the sure the stage-failed-popover widget was added to the cell
@@ -79,17 +79,17 @@ public class FailedJobTest extends AbstractPhantomJSTest {
         // Make sure that when we mouse over the failed stage cell we get a popup...
         moveMouseToElement(webdriver, failedStageCell);
         List<WebElement> popovers = waitForElementsAdded(webdriver, ".cbwf-popover");
-//        System.out.println(webdriver.getPageSource());
         Assert.assertTrue(popovers.size() > 0);
 
         // Make sure the popover has what we expect...
-        Assert.assertEquals("Failed with the following error(s)\n" +
-                "Shell Script script returned exit code 127\n" +
-                "See stage logs for more detail.\n" +
-                "Logs", popovers.get(0).getText().trim());
+        Assert.assertEquals(
+                "Failed with the following error(s)\n"
+                        + "Shell Script script returned exit code 127\n"
+                        + "See stage logs for more detail.\nLogs",
+                popovers.get(0).getText().trim());
 
         // Make sure the popover is removed once we move off it
-        //moveMouseOffElement(webdriver);
-        //waitForElementsRemoved(webdriver, ".cbwf-popover");
+        moveMouseOffElement(webdriver);
+        waitForElementsRemoved(webdriver, ".cbwf-popover");
     }
 }
