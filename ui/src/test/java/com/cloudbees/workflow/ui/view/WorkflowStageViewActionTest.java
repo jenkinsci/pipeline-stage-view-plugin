@@ -140,8 +140,7 @@ public class WorkflowStageViewActionTest extends AbstractWebDriverTest {
             driver.findElement(By.name("j_password")).sendKeys(utz.userId);
             driver.findElement(By.name("Submit")).click();
             WebDriverWait loginWait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            loginWait.until(d ->
-                    d.findElements(By.xpath("//a[contains(@href, 'logout')]")).size() > 0);
+            loginWait.until(d -> !d.getCurrentUrl().contains("/login"));
             driver.get(jenkinsRule.getURL().toString() + job.getUrl());
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             String renderedDate = wait.until(driver1 -> {
