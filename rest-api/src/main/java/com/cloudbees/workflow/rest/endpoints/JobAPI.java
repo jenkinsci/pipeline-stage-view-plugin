@@ -29,6 +29,7 @@ import com.cloudbees.workflow.rest.external.RunExt;
 import com.cloudbees.workflow.util.ModelUtil;
 import com.cloudbees.workflow.util.ServeJson;
 import hudson.Extension;
+import hudson.model.Result;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -67,6 +68,7 @@ public class JobAPI extends AbstractWorkflowJobActionHandler {
     @ServeJson
     public List<RunExt> doRuns(@QueryParameter String since, @QueryParameter boolean fullStages) {
         return JobExt.create(getJob().getBuilds(), since, fullStages);
+//        return JobExt.create(getJob().getLastBuildsOverThreshold(10, Result.ABORTED), since, fullStages);
     }
 
     @ServeJson
