@@ -170,7 +170,9 @@ function addExtensionPoints(onElement, runGroupData) {
             var stageId = stage.attr('data-stageId');
 
             if (!stageId) {
-                console.warn('No "data-stageId" on stage.');
+                if (!stage.hasClass('NOT_EXECUTED')) {
+                    console.warn('No "data-stageId" on stage.');
+                }
                 return;
             }
 
