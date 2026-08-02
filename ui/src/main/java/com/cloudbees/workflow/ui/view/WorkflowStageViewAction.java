@@ -33,7 +33,7 @@ public class WorkflowStageViewAction implements Action {
 
     @Override
     public String getUrlName() {
-        return "workflow-stage";
+        return "";
     }
 
     @Override
