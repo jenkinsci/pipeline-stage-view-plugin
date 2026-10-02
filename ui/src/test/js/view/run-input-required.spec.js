@@ -51,6 +51,7 @@ describe("view/run-input-required-spec", function () {
 
             // Check the caption
             expect($('.caption', inputPopover).text()).toBe('Workflow Configuration');
+            expect($('.help-block', inputPopover).html()).toBe('A checkbox option<br>Some other line<b>bold text</b>');
 
             // Check the inputs
             var inputs = $('.inputs :input', inputPopover);
