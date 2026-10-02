@@ -112,6 +112,9 @@ public class JobAndRunAPITest {
         Assert.assertEquals(1, workflowRuns.length);
         RunExt runExt = workflowRuns[0];
         assertRunInfoOkay(job, runExt, 6, 11, 16);
+        Assert.assertEquals("Run queue duration should extend to the first executed stage",
+            Math.max(0, runExt.getStages().get(0).getStartTimeMillis() - build.get().getTimeInMillis()),
+            runExt.getQueueDurationMillis());
 
         /** Test the describe endpoint, similar to {@link #assertDescribeEndpointOkay(WorkflowJob, JenkinsRule.WebClient)} */
         String descUrl = job.getUrl() + "1/wfapi/describe";
@@ -119,6 +122,9 @@ public class JobAndRunAPITest {
         jsonResponse = runsPage.getWebResponse().getContentAsString();
         RunExt workflowRun = jsonReadWrite.fromString(jsonResponse, RunExt.class);
         assertRunInfoOkay(job, workflowRun, 6, 11, 16);
+        Assert.assertEquals("Describe endpoint should report queue duration through the first executed stage",
+            Math.max(0, workflowRun.getStages().get(0).getStartTimeMillis() - build.get().getTimeInMillis()),
+            workflowRun.getQueueDurationMillis());
 
         // Run another build and then test resultset narrowing using the 'since' query parameter
         build = job.scheduleBuild2(0);

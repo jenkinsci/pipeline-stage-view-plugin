@@ -333,11 +333,15 @@ public class RunExt {
             runExt.setEndTimeMillis(run.getStartTimeInMillis()+run.getDuration());
         }
 
-        // Run has a timestamp when enqueued, and start time when it gets and Executor and begins running
+        StageNodeExt firstExecutedStage = runExt.getFirstExecutedStage();
         if (run.hasntStartedYet()) {
             runExt.setQueueDurationMillis(currentTimeMillis - run.getTimeInMillis());  // Enqueued time, not runtime
+        } else if (firstExecutedStage != null) {
+            runExt.setQueueDurationMillis(Math.max(0, firstExecutedStage.getStartTimeMillis() - run.getTimeInMillis()));
+        } else if (runExt.getStatus() == StatusExt.IN_PROGRESS || runExt.getStatus() == StatusExt.PAUSED_PENDING_INPUT) {
+            runExt.setQueueDurationMillis(Math.max(0, currentTimeMillis - run.getTimeInMillis()));
         } else {
-            runExt.setQueueDurationMillis(Math.max(0, run.getStartTimeInMillis()-run.getTimeInMillis()));
+            runExt.setQueueDurationMillis(Math.max(0, run.getStartTimeInMillis() - run.getTimeInMillis()));
         }
 
         runExt.setDurationMillis(Math.max(0, runExt.getEndTimeMillis() - runExt.getStartTimeMillis()));

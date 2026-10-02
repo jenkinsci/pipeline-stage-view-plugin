@@ -1,5 +1,6 @@
 package com.cloudbees.workflow.rest.external;
 
+import com.cloudbees.workflow.flownode.FlowNodeUtil;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -36,6 +37,8 @@ public class ChunkVisitor extends StandardChunkVisitor {
     WorkflowRun run;
     ArrayList<String> stageNodeIds = new ArrayList<>();
     boolean isLastChunk = true;
+    /** Time spent waiting for an executor inside {@code node} blocks within the current stage chunk. */
+    long internalQueueDurationMillis = 0;
 
     public ChunkVisitor(@NonNull WorkflowRun run) {
         this.run = run;
@@ -82,6 +85,11 @@ public class ChunkVisitor extends StandardChunkVisitor {
             times = new TimingInfo(0, 0, run.getStartTimeInMillis());
         }
         ExecDuration dur = (times == null) ? new ExecDuration() : new ExecDuration(times);
+        if (internalQueueDurationMillis > 0) {
+            // `node` blocks inside this stage may have had to wait for an executor; that wait is counted as
+            // queue time, not stage execution time, so keep it out of the stage duration too.
+            dur.setTotalDurationMillis(Math.max(0, dur.getTotalDurationMillis() - internalQueueDurationMillis));
+        }
 
         GenericStatus status;
         long startTime = 0;
@@ -95,6 +103,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         // TODO add and use pipeline graph analysis API to allow us to get most of the metadata for the chunk in 1 pass, efficiently
         //  and only store the FlowNodes -- not the materialized objects.
         stageExt.addBasicNodeData(chunk.getFirstNode(), "", dur, startTime, StatusExt.fromGenericStatus(status), chunk.getLastNode().getError());
+        stageExt.setQueueDurationMillis(internalQueueDurationMillis);
 
         int childNodeLength = Math.min(StageNodeExt.MAX_CHILD_NODES, stageContents.size());
         ArrayList<AtomFlowNodeExt> internals = new ArrayList<>(childNodeLength);
@@ -112,6 +121,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         firstExecuted = null;
         stageNodeIds.clear();
         stageContents.clear();
+        internalQueueDurationMillis = 0;
     }
 
     @Override
@@ -135,6 +145,7 @@ public class ChunkVisitor extends StandardChunkVisitor {
         stageNodeIds.clear();
         chunk.setPauseTimeMillis(0);
         firstExecuted = null;
+        internalQueueDurationMillis = 0;
 
         // if we're using marker-based (and not block-scoped) stages, add the last node as part of its contents
         if (!(endNode instanceof BlockEndNode)) {
@@ -142,12 +153,25 @@ public class ChunkVisitor extends StandardChunkVisitor {
         }
     }
 
+    @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "We can actually get nulls")
     public void atomNode(@CheckForNull FlowNode before, @NonNull FlowNode atomNode, @CheckForNull FlowNode after, @NonNull ForkScanner scan) {
         if (NotExecutedNodeAction.isExecuted(atomNode)) {
             firstExecuted = atomNode;
         }
         long pause = PauseAction.getPauseDuration(atomNode);
         chunk.setPauseTimeMillis(chunk.getPauseTimeMillis()+pause);
+        long queueWaitMillis = FlowNodeUtil.getInternalQueueWaitMillis(atomNode, after);
+        if (queueWaitMillis > 0) {
+            if (chunk.getLastNode() == null) {
+                // No stage chunk is currently active, so this node (e.g. an outer `node` block wrapping the
+                // whole run) falls outside any stage boundary and its queue wait would otherwise be lost.
+                // Since chunks are visited in reverse, the first stage chronologically has already been
+                // materialized by the time we get here, so attribute the wait to it directly.
+                attributeQueueWaitToFirstStage(queueWaitMillis);
+            } else {
+                internalQueueDurationMillis += queueWaitMillis;
+            }
+        }
 
         // TODO this is rather inefficient, we should optimize to use a circular buffer or ArrayList with limited size
         // And then only create the node container objects when we hit the start (doing timing ETC at that point)
@@ -156,6 +180,19 @@ public class ChunkVisitor extends StandardChunkVisitor {
             stageContents.push(ext);
         }
         stageNodeIds.add(atomNode.getId());
+    }
+
+    /**
+     * Attributes queue wait detected while no stage chunk is active to the first stage executed
+     * chronologically, keeping stage queue duration and stage duration consistent with each other.
+     */
+    private void attributeQueueWaitToFirstStage(long queueWaitMillis) {
+        StageNodeExt firstStage = stages.peekFirst();
+        if (firstStage == null) {
+            return;
+        }
+        firstStage.setQueueDurationMillis(firstStage.getQueueDurationMillis() + queueWaitMillis);
+        // Removed the line that reduces the duration of the first stage
     }
 
     @Override
