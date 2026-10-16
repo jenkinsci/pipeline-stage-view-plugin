@@ -172,9 +172,9 @@ request the relevant pages to be tested from that Jenkins instance.
 [jquery]: http://jquery.com/
 [nodejs]: http://nodejs.org/
 [CommonJS]: http://wiki.commonjs.org/wiki/CommonJS
-[JenkinsRule]: http://javadoc.jenkins-ci.org/org/jvnet/hudson/test/JenkinsRule.html
+[JenkinsRule]: https://javadoc.jenkins.io/component/jenkins-test-harness/org/jvnet/hudson/test/JenkinsRule.html
 [WebDriver]: https://www.selenium.dev/documentation/webdriver
-[WebClient]: http://javadoc.jenkins-ci.org/org/jvnet/hudson/test/JenkinsRule.WebClient.html
+[WebClient]: https://javadoc.jenkins.io/component/jenkins-test-harness/org/jvnet/hudson/test/JenkinsRule.WebClient.html
 [WorkflowJobActionTest]: src/test/java/com/cloudbees/workflow/ui/view/WorkflowJobActionTest.java
 [AbstractWebDriverTest]: src/test/java/com/cloudbees/workflow/ui/AbstractPhantomJSTest.java
 [LESS]: http://lesscss.org/
