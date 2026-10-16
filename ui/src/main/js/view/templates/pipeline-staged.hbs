@@ -30,7 +30,7 @@
         {{#each stageData}}
         <td class="stage-total-{{@index}}">
           <div class="cell-color">
-            <div class="duration">{{formatTime avgDurationMillisNoPause 2}}</div>
+            <div class="duration">{{formatTime this.avgDurationMillisNoPause 2}}</div>
             <div class="stackedBarChart"></div>
           </div>
         </td>

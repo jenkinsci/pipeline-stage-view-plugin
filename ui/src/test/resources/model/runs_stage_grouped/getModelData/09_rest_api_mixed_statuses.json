@@ -1,0 +1,128 @@
+[
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/1/wfapi/describe"
+            }
+        },
+        "id": "1",
+        "name": "#1",
+        "status": "SUCCESS",
+        "startTimeMillis": 1414318232950,
+        "endTimeMillis": 1414318242950,
+        "durationMillis": 10000,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Build",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318233950,
+                "durationMillis": 2000,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/1/execution/node/20/wfapi/describe"
+                    }
+                },
+                "id": "20",
+                "name": "Test",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318235950,
+                "durationMillis": 5000,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/2/wfapi/describe"
+            }
+        },
+        "id": "2",
+        "name": "#2",
+        "status": "FAILED",
+        "startTimeMillis": 1414318252950,
+        "endTimeMillis": 1414318262950,
+        "durationMillis": 10000,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/2/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Build",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318253950,
+                "durationMillis": 1000,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/2/execution/node/20/wfapi/describe"
+                    }
+                },
+                "id": "20",
+                "name": "Test",
+                "status": "FAILED",
+                "startTimeMillis": 1414318254950,
+                "durationMillis": 8000,
+                "pauseDurationMillis": 0
+            }
+        ]
+    },
+    {
+        "_links": {
+            "self": {
+                "href": "/job/cd/3/wfapi/describe"
+            }
+        },
+        "id": "3",
+        "name": "#3",
+        "status": "SUCCESS",
+        "startTimeMillis": 1414318272950,
+        "endTimeMillis": 1414318282950,
+        "durationMillis": 10000,
+        "pauseDurationMillis": 0,
+        "stages": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/3/execution/node/10/wfapi/describe"
+                    }
+                },
+                "id": "10",
+                "name": "Build",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318273950,
+                "durationMillis": 3000,
+                "pauseDurationMillis": 0
+            },
+            {
+                "_links": {
+                    "self": {
+                        "href": "/job/cd/3/execution/node/20/wfapi/describe"
+                    }
+                },
+                "id": "20",
+                "name": "Test",
+                "status": "SUCCESS",
+                "startTimeMillis": 1414318276950,
+                "durationMillis": 5000,
+                "pauseDurationMillis": 0
+            }
+        ]
+    }
+]
