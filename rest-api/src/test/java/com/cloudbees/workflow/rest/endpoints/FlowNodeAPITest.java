@@ -90,6 +90,7 @@ public class FlowNodeAPITest {
         Assert.assertEquals(1, workflowRuns.length);
         Assert.assertEquals("#1", workflowRuns[0].getName());
         Assert.assertEquals(StatusExt.SUCCESS, workflowRuns[0].getStatus());
+        Assert.assertTrue("Run queue duration should be sane", workflowRuns[0].getQueueDurationMillis() >= 0);
 
         // Test the endpoints
         assert_describe_ok(webClient, jsonReadWrite, workflowRuns);
@@ -114,6 +115,7 @@ public class FlowNodeAPITest {
         Assert.assertEquals("Build", stageDesc.getName());
         Assert.assertEquals(StatusExt.SUCCESS, stageDesc.getStatus());
         Assert.assertEquals("/jenkins/job/Noddy%20Job/1/execution/node/6/wfapi/describe", stageDesc.get_links().self.href);
+        Assert.assertTrue("Stage queue duration should be sane", stageDesc.getQueueDurationMillis() >= 0);
         Assert.assertEquals(1, stageDesc.getStageFlowNodes().size());
         Assert.assertEquals("7", stageDesc.getStageFlowNodes().get(0).getId());
         Assert.assertEquals("Print Message", stageDesc.getStageFlowNodes().get(0).getName());

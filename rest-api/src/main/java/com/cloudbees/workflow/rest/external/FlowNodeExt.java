@@ -57,6 +57,7 @@ public class FlowNodeExt {
     private long startTimeMillis;
     private long durationMillis;
     private long pauseDurationMillis;
+    private long queueDurationMillis;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public FlowNodeLinks get_links() {
@@ -140,6 +141,14 @@ public class FlowNodeExt {
 
     public void setPauseDurationMillis(long pauseDurationMillis) {
         this.pauseDurationMillis = pauseDurationMillis;
+    }
+
+    public long getQueueDurationMillis() {
+        return queueDurationMillis;
+    }
+
+    public void setQueueDurationMillis(long queueDurationMillis) {
+        this.queueDurationMillis = queueDurationMillis;
     }
 
     public static final class FlowNodeLinks extends Links {

@@ -41,11 +41,14 @@ import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.NotExecutedNodeAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
+import org.jenkinsci.plugins.workflow.graph.BlockStartNode;
 import org.jenkinsci.plugins.workflow.graph.FlowEndNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
+import org.jenkinsci.plugins.workflow.graph.StepNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.ForkScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.support.actions.PauseAction;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -166,6 +169,32 @@ public class FlowNodeUtil {
      */
     public static boolean isPauseNode(FlowNode flowNode) {
         return PauseAction.isPaused(flowNode);
+    }
+
+    /**
+     * Best-effort computation of the time spent waiting for an executor inside a {@code node} block.
+     * A {@code node} step's {@link BlockStartNode} is created as soon as the step is scheduled, while the
+     * first {@link FlowNode} it contains only starts once an executor has actually been allocated, so the
+     * gap between the two start times is executor queue wait that isn't otherwise accounted for.
+     * Returns {@code 0} if the node isn't a {@code node} block start, or the wait can't be determined.
+     * @param node the candidate block start node.
+     * @param after the node immediately following {@code node} in the flow graph, if known.
+     */
+    public static long getInternalQueueWaitMillis(@NonNull FlowNode node, @CheckForNull FlowNode after) {
+        if (after == null || !(node instanceof BlockStartNode) || !(node instanceof StepNode)) {
+            return 0;
+        }
+        StepDescriptor descriptor = ((StepNode) node).getDescriptor();
+        if (descriptor == null || !"node".equals(descriptor.getFunctionName())) {
+            return 0;
+        }
+        TimingAction nodeTiming = node.getPersistentAction(TimingAction.class);
+        TimingAction afterTiming = after.getPersistentAction(TimingAction.class);
+        if (nodeTiming == null || afterTiming == null) {
+            return 0;
+        }
+        long wait = afterTiming.getStartTime() - nodeTiming.getStartTime();
+        return wait > 0 ? wait : 0;
     }
 
     // Enables us to get the status of a node without creating a bunch of objects
