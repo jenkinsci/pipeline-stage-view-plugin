@@ -1,0 +1,199 @@
+{
+    "stageData": [
+        {
+            "name": "Build",
+            "runs": 1,
+            "durationMillis": 3130,
+            "durationMillisNoPause": 3130,
+            "avgDurationMillis": 3130,
+            "avgDurationMillisNoPause": 3130
+        },
+        {
+            "name": "Test",
+            "runs": 1,
+            "durationMillis": 3323,
+            "durationMillisNoPause": 3323,
+            "avgDurationMillis": 3323,
+            "avgDurationMillisNoPause": 3323
+        },
+        {
+            "name": "Deploy",
+            "runs": 1,
+            "durationMillis": 2496,
+            "durationMillisNoPause": 2496,
+            "avgDurationMillis": 2496,
+            "avgDurationMillisNoPause": 2496
+        }
+    ],
+    "numRuns": 1,
+    "numStages": 7,
+    "durationMillis": 8949,
+    "durationMillisNoPause": 8949,
+    "avgDurationMillis": 8949,
+    "avgDurationMillisNoPause": 8949,
+    "runGroups": [
+        {
+            "stageData": [
+                {
+                    "name": "Build",
+                    "runs": 1,
+                    "durationMillis": 3130,
+                    "durationMillisNoPause": 3130,
+                    "avgDurationMillis": 3130,
+                    "avgDurationMillisNoPause": 3130
+                },
+                {
+                    "name": "Test",
+                    "runs": 1,
+                    "durationMillis": 3323,
+                    "durationMillisNoPause": 3323,
+                    "avgDurationMillis": 3323,
+                    "avgDurationMillisNoPause": 3323
+                },
+                {
+                    "name": "Deploy",
+                    "runs": 1,
+                    "durationMillis": 2496,
+                    "durationMillisNoPause": 2496,
+                    "avgDurationMillis": 2496,
+                    "avgDurationMillisNoPause": 2496
+                }
+            ],
+            "runs": [
+                {
+                    "name": "#3",
+                    "status": "IN_PROGRESS",
+                    "startTimeMillis": 1411556423000,
+                    "durationMillis": 8584,
+                    "pauseDurationMillis": 0,
+                    "stages": [
+                        {
+                            "name": "Build",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556423000,
+                            "durationMillis": 3065,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 3065,
+                            "emphasise": 1.1785298229263748,
+                            "endTimeMillis": 1411556426065
+                        },
+                        {
+                            "name": "Test",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556426065,
+                            "durationMillis": 2695,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 2695,
+                            "emphasise": 1.1569780987884437,
+                            "endTimeMillis": 1411556428760
+                        },
+                        {
+                            "name": "Deploy",
+                            "status": "IN_PROGRESS",
+                            "startTimeMillis": 1411556428760,
+                            "durationMillis": 824,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 824,
+                            "emphasise": 1.047996272134203,
+                            "percentCompleteEstimate": 33,
+                            "timeRemainingEstimate": 1672,
+                            "endTimeMillis": 1411556429584
+                        }
+                    ],
+                    "durationMillisNoPause": 8584,
+                    "percentCompleteEstimate": 95,
+                    "timeRemainingEstimate": 365,
+                    "endTimeMillis": 1411556431584
+                },
+                {
+                    "name": "#2",
+                    "status": "SUCCESS",
+                    "startTimeMillis": 1411556089000,
+                    "durationMillis": 8949,
+                    "pauseDurationMillis": 0,
+                    "stages": [
+                        {
+                            "name": "Build",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556089000,
+                            "durationMillis": 3130,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 3130,
+                            "emphasise": 1.1748798748463516,
+                            "endTimeMillis": 1411556092130
+                        },
+                        {
+                            "name": "Test",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556092130,
+                            "durationMillis": 3323,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 3323,
+                            "emphasise": 1.1856632025924685,
+                            "endTimeMillis": 1411556095453
+                        },
+                        {
+                            "name": "Deploy",
+                            "status": "SUCCESS",
+                            "startTimeMillis": 1411556095453,
+                            "durationMillis": 2496,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 2496,
+                            "emphasise": 1.13945692256118,
+                            "endTimeMillis": 1411556097949
+                        }
+                    ],
+                    "durationMillisNoPause": 8949,
+                    "endTimeMillis": 1411556097949
+                },
+                {
+                    "name": "#1",
+                    "status": "IN_PROGRESS",
+                    "startTimeMillis": 1411552553000,
+                    "durationMillis": 2220,
+                    "pauseDurationMillis": 0,
+                    "stages": [
+                        {
+                            "name": "Build",
+                            "status": "IN_PROGRESS",
+                            "startTimeMillis": 1411552553000,
+                            "durationMillis": 2220,
+                            "pauseDurationMillis": 0,
+                            "durationMillisNoPause": 2220,
+                            "emphasise": 1.5,
+                            "percentCompleteEstimate": 70,
+                            "timeRemainingEstimate": 910,
+                            "endTimeMillis": 1411552555220
+                        },
+                        {
+                            "name": "Test",
+                            "status": "NOT_EXECUTED",
+                            "startTimeMillis": 0,
+                            "endTimeMillis": 0,
+                            "durationMillis": 0,
+                            "emphasise": 1
+                        },
+                        {
+                            "name": "Deploy",
+                            "status": "NOT_EXECUTED",
+                            "startTimeMillis": 0,
+                            "endTimeMillis": 0,
+                            "durationMillis": 0,
+                            "emphasise": 1
+                        }
+                    ],
+                    "durationMillisNoPause": 2220,
+                    "percentCompleteEstimate": 24,
+                    "timeRemainingEstimate": 6729,
+                    "endTimeMillis": 1411552555220
+                }
+            ],
+            "numRuns": 1,
+            "numStages": 7,
+            "durationMillis": 8949,
+            "durationMillisNoPause": 8949,
+            "avgDurationMillis": 8949,
+            "avgDurationMillisNoPause": 8949
+        }
+    ]
+}
