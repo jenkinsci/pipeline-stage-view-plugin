@@ -81,6 +81,7 @@ public class StageNodeExt extends FlowNodeExt {
         public long getStartTimeMillis() {return myNode.getStartTimeMillis();}
         public long getDurationMillis() {return myNode.getDurationMillis();}
         public long getPauseDurationMillis() {return myNode.getPauseDurationMillis();}
+        public long getQueueDurationMillis() {return myNode.getQueueDurationMillis();}
 
         @Override
         public List<AtomFlowNodeExt> getStageFlowNodes() {
